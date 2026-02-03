@@ -18,7 +18,7 @@ from paths import (
     venv_dir,
 )
 from PySide6.QtCore import Qt, QProcess
-from PySide6.QtGui import QPixmap, QIcon, QImageReader
+from PySide6.QtGui import QPixmap, QImageReader
 from PySide6.QtWidgets import QMessageBox, QWidget
 
 
@@ -365,6 +365,7 @@ def get_thumb_pixmap(p: Path, size: int = 96) -> QPixmap | None:
 
 
 # --- Favoriten (Werkzeugkasten) ---
+
 
 def favorites_dir() -> Path:
     return data_dir() / "favorites"

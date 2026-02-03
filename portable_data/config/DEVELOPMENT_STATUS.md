@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.34
-- Fortschritt: 55/55 = **100%**
-- Nächster Schritt: **Release-Checks & Packaging prüfen**
+- Version: 1.0.35
+- Fortschritt: 58/58 = **100%**
+- Nächster Schritt: **Automatisierte Start-Checks und Release-Tests auf Zielsystemen prüfen**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -60,6 +60,9 @@
 53. Automatik: Ungültige Ausgabe-Pfade führen zu Quarantäne statt Abbruch
 54. Selftest: Fehlende Testassets brechen mit klarer Meldung ab
 55. main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)
+56. Start-Routine: Bootstrap-Logik für Python-Abhängigkeiten zentralisiert
+57. Start-Routine: optionaler FFmpeg-Autoinstall mit laienfreundlichem Hinweis
+58. Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap validiert
 
 ## 🔧 Offen
 - (keine)

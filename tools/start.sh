@@ -2,31 +2,28 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="$ROOT/app"
-VENV_DIR="$ROOT/portable_data/.venv"
 DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
+AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
 
 echo "[Modultool] Start – Video-Werkstatt (Portable)"
 if [ "$DEBUG_MODE" = "1" ]; then
   echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
 fi
 
-command -v python3 >/dev/null 2>&1 || { echo "Python3 fehlt. Bitte installieren."; exit 1; }
-
-if [ ! -d "$VENV_DIR" ]; then
-  echo "[Modultool] Python-Umgebung wird erstellt …"
-  python3 -m venv "$VENV_DIR"
-fi
-
 echo "[Modultool] Abhängigkeiten prüfen …"
-if [ "$DEBUG_MODE" = "1" ]; then
-  "$VENV_DIR/bin/python" -m pip install --upgrade pip
-else
-  "$VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
-fi
-if ! "$VENV_DIR/bin/python" -m pip install -r "$APP_DIR/requirements.txt"; then
-  echo "[Modultool] Fehler: Abhängigkeiten (Dependencies = Zusatzpakete) konnten nicht installiert werden."
-  echo "[Modultool] Tipp: Internet prüfen, dann erneut starten."
-  exit 1
+"$ROOT/tools/bootstrap_python_env.sh"
+VENV_DIR="$ROOT/portable_data/.venv"
+
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "[Modultool] Hinweis: FFmpeg fehlt (Video-Werkzeug)."
+  if [ "$AUTO_INSTALL" = "1" ]; then
+    echo "[Modultool] Starte Systemeinrichtung (kann Admin-Rechte brauchen) …"
+    if ! "$ROOT/tools/setup_system.sh"; then
+      echo "[Modultool] Fehler: FFmpeg-Installation fehlgeschlagen."
+    fi
+  else
+    echo "[Modultool] Tipp: Starte \"tools/setup_system.sh\" oder setze MODULTOOL_AUTO_INSTALL=1."
+  fi
 fi
 
 echo "[Modultool] Werkstatt-Check (Startprüfung) …"
