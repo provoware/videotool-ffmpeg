@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.42
+- Start-Routine: optionale Release-Checks per MODULTOOL_RUN_CHECKS mit klarer Rückmeldung.
+- IO: JSON-Pfadprüfung liefert konkrete Gründe im Debug-Log.
+- Validierung: Ordner-Erstellung meldet Fehler eindeutig und bricht sauber ab.
+
 ## 1.0.41
 - Bereinigung: .deb- und ZIP-Release-Artefakte aus dem Repo entfernt.
 - README: Entwicklungsfortschritt in Prozent ergänzt und offene Punkte nummeriert gelistet.

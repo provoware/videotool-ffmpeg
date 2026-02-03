@@ -37,7 +37,12 @@ def ensure_existing_dir(path: Path, label: str, create: bool = False) -> Path:
     resolved = path.resolve(strict=False)
     if not resolved.exists():
         if create:
-            resolved.mkdir(parents=True, exist_ok=True)
+            try:
+                resolved.mkdir(parents=True, exist_ok=True)
+            except Exception as exc:
+                raise PathValidationError(
+                    f"{label} konnte nicht erstellt werden: {resolved}"
+                ) from exc
         else:
             raise PathValidationError(f"{label} nicht gefunden: {resolved}")
     if not resolved.is_dir():

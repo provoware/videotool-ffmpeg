@@ -4,6 +4,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="$ROOT/app"
 DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
+RUN_CHECKS="${MODULTOOL_RUN_CHECKS:-0}"
 
 echo "[Modultool] Start – Video-Werkstatt (Portable)"
 if [ "$DEBUG_MODE" = "1" ]; then
@@ -23,6 +24,16 @@ if ! command -v ffmpeg >/dev/null 2>&1; then
     fi
   else
     echo "[Modultool] Tipp: Starte \"tools/setup_system.sh\" oder setze MODULTOOL_AUTO_INSTALL=1."
+  fi
+fi
+
+if [ "$RUN_CHECKS" = "1" ]; then
+  echo "[Modultool] Release-Checks (automatische Prüfung) …"
+  if "$ROOT/tools/run_quality_checks.sh"; then
+    echo "[Modultool] Release-Checks: ok."
+  else
+    echo "[Modultool] Release-Checks: Fehler."
+    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
   fi
 fi
 
