@@ -6,7 +6,9 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from uuid import uuid4
-from paths import config_dir, data_dir, cache_dir, logs_dir
+from logging_utils import log_message
+from paths import config_dir, data_dir, cache_dir
+from validation_utils import validate_settings_paths, validate_settings_schema
 
 
 def load_json(p: Path, default=None):
@@ -25,18 +27,7 @@ def debug_enabled() -> bool:
 
 
 def log_debug(message: str, level: str = "DEBUG") -> None:
-    try:
-        logs_dir().mkdir(parents=True, exist_ok=True)
-        payload = {
-            "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-            "level": level,
-            "message": message,
-        }
-        log_path = logs_dir() / "preflight_debug.jsonl"
-        with log_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    except Exception:
-        return
+    log_message(message, level=level, context="preflight")
 
 
 def parse_min_free_mb(settings: dict) -> tuple[int, bool, str]:
@@ -93,6 +84,8 @@ def run(settings_path: Path | None = None) -> dict:
         log_debug(f"Preflight start (settings={settings_path})")
     settings = load_json(settings_path, {})
     paths = settings.get("paths", {})
+    schema_errors = validate_settings_schema(settings)
+    path_errors = validate_settings_paths(settings)
     min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
 
     raw_watch = paths.get("watch_folder")
@@ -144,6 +137,8 @@ def run(settings_path: Path | None = None) -> dict:
     ]:
         ok, err = writable_dir(p)
         writable[key] = {"ok": ok, "path": str(p), "error": err}
+        if not ok:
+            path_errors.append(f"paths.{key}:not_writable")
 
     free_mb = free_space_mb(data_dir())
     ok_space = (free_mb >= min_free_mb) if free_mb >= 0 else True
@@ -174,6 +169,14 @@ def run(settings_path: Path | None = None) -> dict:
         rec.append("watchfolder_not_writable")
     if watch_invalid:
         rec.append("watchfolder_invalid")
+    if not ok_watch:
+        path_errors.append("paths.watch_folder:not_found")
+    if ok_watch and not watch_writable_ok:
+        path_errors.append("paths.watch_folder:not_writable")
+    if schema_errors:
+        rec.append("settings_schema_invalid")
+    if path_errors:
+        rec.append("settings_paths_invalid")
 
     result = {
         "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -194,6 +197,8 @@ def run(settings_path: Path | None = None) -> dict:
         "font": font or "",
         "writable": writable,
         "recommendations": rec,
+        "settings_schema_errors": schema_errors,
+        "settings_path_errors": path_errors,
     }
     if debug_enabled():
         log_debug(f"Preflight result overall_ok={overall_ok} rec={rec}")

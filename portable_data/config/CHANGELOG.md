@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.29
+- Release: Build-Workflow bündelt ZIP/.deb und Release-Tests in einem Skript.
+- Logging: zentrales Log-Modul schreibt Debug- und User-Feedback getrennt mit Log-Leveln.
+- Preflight: Settings werden per Schema/Pfad-Checks validiert und Empfehlungen ergänzt.
+
 ## 1.0.28
 - Automatik: fehlende Batch-Namensvorlage fällt sauber auf Standard zurück.
 - Automatik: Lock-Dateien mit PID als Text werden als stale erkannt und bereinigt.

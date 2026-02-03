@@ -74,3 +74,90 @@ def ensure_output_path(path: Path, label: str) -> Path:
     finally:
         test_path.unlink(missing_ok=True)
     return resolved
+
+
+def validate_settings_schema(settings: dict) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(settings, dict):
+        return ["settings_root:not_a_dict"]
+
+    def expect_dict(value: object, key: str) -> dict:
+        if value is None:
+            return {}
+        if isinstance(value, dict):
+            return value
+        errors.append(f"{key}:not_a_dict")
+        return {}
+
+    def expect_type(value: object, key: str, expected: type) -> None:
+        if value is None:
+            return
+        if not isinstance(value, expected):
+            errors.append(f"{key}:not_{expected.__name__}")
+
+    paths = expect_dict(settings.get("paths"), "paths")
+    maintenance = expect_dict(settings.get("maintenance"), "maintenance")
+    performance = expect_dict(settings.get("performance"), "performance")
+    ui = expect_dict(settings.get("ui"), "ui")
+
+    expect_type(paths.get("watch_folder"), "paths.watch_folder", str)
+    for key in (
+        "exports_dir",
+        "reports_dir",
+        "staging_dir",
+        "trash_dir",
+    ):
+        expect_type(paths.get(key), f"paths.{key}", str)
+
+    expect_type(maintenance.get("min_free_mb"), "maintenance.min_free_mb", int)
+
+    expect_type(performance.get("eco_mode"), "performance.eco_mode", bool)
+    expect_type(performance.get("eco_threads"), "performance.eco_threads", int)
+    expect_type(performance.get("normal_threads"), "performance.normal_threads", int)
+
+    expect_type(ui.get("zoom_percent"), "ui.zoom_percent", int)
+    return errors
+
+
+def validate_settings_paths(settings: dict) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(settings, dict):
+        return ["settings_root:not_a_dict"]
+    paths = settings.get("paths")
+    if paths is None:
+        return errors
+    if not isinstance(paths, dict):
+        return ["paths:not_a_dict"]
+
+    def check_string(value: object, key: str, allow_empty: bool = False) -> None:
+        if value is None:
+            return
+        if not isinstance(value, str):
+            errors.append(f"{key}:not_a_string")
+            return
+        if not value.strip() and not allow_empty:
+            errors.append(f"{key}:empty")
+            return
+        if "\x00" in value:
+            errors.append(f"{key}:null_byte")
+
+    def check_relative(value: object, key: str) -> None:
+        check_string(value, key)
+        if not isinstance(value, str) or not value.strip():
+            return
+        candidate = Path(value)
+        if candidate.is_absolute():
+            errors.append(f"{key}:absolute_path")
+            return
+        if ".." in candidate.parts:
+            errors.append(f"{key}:parent_traversal")
+
+    check_string(paths.get("watch_folder"), "paths.watch_folder", allow_empty=True)
+    for key in (
+        "exports_dir",
+        "reports_dir",
+        "staging_dir",
+        "trash_dir",
+    ):
+        check_relative(paths.get(key), f"paths.{key}")
+    return errors
