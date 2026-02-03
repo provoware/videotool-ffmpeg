@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.17
-- Fortschritt: 33/36 = **92%**
-- Nächster Schritt: **Release-Checks (ZIP, .deb, Must-Pass) auf frischem System**
+- Version: 1.0.18
+- Fortschritt: 33/34 = **97%**
+- Nächster Schritt: **Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -40,6 +40,4 @@
 33. Preflight: fehlenden Watchfolder automatisch anlegen (Self-Repair)
 
 ## 🔧 Offen
-1. Release: ZIP bauen und starten
-2. Release: .deb bauen und Installation testen
-3. Release: Must-Pass Suite auf Zielsystem ausführen
+1. Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)

@@ -16,6 +16,18 @@
 - [x] Dokumentation: Debug-Log speichern + Checkliste für Startprobleme auf neuen Systemen.
 - [x] Logging: Exceptions im UI/Automation konsistent ins Debug-Log schreiben.
 - [x] Maintenance: Dateifehler als Warnungen sammeln und im Summary ausgeben.
-- [ ] Release: ZIP bauen und auf frischem System testen.
-- [ ] Release: .deb bauen und Installation testen.
-- [ ] Release: Must-Pass Suite auf Zielsystem ausführen.
+- [ ] Release-Pakete erstellen und testen: automatisierten Build für ZIP-Archiv und .deb-Paket einrichten; Must-Pass-Suite auf Zielsystem ausführen.
+- [ ] main.py modularisieren: UI-Logik in getrennte Klassen (Materialliste, Favoriten, Einstellungen, Quarantäne-UI) auslagern, um Wartbarkeit zu erhöhen.
+- [ ] Parallele Läufe robuster sperren: zuverlässige Datei-Locks oder Prozess-Semaphoren mit Zeitüberschreitung implementieren, um gleichzeitige GUI- und CLI-Läufe zu verhindern.
+- [ ] Fehlerbehandlung verbessern: SystemExit durch Ausnahme-Handling ersetzen und Fehler im Report sowie in der GUI anzeigen.
+- [ ] Sichere Subprozess-Aufrufe: Dateinamen und Pfade strikt validieren und bevorzugt FFmpeg-Bibliotheken verwenden, um Shell-Injection zu vermeiden.
+- [ ] Download-Stabilität überwachen: stable_file() durch echte Dateisystem-Watcher oder Hash-Vergleiche ersetzen, um den Abschluss von Downloads sicher zu erkennen.
+- [ ] Zentrales Logging-Konzept einführen: alle Logs über ein einheitliches Modul mit Log-Level-Steuerung führen und Benutzer-Feedback von Entwickler-Logs trennen.
+- [ ] Konfigurationsvalidierung erweitern: Pfade auf tatsächliche Erreichbarkeit und Schreibrechte prüfen; JSON-Schema-Validierung einführen.
+- [ ] Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste als Tabelle editierbar machen, Plugin-Schnittstelle für Presets umsetzen und Kontrast-Checks automatisieren.
+- [ ] Testabdeckung erhöhen: Selftest um Szenarien mit verschiedenen Bitraten, fehlerhaften Dateien und großen Dateien erweitern; CI-Workflow für Must-Pass-Suite einrichten.
+- [ ] Plattform-Unabhängigkeit verbessern: Skripte portabel gestalten und Installationshinweise für nicht-Linux-Plattformen ergänzen.
+- [ ] Datenstrukturen versionieren: Migrationslogik für Reports und Quarantäne-Listen entwickeln, um Schema-Änderungen zu unterstützen.
+- [ ] Performance optimieren: Thread-Anzahl dynamisch an CPU-Kerne anpassen und parallele Audio-Verarbeitung einführen.
+- [ ] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
+- [ ] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.
