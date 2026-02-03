@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from io_utils import atomic_write_json
 from preflight import run as preflight_run
 from logging_utils import log_exception, log_message
 from paths import config_dir, data_dir, repo_root
@@ -613,12 +614,21 @@ class Main(QMainWindow):
 
     def toggle_automation_enabled(self, state: int):
         self.rules["enabled"] = state == Qt.Checked
-        self.rules_path.write_text(
-            json.dumps(self.rules, ensure_ascii=False, indent=2), encoding="utf-8"
+        ok = atomic_write_json(
+            self.rules_path,
+            self.rules,
+            context="ui.rules_save",
         )
-        activity(
-            f"Automatik {'aktiviert' if self.rules['enabled'] else 'deaktiviert'}."
-        )
+        if ok:
+            activity(
+                f"Automatik {'aktiviert' if self.rules['enabled'] else 'deaktiviert'}."
+            )
+        else:
+            QMessageBox.critical(
+                self,
+                "Automatik",
+                "Speichern der Automatik-Regeln fehlgeschlagen.",
+            )
 
     # --- Selftest (0.9.2) ---
     def selftest_full(self):
@@ -1065,15 +1075,25 @@ class Main(QMainWindow):
             self.set_append_short.isChecked()
         )
 
-        (config_dir() / "settings.json").write_text(
-            json.dumps(self.settings, ensure_ascii=False, indent=2), encoding="utf-8"
+        settings_path = config_dir() / "settings.json"
+        ok = atomic_write_json(
+            settings_path,
+            self.settings,
+            context="ui.settings_save",
         )
-        QMessageBox.information(
-            self,
-            self.texts["strings"].get("settings.ok", "OK"),
-            "Gespeichert. Werkstatt läuft weiter.",
-        )
-        activity("Einstellungen gespeichert.")
+        if ok:
+            QMessageBox.information(
+                self,
+                self.texts["strings"].get("settings.ok", "OK"),
+                "Gespeichert. Werkstatt läuft weiter.",
+            )
+            activity("Einstellungen gespeichert.")
+        else:
+            QMessageBox.critical(
+                self,
+                "Einstellungen",
+                "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+            )
 
     def _settings_test_paths(self):
         base_dir = data_dir()
@@ -1765,17 +1785,26 @@ class Main(QMainWindow):
                 self.set_watch_folder.setText(folder)
             self.settings.setdefault("paths", {})
             self.settings["paths"]["watch_folder"] = folder
-            (config_dir() / "settings.json").write_text(
-                json.dumps(self.settings, ensure_ascii=False, indent=2),
-                encoding="utf-8",
+            settings_path = config_dir() / "settings.json"
+            ok = atomic_write_json(
+                settings_path,
+                self.settings,
+                context="ui.watchfolder_save",
             )
-            QMessageBox.information(
-                self,
-                "Watchfolder",
-                self.texts["strings"].get(
-                    "edge.watch_set", "Watchfolder gesetzt und gespeichert."
-                ),
-            )
+            if ok:
+                QMessageBox.information(
+                    self,
+                    "Watchfolder",
+                    self.texts["strings"].get(
+                        "edge.watch_set", "Watchfolder gesetzt und gespeichert."
+                    ),
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    "Watchfolder",
+                    "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+                )
         except Exception as e:
             QMessageBox.critical(self, "Watchfolder", f"Konnte nicht speichern:\n{e}")
         self._run_preflight()
