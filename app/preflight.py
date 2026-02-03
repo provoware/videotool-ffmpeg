@@ -33,6 +33,8 @@ def log_debug(message: str, level: str = "DEBUG") -> None:
 def parse_min_free_mb(settings: dict) -> tuple[int, bool, str]:
     raw = settings.get("maintenance", {}).get("min_free_mb", 1024)
     try:
+        if isinstance(raw, bool):
+            raise ValueError("bool is not a valid min_free_mb")
         value = int(raw)
     except (TypeError, ValueError):
         return 1024, False, str(raw)
@@ -149,12 +151,14 @@ def run(settings_path: Path | None = None) -> dict:
     font = find_font()
     ok_font = font is not None
 
+    settings_ok = min_free_ok and not schema_errors and not path_errors
     overall_ok = (
         ok_ffmpeg
         and ok_watch
         and ok_space
         and watch_writable_ok
         and all(v["ok"] for v in writable.values())
+        and settings_ok
     )
 
     rec = []
@@ -195,6 +199,7 @@ def run(settings_path: Path | None = None) -> dict:
         "min_free_mb_ok": min_free_ok,
         "min_free_mb_input": min_free_raw,
         "min_free_mb": min_free_mb,
+        "settings_ok": settings_ok,
         "space_ok": ok_space,
         "font_ok": ok_font,
         "font": font or "",

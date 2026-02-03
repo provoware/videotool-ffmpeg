@@ -49,6 +49,10 @@ def safe_slug(s: str, maxlen: int = 120, fallback: str = "unbenannt") -> str:
     return s[:maxlen] if len(s) > maxlen else s
 
 
+def have(cmd: str) -> bool:
+    return shutil.which(cmd) is not None
+
+
 def ffprobe_json(path: Path) -> dict:
     path = ensure_existing_file(path, "FFprobe-Eingabe")
     cmd = [
@@ -171,6 +175,13 @@ def run(job_id: str | None = None) -> int:
     job = pick_job(doc, job_id)
     if not job:
         return 0
+
+    if not (have("ffmpeg") and have("ffprobe")):
+        job["status"] = "fest"
+        job["summary"] = "FFmpeg fehlt"
+        job["error"] = "ffmpeg oder ffprobe nicht gefunden. Aktion: ffmpeg installieren."
+        save_json(qjobs, update_list_status(doc))
+        return 1
 
     job["status"] = "laeuft"
     job["tries"] = int(job.get("tries", 0)) + 1

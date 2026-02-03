@@ -168,6 +168,11 @@ def build_filters(
             )
             v_in = "[txt]"
             out_label = v_in
+        else:
+            print(
+                "WARNUNG: Kein Font gefunden, Lauftext wird übersprungen. "
+                "Aktion: Schriftart installieren (z. B. DejaVuSans)."
+            )
 
     if logo_path and logo_path.exists():
         scale = max(5, min(100, int(logo_scale_percent)))

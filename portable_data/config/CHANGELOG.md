@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.31
+- Preflight: ungültige Settings (inkl. min_free_mb) blocken overall_ok und liefern settings_ok.
+- Quarantäne-Worker: fehlendes ffmpeg/ffprobe wird als klarer Abbruch gemeldet.
+- Werkbank: fehlender Font warnt klar, wenn Lauftext übersprungen wird.
+
 ## 1.0.30
 - Werkbank: FFmpeg-Prüfung mit klarem Hinweis, bevor der Export startet.
 - Werkbank: fehlgeschlagene Exporte räumen Temp-Dateien sauber auf und melden den Exit-Code.
