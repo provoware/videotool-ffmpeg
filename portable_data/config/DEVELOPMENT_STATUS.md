@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.19
-- Fortschritt: 34/35 = **97%**
+- Version: 1.0.20
+- Fortschritt: 35/36 = **97%**
 - Nächster Schritt: **Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)**
 
 ## ✅ Fertig
@@ -39,6 +39,7 @@
 32. Maintenance: Dateifehler werden als Warnungen im Summary protokolliert
 33. Preflight: fehlenden Watchfolder automatisch anlegen (Self-Repair)
 34. Automatik: leere Dateinamen-Slugs mit sicherem Fallback absichern
+35. Automatik: Lock-Datei mit Timeout und PID-Erkennung gegen parallele Läufe härten
 
 ## 🔧 Offen
 1. Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)

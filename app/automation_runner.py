@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -38,6 +39,58 @@ def log_line(logs_dir: Path, msg: str):
     entry = {"at": datetime.utcnow().isoformat(timespec="seconds") + "Z", "msg": msg}
     with p.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+LOCK_TIMEOUT_SECONDS = 8 * 60 * 60
+
+
+def lock_payload(run_id: str) -> dict:
+    return {
+        "run_id": run_id,
+        "pid": os.getpid(),
+        "created_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "host": os.uname().nodename,
+    }
+
+
+def read_lock(lock_path: Path) -> dict:
+    try:
+        return json.loads(lock_path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def process_alive(pid: int | None) -> bool:
+    if not isinstance(pid, int) or pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def lock_is_stale(lock_path: Path, lock_info: dict) -> tuple[bool, str]:
+    try:
+        age = time.time() - lock_path.stat().st_mtime
+    except Exception:
+        age = LOCK_TIMEOUT_SECONDS + 1
+    pid = lock_info.get("pid")
+    if pid and not process_alive(pid):
+        return True, "pid_not_running"
+    if age > LOCK_TIMEOUT_SECONDS:
+        return True, "timeout"
+    return False, "active"
+
+
+def create_lock(lock_path: Path, run_id: str) -> bool:
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with lock_path.open("x", encoding="utf-8") as f:
+            f.write(json.dumps(lock_payload(run_id), ensure_ascii=False, indent=2))
+        return True
+    except FileExistsError:
+        return False
 
 
 def validate_settings(settings: dict, logs_dir: Path) -> dict:
@@ -273,9 +326,33 @@ def run(settings_path: Path, rules_path: Path) -> Path:
 
     lock = base / settings["paths"]["staging_dir"] / "automation.lock"
     if lock.exists():
+        lock_info = read_lock(lock)
+        stale, reason = lock_is_stale(lock, lock_info)
+        if stale:
+            log_line(
+                logs_dir_path,
+                f"Stale-Lock erkannt ({reason}). Lock wird erneuert: {lock}",
+            )
+            try:
+                lock.unlink()
+            except Exception as exc:
+                log_exception(
+                    "automation_runner.lock_remove",
+                    exc,
+                    logs_path=logs_dir_path,
+                    extra={"lock_path": str(lock)},
+                )
+                log_line(
+                    logs_dir_path,
+                    "Automatik abgebrochen: Lock konnte nicht entfernt werden.",
+                )
+                raise SystemExit(1)
+        else:
+            log_line(logs_dir_path, "Lock vorhanden: Automatik läuft schon. Abbruch.")
+            raise SystemExit(0)
+    if not create_lock(lock, run_id):
         log_line(logs_dir_path, "Lock vorhanden: Automatik läuft schon. Abbruch.")
         raise SystemExit(0)
-    lock.write_text(run_id, encoding="utf-8")
 
     report = {
         "schema_version": 1,

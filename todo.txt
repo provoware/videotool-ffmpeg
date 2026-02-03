@@ -19,7 +19,7 @@
 - [x] Automatik: sichere Fallback-Logik für leere Dateinamen-Slugs ergänzen.
 - [ ] Release-Pakete erstellen und testen: automatisierten Build für ZIP-Archiv und .deb-Paket einrichten; Must-Pass-Suite auf Zielsystem ausführen.
 - [ ] main.py modularisieren: UI-Logik in getrennte Klassen (Materialliste, Favoriten, Einstellungen, Quarantäne-UI) auslagern, um Wartbarkeit zu erhöhen.
-- [ ] Parallele Läufe robuster sperren: zuverlässige Datei-Locks oder Prozess-Semaphoren mit Zeitüberschreitung implementieren, um gleichzeitige GUI- und CLI-Läufe zu verhindern.
+- [x] Parallele Läufe robuster sperren: zuverlässige Datei-Locks mit Zeitüberschreitung und PID-Erkennung implementieren, um gleichzeitige GUI- und CLI-Läufe zu verhindern.
 - [ ] Fehlerbehandlung verbessern: SystemExit durch Ausnahme-Handling ersetzen und Fehler im Report sowie in der GUI anzeigen.
 - [ ] Sichere Subprozess-Aufrufe: Dateinamen und Pfade strikt validieren und bevorzugt FFmpeg-Bibliotheken verwenden, um Shell-Injection zu vermeiden.
 - [ ] Download-Stabilität überwachen: stable_file() durch echte Dateisystem-Watcher oder Hash-Vergleiche ersetzen, um den Abschluss von Downloads sicher zu erkennen.
