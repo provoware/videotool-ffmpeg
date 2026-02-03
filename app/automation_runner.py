@@ -13,6 +13,13 @@ from paths import config_dir, logs_dir, cache_dir, repo_root
 from logging_utils import log_exception
 
 
+class AutomationAbort(Exception):
+    def __init__(self, code: int, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
 def default_settings_path() -> Path:
     return config_dir() / "settings.json"
 
@@ -95,18 +102,14 @@ def create_lock(lock_path: Path, run_id: str) -> bool:
 
 def validate_settings(settings: dict, logs_dir: Path) -> dict:
     if not isinstance(settings, dict):
-        log_line(
-            logs_dir,
-            "Automatik abgebrochen: Einstellungen sind unlesbar. Aktion: Einstellungen reparieren.",
-        )
-        raise SystemExit(1)
+        message = "Automatik abgebrochen: Einstellungen sind unlesbar. Aktion: Einstellungen reparieren."
+        log_line(logs_dir, message)
+        raise AutomationAbort(1, message)
     paths = settings.get("paths")
     if not isinstance(paths, dict):
-        log_line(
-            logs_dir,
-            "Automatik abgebrochen: Pfad-Einstellungen fehlen. Aktion: Einstellungen reparieren.",
-        )
-        raise SystemExit(1)
+        message = "Automatik abgebrochen: Pfad-Einstellungen fehlen. Aktion: Einstellungen reparieren."
+        log_line(logs_dir, message)
+        raise AutomationAbort(1, message)
     required = [
         "watch_folder",
         "base_data_dir",
@@ -122,12 +125,12 @@ def validate_settings(settings: dict, logs_dir: Path) -> dict:
     missing = [key for key in required if not paths.get(key)]
     if missing:
         missing_list = ", ".join(missing)
-        log_line(
-            logs_dir,
+        message = (
             "Automatik abgebrochen: fehlende Pfade in Einstellungen "
-            f"({missing_list}). Aktion: Einstellungen reparieren.",
+            f"({missing_list}). Aktion: Einstellungen reparieren."
         )
-        raise SystemExit(1)
+        log_line(logs_dir, message)
+        raise AutomationAbort(1, message)
     return settings
 
 
@@ -311,15 +314,15 @@ def run(settings_path: Path, rules_path: Path) -> Path:
     ensure_structure(base, settings)
 
     if not have("ffmpeg") or not have("ffprobe"):
-        log_line(
-            logs_dir_path, "Automatik abgebrochen: ffmpeg/ffprobe fehlt (Setup nötig)."
-        )
-        raise SystemExit(2)
+        message = "Automatik abgebrochen: ffmpeg/ffprobe fehlt (Setup nötig)."
+        log_line(logs_dir_path, message)
+        raise AutomationAbort(2, message)
 
     watch = Path(settings["paths"]["watch_folder"]).expanduser()
     if not watch.exists():
-        log_line(logs_dir_path, f"Automatik abgebrochen: Watchfolder fehlt: {watch}")
-        raise SystemExit(1)
+        message = f"Automatik abgebrochen: Watchfolder fehlt: {watch}"
+        log_line(logs_dir_path, message)
+        raise AutomationAbort(1, message)
 
     day = datetime.now().strftime("%Y-%m-%d")
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -346,13 +349,15 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                     logs_dir_path,
                     "Automatik abgebrochen: Lock konnte nicht entfernt werden.",
                 )
-                raise SystemExit(1)
+                raise AutomationAbort(
+                    1, "Automatik abgebrochen: Lock konnte nicht entfernt werden."
+                )
         else:
             log_line(logs_dir_path, "Lock vorhanden: Automatik läuft schon. Abbruch.")
-            raise SystemExit(0)
+            raise AutomationAbort(0, "Lock vorhanden: Automatik läuft schon. Abbruch.")
     if not create_lock(lock, run_id):
         log_line(logs_dir_path, "Lock vorhanden: Automatik läuft schon. Abbruch.")
-        raise SystemExit(0)
+        raise AutomationAbort(0, "Lock vorhanden: Automatik läuft schon. Abbruch.")
 
     report = {
         "schema_version": 1,
@@ -710,15 +715,30 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                     )
 
 
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--settings", default=str(default_settings_path()))
     ap.add_argument("--rules", default=str(default_rules_path()))
     args = ap.parse_args()
-    rp = run(Path(args.settings), Path(args.rules))
+    try:
+        rp = run(Path(args.settings), Path(args.rules))
+    except AutomationAbort as exc:
+        if exc.message:
+            print(exc.message)
+        return exc.code
+    except Exception as exc:
+        log_exception(
+            "automation_runner.unhandled",
+            exc,
+            logs_path=logs_dir(),
+            extra={"settings": args.settings, "rules": args.rules},
+        )
+        print("Automatik abgebrochen: Unbekannter Fehler. Details im Debug-Log.")
+        return 1
     # Print report path for callers (selftest)
     print(str(rp))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

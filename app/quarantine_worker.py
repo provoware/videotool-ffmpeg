@@ -17,6 +17,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 from paths import assets_dir, config_dir, cache_dir
+from logging_utils import log_exception
 
 
 def load_json(p: Path, default=None):
@@ -31,11 +32,15 @@ def save_json(p: Path, obj):
     p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def safe_slug(s: str, maxlen: int = 120) -> str:
+def safe_slug(s: str, maxlen: int = 120, fallback: str = "unbenannt") -> str:
+    if not isinstance(s, str):
+        s = str(s)
     s = s.lower().strip()
     s = re.sub(r"\s+", "_", s)
     s = re.sub(r"[^a-z0-9._-]+", "", s)
     s = s.strip("._-")
+    if not s:
+        s = fallback
     return s[:maxlen] if len(s) > maxlen else s
 
 
@@ -96,8 +101,50 @@ def pick_job(doc: dict, job_id: str | None):
     return None
 
 
+def validate_settings(settings: dict) -> tuple[bool, str]:
+    if not isinstance(settings, dict):
+        return False, "Einstellungen unlesbar. Aktion: Einstellungen reparieren."
+    paths = settings.get("paths")
+    if not isinstance(paths, dict):
+        return False, "Pfad-Einstellungen fehlen. Aktion: Einstellungen reparieren."
+    required = [
+        "base_data_dir",
+        "exports_dir",
+        "quarantine_dir",
+        "quarantine_jobs_dir",
+        "library_audio_dir",
+        "library_images_dir",
+    ]
+    missing = [key for key in required if not paths.get(key)]
+    if missing:
+        missing_list = ", ".join(missing)
+        return (
+            False,
+            "Fehlende Pfade in Einstellungen "
+            f"({missing_list}). Aktion: Einstellungen reparieren.",
+        )
+    audio = settings.get("audio")
+    if not isinstance(audio, dict):
+        return False, "Audio-Einstellungen fehlen. Aktion: Einstellungen reparieren."
+    for key in ["target_bitrate_kbps", "target_samplerate_hz", "min_bitrate_kbps"]:
+        if audio.get(key) is None:
+            return (
+                False,
+                f"Audio-Einstellung fehlt ({key}). Aktion: Einstellungen reparieren.",
+            )
+    return True, ""
+
+
 def run(job_id: str | None = None) -> int:
     settings = load_json(config_dir() / "settings.json", {})
+    ok, message = validate_settings(settings)
+    if not ok:
+        log_exception(
+            "quarantine_worker.settings_invalid",
+            ValueError(message),
+            extra={"settings_path": str(config_dir() / "settings.json")},
+        )
+        return 1
     base = Path(settings["paths"]["base_data_dir"])
     today = datetime.now().strftime("%Y-%m-%d")
     qjobs = (

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.21
+- Automatik: Abbrüche laufen jetzt über klare Fehlercodes statt SystemExit im Ablauf.
+- Quarantäne-Worker: Einstellungen werden vor dem Start validiert und ins Debug-Log geschrieben.
+- Quarantäne-Worker: sichere Fallback-Slugs verhindern leere Dateinamen.
+
 ## 1.0.20
 - Automatik: Lock-Datei mit Timeout und PID-Erkennung gegen parallele Läufe gehärtet.
 
