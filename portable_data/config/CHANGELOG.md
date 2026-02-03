@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.2
+- Test: Must-Pass Suite prüft automatisch die Thumbnail-Erzeugung aus einer Beispiel-Bilddatei.
+
+
 ## 1.0.1
 - Fix: Thumbnails werden wieder korrekt erzeugt und gecacht (get_thumb_pixmap Logik korrigiert).
 
