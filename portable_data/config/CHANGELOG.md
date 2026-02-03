@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.37
+- Quarantäne-Tabelle: Inline-Bearbeitung für Status, Grund und Empfehlung mit Validierung.
+- UI-Logik: Quarantäne-Tab in einen eigenen Controller modularisiert.
+- Rückmeldungen: Statusleiste bestätigt Quarantäne-Updates klar und verständlich.
+
 ## 1.0.36
 - Preflight: Theme-Auswahl wird geprüft und meldet unbekannte Themes mit Empfehlung.
 - UI: Theme-Fallback mit Warn-Log sorgt für stabile Barrierefreiheit bei ungültigen Einstellungen.
