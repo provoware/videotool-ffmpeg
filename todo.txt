@@ -1,0 +1,4 @@
+# todo.txt
+- [ ] Autotest: Thumbnail-Erzeugung im Must-Pass integrieren.
+- [ ] Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln.
+- [ ] Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren.

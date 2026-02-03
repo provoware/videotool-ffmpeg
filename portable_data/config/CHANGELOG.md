@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.1
+- Fix: Thumbnails werden wieder korrekt erzeugt und gecacht (get_thumb_pixmap Logik korrigiert).
+
+
 ## 1.0.0
 - Release UI-Politur: konsistente Beschriftungen, Standardwerte, Button-Abstände, kontrastreiche Themes.
 - Theme-QSS aus themes.json wird geladen (hochkontrast dunkel/hell, dämmerung).
