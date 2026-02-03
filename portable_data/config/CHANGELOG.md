@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.28
+- Automatik: fehlende Batch-Namensvorlage fällt sauber auf Standard zurück.
+- Automatik: Lock-Dateien mit PID als Text werden als stale erkannt und bereinigt.
+- Maintenance: Log-Rotation trunciert direkt, wenn keine Historie behalten werden soll.
+
 ## 1.0.27
 - Preflight: Schreibtest nutzt eindeutige Temp-Dateien, damit parallele Checks nicht kollidieren.
 - Maintenance: Settings-JSON wird nur als Dict akzeptiert, sonst wird sauber auf Standard zurückgefallen.
