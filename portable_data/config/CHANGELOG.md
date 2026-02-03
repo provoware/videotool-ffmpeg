@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.4
+- Start-Routine: Werkstatt-Check mit klaren nächsten Schritten beim Start.
+
+
 ## 1.0.3
 - Werkstatt-Check Details: Klartext-Anzeige mit einfachen Empfehlungen und Status.
 

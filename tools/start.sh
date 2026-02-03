@@ -17,6 +17,34 @@ echo "[Modultool] Abhängigkeiten prüfen …"
 "$VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
 "$VENV_DIR/bin/python" -m pip install -r "$APP_DIR/requirements.txt"
 
+echo "[Modultool] Werkstatt-Check (Startprüfung) …"
+if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json 2>/dev/null); then
+  echo "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
+import json
+import sys
+
+data = json.load(sys.stdin)
+overall_ok = bool(data.get("overall_ok", False))
+if overall_ok:
+    print("[Modultool] Werkstatt-Check: Alles bereit.")
+else:
+    print("[Modultool] Werkstatt-Check: Bitte prüfen.")
+    recs = data.get("recommendations") or []
+    rec_map = {
+        "ffmpeg_install": "FFmpeg (Video-Werkzeug) installieren.",
+        "set_watchfolder": "Watchfolder (Eingangsordner) wählen.",
+        "free_space": "Speicher frei machen (nicht benötigte Dateien löschen).",
+        "install_font": "Schrift (Font) installieren, z.B. DejaVuSans."
+    }
+    if recs:
+        print("[Modultool] Nächste Schritte:")
+        for rec in recs:
+            print(f" - {rec_map.get(rec, rec)}")
+PY
+else
+  echo "[Modultool] Werkstatt-Check: fehlgeschlagen (weiter mit Standardstart)."
+fi
+
 echo "[Modultool] Werkstatt-Aufräumen …"
 # Maintenance (Logs/Cache/Temp) – best effort
 "$VENV_DIR/bin/python" "$ROOT/app/maintenance.py" --auto >/dev/null 2>&1 || true

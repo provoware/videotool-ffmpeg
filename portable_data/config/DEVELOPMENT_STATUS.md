@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.3
-- Fortschritt: 23/24 = **96%**
-- Nächster Schritt: **Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln**
+- Version: 1.0.4
+- Fortschritt: 24/24 = **100%**
+- Nächster Schritt: **Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -28,6 +28,7 @@
 21. Schonmodus Threads
 22. Preflight/Werkstatt-Check (neu)
 23. Thumbnail-Regressionstest in Must-Pass Suite
+24. Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln
 
 ## 🔧 Offen
 1. Portable Edgecase-Härtung (Dialogs, Fallbacks)
