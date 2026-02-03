@@ -66,6 +66,24 @@ Es prüft u. a.:
 - Wichtige Dateien: `activity_log.jsonl`, `debug.log`.
 - Die Wartung rotiert Logs automatisch (schützt vor übervollen Dateien).
 - Debug-Modus (Fehlersuche): starte mit `MODULTOOL_DEBUG=1 tools/start.sh` (Debug = mehr Details im Log).
+- Längere Fehlersuche (Debug-Log direkt speichern):
+  ```bash
+  MODULTOOL_DEBUG=1 tools/start.sh | tee start.log
+  ```
+  *`tee` speichert den Log (Protokoll) in `start.log` und zeigt ihn gleichzeitig im Terminal.*
+
+### Wenn der Start auf neuen Systemen hakt (Checkliste für Laien)
+1) **Fehlertext notieren** (genau so wie angezeigt).
+2) **Debug-Log speichern**:
+   ```bash
+   MODULTOOL_DEBUG=1 tools/start.sh | tee start.log
+   ```
+3) **System prüfen** (einfach):
+   - Ist **FFmpeg** (Video-Werkzeug) installiert?
+   - Ist **Python 3.9+** (Programmiersprache) verfügbar?
+   - Ist genug **Speicherplatz** frei?
+4) **Log teilen**: `start.log` an Support/Technik weitergeben.
+5) **Sicherer Standard**: Neustart nach Installation/Update der fehlenden Abhängigkeiten.
 
 ## Linux-Konformität & Berechtigungen
 - Alle Skripte in `tools/` sind ausführbar (Linux-Standard).
