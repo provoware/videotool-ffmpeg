@@ -1937,7 +1937,68 @@ class Main(QMainWindow):
 
     def _show_preflight_details(self):
         t = getattr(self, "preflight", None) or self._run_preflight()
-        QMessageBox.information(self, "Werkstatt-Check Details", json.dumps(t, ensure_ascii=False, indent=2))
+        if not isinstance(t, dict):
+            QMessageBox.critical(self, "Werkstatt-Check Details", "Unerwartete Daten vom Werkstatt-Check.")
+            return
+
+        lines = [self.texts["strings"].get("preflight.details_header","Werkstatt-Check – klar erklärt.")]
+        lines.append("")
+
+        if t.get("ffmpeg_ok", True):
+            lines.append(self.texts["strings"].get("preflight.details_ffmpeg_ok","✅ FFmpeg (Video-Werkzeug) ist da."))
+        else:
+            lines.append(self.texts["strings"].get("preflight.details_ffmpeg_bad","⚠️ FFmpeg (Video-Werkzeug) fehlt. Bitte einrichten."))
+
+        watchfolder = t.get("watchfolder", "") or "–"
+        if t.get("watchfolder_ok", True):
+            lines.append(self.texts["strings"].get("preflight.details_watch_ok","✅ Watchfolder (Eingangsordner) ist gesetzt.") + f"\n   {watchfolder}")
+        else:
+            lines.append(self.texts["strings"].get("preflight.details_watch_bad","⚠️ Watchfolder (Eingangsordner) fehlt. Bitte wählen.") + f"\n   {watchfolder}")
+
+        free_mb = t.get("free_mb", -1)
+        min_mb = t.get("min_free_mb", 0)
+        if free_mb >= 0:
+            space_info = f"{free_mb} MB frei (Ziel: {min_mb} MB)"
+        else:
+            space_info = self.texts["strings"].get("preflight.details_space_unknown","Speicher frei: nicht messbar.")
+        if t.get("space_ok", True):
+            lines.append(self.texts["strings"].get("preflight.details_space_ok","✅ Genug Speicher frei.") + f" {space_info}")
+        else:
+            lines.append(self.texts["strings"].get("preflight.details_space_bad","⚠️ Speicher knapp. Export kann scheitern.") + f" {space_info}")
+
+        if t.get("font_ok", True):
+            lines.append(self.texts["strings"].get("preflight.details_font_ok","✅ Schrift (Font) verfügbar. Lauftext möglich."))
+        else:
+            lines.append(self.texts["strings"].get("preflight.details_font_bad","⚠️ Schrift (Font) fehlt. Lauftext bleibt aus."))
+
+        writable = t.get("writable") or {}
+        if writable:
+            lines.append("")
+            lines.append(self.texts["strings"].get("preflight.details_write_header","Ordner-Zugriff (Schreibrecht):"))
+            for key, info in writable.items():
+                ok = info.get("ok", True)
+                path = info.get("path", "") or "–"
+                err = info.get("error", "") or ""
+                if ok:
+                    lines.append(f"✅ {key}: {path}")
+                else:
+                    extra = f" – {err}" if err else ""
+                    lines.append(f"⚠️ {key}: {path}{extra}")
+
+        recs = t.get("recommendations") or []
+        if recs:
+            lines.append("")
+            lines.append(self.texts["strings"].get("preflight.details_next_header","Nächste Schritte (einfach):"))
+            rec_map = {
+                "ffmpeg_install": self.texts["strings"].get("preflight.details_rec_ffmpeg","• FFmpeg (Video-Werkzeug) installieren."),
+                "set_watchfolder": self.texts["strings"].get("preflight.details_rec_watch","• Watchfolder (Eingangsordner) wählen."),
+                "free_space": self.texts["strings"].get("preflight.details_rec_space","• Speicher frei machen (nicht benötigte Dateien löschen)."),
+                "install_font": self.texts["strings"].get("preflight.details_rec_font","• Schrift (Font) installieren, z.B. DejaVuSans.")
+            }
+            for rec in recs:
+                lines.append(rec_map.get(rec, f"• {rec}"))
+
+        QMessageBox.information(self, "Werkstatt-Check Details", "\n".join(lines))
 
 
     def _pick_and_save_watchfolder(self):

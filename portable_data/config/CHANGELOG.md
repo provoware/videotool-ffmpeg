@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.3
+- Werkstatt-Check Details: Klartext-Anzeige mit einfachen Empfehlungen und Status.
+
+
 ## 1.0.2
 - Test: Must-Pass Suite prüft automatisch die Thumbnail-Erzeugung aus einer Beispiel-Bilddatei.
 
