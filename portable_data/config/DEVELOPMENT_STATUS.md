@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.40
-- Fortschritt: 65/65 = **100%**
+- Version: 1.0.41
+- Fortschritt: 64/72 = **89%**
 - Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
 ## ✅ Fertig
@@ -59,7 +59,6 @@
 52. Automatik: Fallback-Bild wird vorab geprüft und fehlende Bilder landen in Quarantäne
 53. Automatik: Ungültige Ausgabe-Pfade führen zu Quarantäne statt Abbruch
 54. Selftest: Fehlende Testassets brechen mit klarer Meldung ab
-55. main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)
 56. Start-Routine: Bootstrap-Logik für Python-Abhängigkeiten zentralisiert
 57. Start-Routine: optionaler FFmpeg-Autoinstall mit laienfreundlichem Hinweis
 58. Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap validiert
@@ -72,4 +71,11 @@
 65. Preflight: JSON-IO vereinheitlicht und Debug-Flag einmalig ermittelt
 
 ## 🔧 Offen
-- (keine)
+1. main.py modularisieren: UI (Benutzeroberfläche) in klare Klassen trennen.
+2. Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste editierbar, Plugin-Schnittstelle (Erweiterungs-Anschluss) für Presets.
+3. Selftest (automatische Prüfung) um Bitraten-, Fehler- und Großdatei-Szenarien erweitern.
+4. Performance (Leistung) optimieren: parallele Audio-Verarbeitung einführen.
+5. Hilfe-Center integrieren: interaktive Hilfe mit Suche und Schritt-für-Schritt-Anleitungen.
+6. Internationalisierung (Übersetzungen) hinzufügen und Oberfläche vorbereiten.
+7. Eingabe-/Ausgabe-Validierung vereinheitlichen: pro Funktion klare Checks mit Erfolgsmeldung.
+8. Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln.
