@@ -94,11 +94,15 @@ def stable_file(p: Path, seconds: int = 8) -> bool:
         return False
 
 
-def safe_slug(s: str, maxlen: int = 120) -> str:
+def safe_slug(s: str, maxlen: int = 120, fallback: str = "unbenannt") -> str:
+    if not isinstance(s, str):
+        s = str(s)
     s = s.lower().strip()
     s = re.sub(r"\s+", "_", s)
     s = re.sub(r"[^a-z0-9._-]+", "", s)
     s = s.strip("._-")
+    if not s:
+        s = fallback
     return s[:maxlen] if len(s) > maxlen else s
 
 

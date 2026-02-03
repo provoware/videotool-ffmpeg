@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.19
+- Automatik: leere Dateinamen-Slugs erhalten einen sicheren Fallback.
+
 ## 1.0.18
 - Todo-Liste um neue Roadmap-Punkte erweitert.
 
