@@ -11,7 +11,7 @@ Outputs:
 Exit code 0 = pass, 1 = fail
 """
 from __future__ import annotations
-import json, subprocess, shutil, time, os, py_compile, wave, struct, math, hashlib
+import json, subprocess, shutil, time, os, py_compile, wave, struct, math, hashlib, re
 from pathlib import Path
 from datetime import datetime
 from PySide6.QtCore import Qt
@@ -174,6 +174,59 @@ def compile_all() -> list:
             errs.append({"file": str(p), "error": str(e)})
     return errs
 
+def _hex_to_rgb(value: str) -> tuple[float, float, float] | None:
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    if not re.match(r"^#[0-9a-fA-F]{6}$", value):
+        return None
+    r = int(value[1:3], 16) / 255.0
+    g = int(value[3:5], 16) / 255.0
+    b = int(value[5:7], 16) / 255.0
+    return r, g, b
+
+def _relative_luminance(rgb: tuple[float, float, float]) -> float:
+    def channel(c: float) -> float:
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = rgb
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+
+def _contrast_ratio(fg: tuple[float, float, float], bg: tuple[float, float, float]) -> float:
+    l1 = _relative_luminance(fg)
+    l2 = _relative_luminance(bg)
+    lighter, darker = (l1, l2) if l1 >= l2 else (l2, l1)
+    return (lighter + 0.05) / (darker + 0.05)
+
+def _extract_widget_colors(qss: str) -> dict:
+    if not isinstance(qss, str):
+        return {}
+    widget = re.search(r"QWidget\\s*\\{([^}]*)\\}", qss, re.DOTALL)
+    if not widget:
+        return {}
+    block = widget.group(1)
+    bg_match = re.search(r"background\\s*:\\s*(#[0-9a-fA-F]{6})", block)
+    fg_match = re.search(r"color\\s*:\\s*(#[0-9a-fA-F]{6})", block)
+    return {"background": bg_match.group(1) if bg_match else "", "color": fg_match.group(1) if fg_match else ""}
+
+def check_theme_contrast(themes_path: Path, min_ratio: float = 4.5) -> dict:
+    doc = load_json(themes_path, {})
+    qss_map = doc.get("qss", {}) or {}
+    results = {"min_ratio": min_ratio, "themes": {}, "ok": True}
+    for name, qss in qss_map.items():
+        colors = _extract_widget_colors(qss)
+        fg = _hex_to_rgb(colors.get("color", ""))
+        bg = _hex_to_rgb(colors.get("background", ""))
+        if fg is None or bg is None:
+            results["themes"][name] = {"ok": False, "ratio": None, "colors": colors}
+            results["ok"] = False
+            continue
+        ratio = _contrast_ratio(fg, bg)
+        ok = ratio >= min_ratio
+        results["themes"][name] = {"ok": ok, "ratio": round(ratio, 2), "colors": colors}
+        if not ok:
+            results["ok"] = False
+    return results
+
 def main():
     results = {"at": datetime.utcnow().isoformat(timespec="seconds")+"Z", "pass": True, "checks": {}}
 
@@ -228,6 +281,16 @@ def main():
             results["pass"] = False
     except Exception as e:
         results["checks"]["automation"] = {"error": str(e)}
+        results["pass"] = False
+
+    # Theme contrast check (accessibility)
+    try:
+        contrast = check_theme_contrast(cfg_dir()/"themes.json")
+        results["checks"]["theme_contrast"] = contrast
+        if not contrast["ok"]:
+            results["pass"] = False
+    except Exception as e:
+        results["checks"]["theme_contrast"] = {"error": str(e)}
         results["pass"] = False
 
     out = user_data()/"reports"/f"must_pass_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
