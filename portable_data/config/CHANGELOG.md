@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.30
+- Werkbank: FFmpeg-Prüfung mit klarem Hinweis, bevor der Export startet.
+- Werkbank: fehlgeschlagene Exporte räumen Temp-Dateien sauber auf und melden den Exit-Code.
+- Preflight: Watchfolder-Status zeigt Schreibbarkeit nur bei gültigem Ordner an.
+
 ## 1.0.29
 - Release: Build-Workflow bündelt ZIP/.deb und Release-Tests in einem Skript.
 - Logging: zentrales Log-Modul schreibt Debug- und User-Feedback getrennt mit Log-Leveln.

@@ -125,6 +125,9 @@ def run(settings_path: Path | None = None) -> dict:
     watch_writable_error = ""
     if ok_watch:
         watch_writable_ok, watch_writable_error = writable_dir(watch)
+    else:
+        watch_writable_ok = False
+        watch_writable_error = "watchfolder_missing_or_invalid"
 
     writable = {}
     for key, p in [
