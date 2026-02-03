@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.7
-- Fortschritt: 25/25 = **100%**
-- Nächster Schritt: **Preflight weiter härten (Watchfolder-Validierung, klare Hinweise)**
+- Version: 1.0.8
+- Fortschritt: 27/27 = **100%**
+- Nächster Schritt: **Deb-Paket vorbereiten und testen**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -31,7 +31,7 @@
 24. Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln
 25. Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren
 26. Qualitäts-Checks: Compile, Bash-Check, Marker-Scan, Must-Pass
+27. Debug-Modus (Log-Level) + gezielte Fehlerberichte
 
 ## 🔧 Offen
-1. Debug-Modus (Log-Level) + gezielte Fehlerberichte
-2. Deb-Paket (später)
+1. Deb-Paket (später)
