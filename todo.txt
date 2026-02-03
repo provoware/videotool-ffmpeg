@@ -43,9 +43,9 @@
 - [x] Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap-Skript validieren.
 - [x] Start-Routine: optionaler Auto-Install von FFmpeg per MODULTOOL_AUTO_INSTALL mit laienfreundlichem Hinweis.
 - [ ] Performance optimieren: parallele Audio-Verarbeitung einführen.
-- [ ] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
-- [ ] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.
-- [ ] Eingabe-/Ausgabe-Validierung weiter vereinheitlichen: pro Funktion klare Checks mit Erfolgsmeldung, damit Laien immer wissen, was passiert.
+- [x] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
+- [x] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.
+- [x] Eingabe-/Ausgabe-Validierung weiter vereinheitlichen: klare Checks mit Erfolgsmeldung für Ordner/Report-Aktionen.
 - [x] Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln (ein Klick, klare Rückmeldung).
 - [x] JSON-IO vereinheitlichen: Atomic JSON Writes (atomar/sicher speichern) und IO-Helper einführen.
 - [x] Datei-Lock (Single-Writer) für Settings und Quarantäne-Listen ergänzen.

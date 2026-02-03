@@ -1,6 +1,6 @@
 # Hilfe-Center – Modultool Video-Werkstatt
 
-Stand: 2026-02-03T00:30:20Z
+Stand: 2026-02-11T12:00:00Z
 
 ## Schnellstart (60 Sekunden)
 1. **Material holen**: Zieh Audio + Bild in den Material-Tab oder klick **Dateien holen**.
@@ -12,6 +12,32 @@ Stand: 2026-02-03T00:30:20Z
    - Schwarz/Weiß an/aus
 5. **Ausgabe bauen** klicken.
 6. Fertig: **Ausgaben öffnen**.
+
+## Interaktive Hilfe (Suchen + Anleitungen)
+- **Suche**: Oben im Hilfe-Tab Text eingeben. Treffer werden markiert.
+- **Anleitungen (Schritte)**: In der Liste ein Thema auswählen. Du springst direkt an die passende Stelle.
+- **Wenn nichts gefunden wird**: Schreibweise prüfen (Query = Suchtext).
+
+## Schritt-für-Schritt: Ausgabe bauen (Output = fertiges Video)
+1. **Material holen**: Audio + Bild in den Material-Tab ziehen.
+2. **Auswahl setzen**: Checkboxen anklicken.
+3. **Werkbank öffnen**: Vorlage wählen (Ton Safe = sichere Audio-Qualität).
+4. Optional: Lauftext/Logo aktivieren.
+5. **Ausgabe bauen** klicken.
+6. **Ausgaben öffnen**: Prüfe das Ergebnis.
+
+## Schritt-für-Schritt: Automatik starten (Automation = geplanter Lauf)
+1. **Einstellungen** öffnen und Pfade prüfen.
+2. **Werkstatt-Check** oben grün bekommen.
+3. **Automatik**-Tab öffnen und Zeitplan setzen.
+4. **Automatik-Test** starten.
+5. Status ansehen: Report liegt in **Arbeitsberichte**.
+
+## Schritt-für-Schritt: Quarantäne lösen (Quarantäne = Problemfälle)
+1. **Quarantäne-Aufträge (heute)** öffnen.
+2. Auftrag anklicken, **Grund** lesen.
+3. **Quelle ersetzen** oder **Neu (Ton Safe)** wählen.
+4. **Erledigt** setzen, wenn der Fall ok ist.
 
 ## Automatik (22:00 oder andere Uhrzeit)
 - In **Einstellungen** kannst du Pfade und Qualität prüfen.

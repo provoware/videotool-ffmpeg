@@ -2,10 +2,16 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from i18n_utils import load_texts
 from io_utils import atomic_write_json
 from preflight import run as preflight_run
 from logging_utils import log_exception, log_message
 from paths import config_dir, data_dir, repo_root
+from validation_utils import (
+    ensure_existing_dir,
+    ensure_existing_file,
+    PathValidationError,
+)
 from PySide6.QtCore import Qt, QSize, QProcess
 from PySide6.QtGui import QPixmap, QIcon, QImageReader
 from PySide6.QtWidgets import (
@@ -80,10 +86,8 @@ class Main(QMainWindow):
     def __init__(self):
         super().__init__()
         ensure_dirs()
-        self.texts = load_json(
-            config_dir() / "texte_de.json", {"strings": {}, "tooltips": {}}
-        )
         self.settings = load_json(config_dir() / "settings.json", {})
+        self.texts = load_texts(self.settings)
         self.rules_path = config_dir() / "automation_rules.json"
         self.rules = load_json(self.rules_path, {})
         self._tool_procs = []
@@ -102,6 +106,7 @@ class Main(QMainWindow):
         self.done_search = ""
 
         self._init_ui()
+        self._load_help_center()
         self._quar_controller = QuarantineTableController(
             self.quar_table,
             self.statusBar(),
@@ -186,6 +191,8 @@ class Main(QMainWindow):
 
         # Hilfe
         self.help_search.textChanged.connect(self.help_find)
+        self.help_topics.itemActivated.connect(self._jump_help_topic)
+        self.help_topics.itemClicked.connect(self._jump_help_topic)
         self.btn_help_open.clicked.connect(
             lambda: open_path(config_dir() / "HELP_CENTER.md")
         )
@@ -323,15 +330,12 @@ class Main(QMainWindow):
 
     # --- Developer docs search ---
     def dev_find(self, q: str):
-        if not q.strip():
-            return
-        text = self.dev_view.toPlainText()
-        idx = text.lower().find(q.lower())
-        if idx >= 0:
-            cursor = self.dev_view.textCursor()
-            cursor.setPosition(idx)
-            cursor.setPosition(idx + len(q), cursor.KeepAnchor)
-            self.dev_view.setTextCursor(cursor)
+        self._find_in_text_view(
+            self.dev_view,
+            q,
+            "Entwicklerdoku-Suche",
+            "Suche in Entwicklerdoku abgeschlossen.",
+        )
 
     # --- Import ---
     def pick_files(self):
@@ -582,20 +586,18 @@ class Main(QMainWindow):
         exports = data_dir() / self.settings.get("paths", {}).get(
             "exports_dir", "exports"
         )
-        open_path(exports)
-        activity("Ausgaben-Ordner geöffnet.")
+        self._open_dir_with_feedback(exports, "Ausgaben-Ordner")
 
     def open_reports(self):
-        open_path(
-            data_dir() / self.settings.get("paths", {}).get("reports_dir", "reports")
+        reports = data_dir() / self.settings.get("paths", {}).get(
+            "reports_dir", "reports"
         )
-        activity("Reports geöffnet.")
+        self._open_dir_with_feedback(reports, "Reports")
 
     def open_last_report(self):
         rf = latest_report_file()
         if rf:
-            open_path(rf)
-            activity("Letzten Arbeitsbericht geöffnet.")
+            self._open_file_with_feedback(rf, "Arbeitsbericht")
         else:
             QMessageBox.information(
                 self, "Arbeitsbericht", "Noch kein Arbeitsbericht vorhanden."
@@ -1440,15 +1442,112 @@ class Main(QMainWindow):
         return [(a, img0) for a in audios]
 
     def help_find(self, q: str):
-        if not q.strip():
+        self._find_in_text_view(
+            self.help_view,
+            q,
+            "Hilfe-Suche",
+            "Suche im Hilfe-Center abgeschlossen.",
+        )
+
+    def _find_in_text_view(
+        self,
+        view: QTextEdit,
+        query: str,
+        label: str,
+        success_msg: str,
+    ) -> None:
+        if not query.strip():
+            self.statusBar().showMessage(
+                f"{label}: Bitte Suchbegriff eingeben (Query = Suchtext)."
+            )
             return
-        text = self.help_view.toPlainText()
-        idx = text.lower().find(q.lower())
+        text = view.toPlainText()
+        idx = text.lower().find(query.lower())
         if idx >= 0:
-            cursor = self.help_view.textCursor()
+            cursor = view.textCursor()
             cursor.setPosition(idx)
-            cursor.setPosition(idx + len(q), cursor.KeepAnchor)
-            self.help_view.setTextCursor(cursor)
+            cursor.setPosition(idx + len(query), cursor.KeepAnchor)
+            view.setTextCursor(cursor)
+            self.statusBar().showMessage(success_msg)
+        else:
+            self.statusBar().showMessage(
+                f"{label}: Kein Treffer gefunden. Nächster Schritt: Begriff prüfen."
+            )
+
+    def _open_dir_with_feedback(self, path: Path, label: str) -> None:
+        try:
+            resolved = ensure_existing_dir(path, label, create=True)
+        except PathValidationError as exc:
+            QMessageBox.warning(
+                self,
+                label,
+                f"{label} konnte nicht geöffnet werden.\nNächster Schritt: Pfad prüfen.",
+            )
+            log_exception(
+                "open_dir_with_feedback",
+                exc,
+                extra={"path": str(path), "label": label},
+            )
+            return
+        open_path(resolved, self)
+        self.statusBar().showMessage(f"{label} geöffnet.")
+        activity(f"{label} geöffnet.")
+
+    def _open_file_with_feedback(self, path: Path, label: str) -> None:
+        try:
+            resolved = ensure_existing_file(path, label)
+        except PathValidationError as exc:
+            QMessageBox.warning(
+                self,
+                label,
+                f"{label} konnte nicht geöffnet werden.\nNächster Schritt: Datei prüfen.",
+            )
+            log_exception(
+                "open_file_with_feedback",
+                exc,
+                extra={"path": str(path), "label": label},
+            )
+            return
+        open_path(resolved, self)
+        self.statusBar().showMessage(f"{label} geöffnet.")
+        activity(f"{label} geöffnet.")
+
+    def _load_help_center(self) -> None:
+        help_path = config_dir() / "HELP_CENTER.md"
+        if help_path.exists():
+            content = help_path.read_text(encoding="utf-8")
+        else:
+            content = "HELP_CENTER.md fehlt."
+        self.help_view.setPlainText(content)
+        self._help_index = self._build_help_index(content)
+        self.help_topics.clear()
+        for title in self._help_index:
+            self.help_topics.addItem(title)
+        self.statusBar().showMessage("Hilfe-Center geladen.")
+
+    def _build_help_index(self, content: str) -> dict[str, int]:
+        index: dict[str, int] = {}
+        offset = 0
+        for line in content.splitlines(keepends=True):
+            stripped = line.strip()
+            if stripped.startswith("## "):
+                title = stripped.replace("## ", "", 1).strip()
+                if title:
+                    index[title] = offset
+            offset += len(line)
+        return index
+
+    def _jump_help_topic(self, item: QListWidgetItem) -> None:
+        if not item:
+            return
+        title = item.text()
+        pos = self._help_index.get(title)
+        if pos is None:
+            return
+        cursor = self.help_view.textCursor()
+        cursor.setPosition(pos)
+        self.help_view.setTextCursor(cursor)
+        self.statusBar().showMessage("Hilfe-Thema geöffnet.")
 
     # --- Barriere-Labels (0.9.13) ---
     def _acc(self, widget, name: str, desc: str = ""):
