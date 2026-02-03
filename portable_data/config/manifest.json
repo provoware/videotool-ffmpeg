@@ -1,8 +1,8 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.24",
-  "build_date": "2026-02-05T09:00:00Z",
+  "version": "1.0.25",
+  "build_date": "2026-02-06T09:00:00Z",
   "schema_versions": {
     "settings": 1,
     "automation_rules": 1,
@@ -67,6 +67,6 @@
   },
   "release": {
     "channel": "release",
-    "notes": "Preflight meldet ungültige Watchfolder-Werte; Werkbank parst Audio-Werte robust und setzt sichere Dateinamen-Fallbacks."
+    "notes": "Automatik prüft Watchfolder nun auf Ordnerstatus; Werkbank akzeptiert nur positive Audio-Werte; Ausgabe-Validierung meldet ungültige Zielordner klar."
   }
 }

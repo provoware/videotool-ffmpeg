@@ -48,9 +48,20 @@ def ensure_existing_dir(path: Path, label: str, create: bool = False) -> Path:
 def ensure_output_path(path: Path, label: str) -> Path:
     path = _ensure_no_null_bytes(Path(path).expanduser(), label)
     resolved = path.resolve(strict=False)
-    resolved.parent.mkdir(parents=True, exist_ok=True)
+    if resolved.parent.exists() and not resolved.parent.is_dir():
+        raise PathValidationError(
+            f"{label} hat keinen gültigen Zielordner: {resolved.parent}"
+        )
+    try:
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        raise PathValidationError(
+            f"{label} hat keinen gültigen Zielordner: {resolved.parent}"
+        ) from exc
     if not resolved.parent.is_dir():
-        raise PathValidationError(f"{label} hat keinen gültigen Zielordner: {resolved}")
+        raise PathValidationError(
+            f"{label} hat keinen gültigen Zielordner: {resolved.parent}"
+        )
     if resolved.exists() and resolved.is_dir():
         raise PathValidationError(f"{label} verweist auf einen Ordner: {resolved}")
     test_path = resolved.parent / f".write_test_{uuid4().hex}.tmp"

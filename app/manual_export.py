@@ -62,6 +62,16 @@ def parse_int(value, default: int, label: str) -> int:
         return default
 
 
+def parse_positive_int(value, default: int, label: str) -> int:
+    parsed = parse_int(value, default, label)
+    if parsed <= 0:
+        print(
+            f"WARNUNG: {label} ungültig ({value}), nutze Standard {default}."
+        )
+        return default
+    return parsed
+
+
 def unique_path(p: Path) -> Path:
     if not p.exists():
         return p
@@ -209,8 +219,10 @@ def main() -> int:
     settings = load_json(Path(args.settings), {})
     threads = get_threads(Path(args.settings))
     a_cfg = settings.get("audio", {})
-    a_bitrate = parse_int(a_cfg.get("target_bitrate_kbps", 320), 320, "Audio-Bitrate")
-    a_sr = parse_int(
+    a_bitrate = parse_positive_int(
+        a_cfg.get("target_bitrate_kbps", 320), 320, "Audio-Bitrate"
+    )
+    a_sr = parse_positive_int(
         a_cfg.get("target_samplerate_hz", 48000), 48000, "Audio-Samplerate"
     )
 

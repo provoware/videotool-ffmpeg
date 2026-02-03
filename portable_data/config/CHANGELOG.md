@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.25
+- Automatik: Watchfolder wird auch auf Ordner-Status geprüft (klarer Abbruch bei Datei-Pfad).
+- Validierung: Ausgabe-Pfad meldet Zielordner sauber, wenn ein Datei-Pfad als Ordner missbraucht wird.
+- Werkbank: Audio-Parameter akzeptieren nur positive Werte und fallen sonst sicher auf Standard zurück.
+
 ## 1.0.24
 - Preflight: ungültige Watchfolder-Eingaben werden klar als Empfehlung gemeldet.
 - Werkbank: sichere Fallback-Slugs verhindern leere Dateinamen.
