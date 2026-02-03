@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.6
+- Doku: erweiterter README mit Start, Prüfungen, Barrierefreiheit und Linux-Hinweisen.
+- Tooling: Qualitäts-Checks als eigenes Skript (Compile/Bash/Marker/Must-Pass).
+- Linux: Shell-Skripte sind ausführbar gesetzt.
+
 ## 1.0.5
 - Must-Pass Suite: automatischer Kontrast-Check für alle Themes.
 
