@@ -149,38 +149,36 @@ class Main(QMainWindow):
         self.btn_quar_all_rerun.clicked.connect(self.rerun_all_quarantine_ready)
         self.btn_quar_rerun.clicked.connect(
             lambda: (
-                lambda jid=self._selected_quar_job_id(): run_quarantine_worker(jid)
-                if jid
-                else None
+                lambda jid=self._selected_quar_job_id(): (
+                    run_quarantine_worker(jid) if jid else None
+                )
             )()
         )
         self.btn_quar_replace.clicked.connect(
             lambda: (
-                lambda jid=self._selected_quar_job_id(): self._quar_replace_source_simple(
-                    jid
+                lambda jid=self._selected_quar_job_id(): (
+                    self._quar_replace_source_simple(jid) if jid else None
                 )
-                if jid
-                else None
             )()
         )
         self.btn_quar_postpone.clicked.connect(
             lambda: (
-                lambda jid=self._selected_quar_job_id(): self._update_quar_status(
-                    jid, "zurueckgestellt"
+                lambda jid=self._selected_quar_job_id(): (
+                    self._update_quar_status(jid, "zurueckgestellt")
+                    and self._load_quarantine_table()
+                    if jid
+                    else None
                 )
-                and self._load_quarantine_table()
-                if jid
-                else None
             )()
         )
         self.btn_quar_done.clicked.connect(
             lambda: (
-                lambda jid=self._selected_quar_job_id(): self._update_quar_status(
-                    jid, "erledigt"
+                lambda jid=self._selected_quar_job_id(): (
+                    self._update_quar_status(jid, "erledigt")
+                    and self._load_quarantine_table()
+                    if jid
+                    else None
                 )
-                and self._load_quarantine_table()
-                if jid
-                else None
             )()
         )
         # Initial load

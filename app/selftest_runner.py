@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Selftest (Iteration 0.9.2):
+Selftest (Iteration 1.0.46):
 - erzeugt einen internen Test-Ordner
-- führt zwei Läufe aus:
+- führt vier Läufe aus:
   A) Erfolgs-Lauf (Ton Safe) → 1 fertige Ausgabe
   B) Quarantäne-Lauf (absichtlich niedrige Audio-Bitrate) → 1 Quarantäne-Auftrag
+  C) Mittel-Bitrate-Lauf (weitere Bitraten-Variante) → 1 fertige Ausgabe
+  D) Fehler/Größe-Lauf (defekte + große Datei) → robuste Prüfung
 - kopiert die erzeugten Reports in den normalen Reports-Ordner, damit die GUI sofort "Letzte Nacht" aktualisieren kann.
 - schreibt eine Selftest-Zusammenfassung als JSON.
 """
@@ -35,6 +37,14 @@ def require_asset(path: Path, label: str) -> None:
         raise FileNotFoundError(f"{label} fehlt: {path}")
 
 
+def require_setting(settings: dict, *keys: str) -> None:
+    cur = settings
+    for key in keys:
+        if not isinstance(cur, dict) or key not in cur:
+            raise ValueError(f"Selftest-Config unvollständig: {'.'.join(keys)} fehlt.")
+        cur = cur[key]
+
+
 def run_runner(settings_path: Path, rules_path: Path) -> Path:
     # returns report path printed by automation_runner
     cmd = [
@@ -62,6 +72,27 @@ def prepare_watch(folder: Path):
     shutil.copy(image_asset, folder / "test_image.jpg")
     # Copy audio (wav)
     shutil.copy(audio_asset, folder / "test_audio_10s.wav")
+
+
+def add_corrupt_audio(folder: Path) -> Path:
+    corrupt = folder / "corrupt_audio.wav"
+    corrupt.write_bytes(b"")
+    return corrupt
+
+
+def add_large_audio(source: Path, folder: Path, target_size_bytes: int) -> Path:
+    if target_size_bytes <= 0:
+        raise ValueError(
+            "Selftest-Config unvollständig: target_size_bytes muss > 0 sein."
+        )
+    large = folder / "large_audio.wav"
+    shutil.copy(source, large)
+    current = large.stat().st_size
+    if current < target_size_bytes:
+        extra = target_size_bytes - current
+        with large.open("ab") as handle:
+            handle.write(b"\0" * extra)
+    return large
 
 
 def make_overrides(
@@ -97,79 +128,118 @@ def main():
 
     settings_base = load_json(config_dir() / "settings.json", {})
     rules_base = load_json(config_dir() / "automation_rules.json", {})
+    try:
+        require_setting(settings_base, "paths", "quarantine_jobs_dir")
+    except ValueError as exc:
+        print(f"Selftest abgebrochen: {exc}")
+        return 1
 
     # sandbox base dir
     sandbox = data_dir() / "selftest"
     base_ok = sandbox / "ok"
     base_bad = sandbox / "quarantine"
+    base_mid = sandbox / "mid"
+    base_edge = sandbox / "edge"
     watch_ok = base_ok / "watch"
     watch_bad = base_bad / "watch"
+    watch_mid = base_mid / "watch"
+    watch_edge = base_edge / "watch"
 
     # Prepare watch folders
     try:
         prepare_watch(watch_ok)
         prepare_watch(watch_bad)
+        prepare_watch(watch_mid)
+        prepare_watch(watch_edge)
     except FileNotFoundError as exc:
         print(f"Selftest abgebrochen: {exc}")
         return 1
 
-    # Create overrides:
-    # A) OK: target 320, min 192
-    s_ok, r_ok = make_overrides(
-        base_ok,
-        watch_ok,
-        settings_base,
-        rules_base,
-        target_bitrate=320,
-        min_bitrate=192,
-    )
-    # B) BAD: target 96, min 192 -> should fail validation and create quarantine job
-    s_bad, r_bad = make_overrides(
-        base_bad,
-        watch_bad,
-        settings_base,
-        rules_base,
-        target_bitrate=96,
-        min_bitrate=192,
+    add_corrupt_audio(watch_edge)
+    add_large_audio(
+        assets_dir() / "default_assets" / "test_audio_10s.wav",
+        watch_edge,
+        5 * 1024 * 1024,
     )
 
-    # Run A
-    rep_ok = run_runner(s_ok, r_ok)
-    # Run B
-    rep_bad = run_runner(s_bad, r_bad)
+    scenarios = [
+        {
+            "name": "ok",
+            "base": base_ok,
+            "watch": watch_ok,
+            "target_bitrate": 320,
+            "min_bitrate": 192,
+        },
+        {
+            "name": "quarantine",
+            "base": base_bad,
+            "watch": watch_bad,
+            "target_bitrate": 96,
+            "min_bitrate": 192,
+        },
+        {
+            "name": "mid_bitrate",
+            "base": base_mid,
+            "watch": watch_mid,
+            "target_bitrate": 160,
+            "min_bitrate": 128,
+        },
+        {
+            "name": "edge_files",
+            "base": base_edge,
+            "watch": watch_edge,
+            "target_bitrate": 320,
+            "min_bitrate": 192,
+        },
+    ]
 
-    # Copy reports to main reports folder (so GUI sees them)
     main_reports = data_dir() / "reports"
     main_reports.mkdir(parents=True, exist_ok=True)
-    rep_ok_copy = main_reports / f"run_selftest_{ts}_ok.json"
-    rep_bad_copy = main_reports / f"run_selftest_{ts}_quarantine.json"
-    shutil.copy(rep_ok, rep_ok_copy)
-    shutil.copy(rep_bad, rep_bad_copy)
+    report_map: dict[str, str] = {}
+    sandbox_map: dict[str, str] = {}
 
-    # Also copy quarantine jobs list from bad run into a selftest-namespaced file inside reports
-    qjobs = (
-        base_bad
-        / settings_base["paths"]["quarantine_jobs_dir"]
-        / f"quarantine_jobs_{today}.json"
-    )
-    qjobs_copy = main_reports / f"selftest_quarantine_jobs_{ts}.json"
-    if qjobs.exists():
-        shutil.copy(qjobs, qjobs_copy)
-        # Patch the copied bad report to point to this file
-        bad_doc = load_json(rep_bad_copy, {})
-        bad_doc["selftest"] = {"quarantine_jobs_file": str(qjobs_copy)}
-        save_json(rep_bad_copy, bad_doc)
+    for scenario in scenarios:
+        base_dir = scenario["base"]
+        watch_dir = scenario["watch"]
+        sandbox_map[scenario["name"]] = str(base_dir)
+        s_path, r_path = make_overrides(
+            base_dir,
+            watch_dir,
+            settings_base,
+            rules_base,
+            target_bitrate=int(scenario["target_bitrate"]),
+            min_bitrate=int(scenario["min_bitrate"]),
+        )
+        report_path = run_runner(s_path, r_path)
+        report_copy = main_reports / f"run_selftest_{ts}_{scenario['name']}.json"
+        shutil.copy(report_path, report_copy)
+        report_map[scenario["name"]] = str(report_copy)
+
+        qjobs = (
+            base_dir
+            / settings_base["paths"]["quarantine_jobs_dir"]
+            / f"quarantine_jobs_{today}.json"
+        )
+        if qjobs.exists():
+            qjobs_copy = (
+                main_reports / f"selftest_quarantine_jobs_{ts}_{scenario['name']}.json"
+            )
+            shutil.copy(qjobs, qjobs_copy)
+            report_doc = load_json(report_copy, {})
+            report_doc["selftest"] = {"quarantine_jobs_file": str(qjobs_copy)}
+            save_json(report_copy, report_doc)
 
     summary = {
         "schema_version": 1,
         "selftest_id": ts,
         "created_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-        "reports": {"ok": str(rep_ok_copy), "quarantine": str(rep_bad_copy)},
-        "sandbox": {"ok": str(base_ok), "quarantine": str(base_bad)},
+        "reports": report_map,
+        "sandbox": sandbox_map,
     }
-    save_json(main_reports / f"selftest_summary_{ts}.json", summary)
+    summary_path = main_reports / f"selftest_summary_{ts}.json"
+    save_json(summary_path, summary)
 
-    print(str(rep_bad_copy))
+    print(str(summary_path))
     return 0
 
 

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.46
+- Selftest erweitert: zusätzliche Bitraten-Variante sowie Tests für defekte und große Dateien.
+- Selftest: Reports und Quarantäne-Listen werden jetzt je Szenario kopiert und eindeutig benannt.
+- Selftest: klare Config-Prüfung mit verständlicher Abbruchmeldung ergänzt.
+
 ## 1.0.45
 - Dokumentation erweitert: README, Entwicklerdoku und Projektstruktur-Info aktualisiert.
 - Release-Checks: neues Skript für vollständige, automatische Prüfsequenz.
