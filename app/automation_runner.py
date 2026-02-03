@@ -33,6 +33,37 @@ def log_line(logs_dir: Path, msg: str):
     with p.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False)+"\n")
 
+def validate_settings(settings: dict, logs_dir: Path) -> dict:
+    if not isinstance(settings, dict):
+        log_line(logs_dir, "Automatik abgebrochen: Einstellungen sind unlesbar. Aktion: Einstellungen reparieren.")
+        raise SystemExit(1)
+    paths = settings.get("paths")
+    if not isinstance(paths, dict):
+        log_line(logs_dir, "Automatik abgebrochen: Pfad-Einstellungen fehlen. Aktion: Einstellungen reparieren.")
+        raise SystemExit(1)
+    required = [
+        "watch_folder",
+        "base_data_dir",
+        "exports_dir",
+        "library_audio_dir",
+        "library_images_dir",
+        "quarantine_dir",
+        "quarantine_jobs_dir",
+        "reports_dir",
+        "trash_dir",
+        "staging_dir"
+    ]
+    missing = [key for key in required if not paths.get(key)]
+    if missing:
+        missing_list = ", ".join(missing)
+        log_line(
+            logs_dir,
+            "Automatik abgebrochen: fehlende Pfade in Einstellungen "
+            f"({missing_list}). Aktion: Einstellungen reparieren."
+        )
+        raise SystemExit(1)
+    return settings
+
 def have(cmd: str) -> bool:
     from shutil import which
     return which(cmd) is not None
@@ -140,10 +171,11 @@ def run(settings_path: Path, rules_path: Path) -> Path:
     threads = get_threads(settings_path)
     rules = load_json(rules_path, {})
 
+    logs_dir = root()/"portable_data"/"logs"
+    validate_settings(settings, logs_dir)
+
     base = Path(settings["paths"]["base_data_dir"])
     ensure_structure(base, settings)
-
-    logs_dir = root()/"portable_data"/"logs"
 
     if not have("ffmpeg") or not have("ffprobe"):
         log_line(logs_dir, "Automatik abgebrochen: ffmpeg/ffprobe fehlt (Setup nötig).")
