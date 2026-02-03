@@ -6,5 +6,5 @@
 - [x] Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren.
 - [x] Qualitäts-Checks: eigenes Skript für Compile, Bash-Check, Marker-Scan und Must-Pass.
 - [x] Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen.
-- [ ] Debug-Modus (erweiterte Fehlersuche) mit klaren Log-Leveln ergänzen.
+- [x] Debug-Modus (erweiterte Fehlersuche) mit klaren Log-Leveln ergänzen.
 - [ ] Format-Prüfung (Code-Format) als optionaler Prüfschritt dokumentieren.

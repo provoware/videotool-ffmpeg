@@ -16,11 +16,32 @@ def data_dir() -> Path:
 def cache_dir() -> Path:
     return root()/ "portable_data"/ "cache"
 
+def logs_dir() -> Path:
+    return root()/ "portable_data"/ "logs"
+
 def load_json(p: Path, default=None):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return default if default is not None else {}
+
+def debug_enabled() -> bool:
+    raw = os.getenv("MODULTOOL_DEBUG", "").strip().lower()
+    return raw in {"1", "true", "yes", "on"}
+
+def log_debug(message: str, level: str = "DEBUG") -> None:
+    try:
+        logs_dir().mkdir(parents=True, exist_ok=True)
+        payload = {
+            "at": datetime.utcnow().isoformat(timespec="seconds")+"Z",
+            "level": level,
+            "message": message
+        }
+        (logs_dir()/ "preflight_debug.jsonl").open("a", encoding="utf-8").write(
+            json.dumps(payload, ensure_ascii=False) + "\n"
+        )
+    except Exception:
+        return
 
 def parse_min_free_mb(settings: dict) -> tuple[int, bool, str]:
     raw = settings.get("maintenance", {}).get("min_free_mb", 1024)
@@ -67,6 +88,8 @@ def find_font() -> str|None:
 def run(settings_path: Path|None = None) -> dict:
     if settings_path is None:
         settings_path = cfg_dir()/ "settings.json"
+    if debug_enabled():
+        log_debug(f"Preflight start (settings={settings_path})")
     settings = load_json(settings_path, {})
     paths = settings.get("paths", {})
     min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
@@ -107,7 +130,7 @@ def run(settings_path: Path|None = None) -> dict:
     if not min_free_ok:
         rec.append("min_free_mb_invalid")
 
-    return {
+    result = {
         "at": datetime.utcnow().isoformat(timespec="seconds")+"Z",
         "overall_ok": overall_ok,
         "ffmpeg_ok": ok_ffmpeg,
@@ -123,6 +146,9 @@ def run(settings_path: Path|None = None) -> dict:
         "writable": writable,
         "recommendations": rec
     }
+    if debug_enabled():
+        log_debug(f"Preflight result overall_ok={overall_ok} rec={rec}")
+    return result
 
 if __name__ == "__main__":
     import argparse

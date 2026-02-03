@@ -1,7 +1,7 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "build_date": "2026-02-03T06:00:00Z",
   "schema_versions": {
     "settings": 1,
@@ -67,6 +67,6 @@
   },
   "release": {
     "channel": "release",
-    "notes": "Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen."
+    "notes": "Preflight: Debug-Modus mit Log-Leveln und Debug-Logausgabe ergänzt."
   }
 }

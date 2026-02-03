@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.8
+- Preflight: Debug-Modus mit Log-Leveln und Debug-Logausgabe ergänzt.
+
+
 ## 1.0.7
 - Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen.
 
