@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from preflight import run as preflight_run
-from logging_utils import log_exception
+from logging_utils import log_exception, log_message
 from paths import config_dir, data_dir, repo_root
 from PySide6.QtCore import Qt, QSize, QProcess
 from PySide6.QtGui import QPixmap, QIcon, QImageReader
@@ -58,6 +58,17 @@ class Main(QMainWindow):
     def apply_theme(self):
         theme = self.settings.get("ui", {}).get("theme", "hochkontrast_dunkel")
         qss = _load_theme_qss(theme)
+        if not qss:
+            fallback = "hochkontrast_dunkel"
+            if theme != fallback:
+                log_message(
+                    "Theme fehlt, Standard wird genutzt.",
+                    level="WARN",
+                    context="ui",
+                    extra={"theme": theme, "fallback": fallback},
+                )
+            theme = fallback
+            qss = _load_theme_qss(theme)
         if qss:
             QApplication.instance().setStyleSheet(qss)
         # Button height and padding can be adjusted via stylesheet, but keep min heights coherent
@@ -1523,6 +1534,14 @@ class Main(QMainWindow):
                 )
                 + f" (Eingabe: {t.get('min_free_mb_input')})"
             )
+        if not t.get("theme_ok", True):
+            msg_lines.append(
+                self.texts["strings"].get(
+                    "preflight.theme_invalid",
+                    "Theme ist unbekannt. Standard wird genutzt.",
+                )
+                + f" (Eingabe: {t.get('theme_input')})"
+            )
         for k, v in (t.get("writable") or {}).items():
             if not v.get("ok", True):
                 msg_lines.append(f"Ordner nicht schreibbar: {k} ({v.get('path')})")
@@ -1688,6 +1707,24 @@ class Main(QMainWindow):
                 )
             )
 
+        theme_name = t.get("theme", "") or "–"
+        if t.get("theme_ok", True):
+            lines.append(
+                self.texts["strings"].get(
+                    "preflight.details_theme_ok",
+                    "✅ Theme ist verfügbar.",
+                )
+                + f" {theme_name}"
+            )
+        else:
+            lines.append(
+                self.texts["strings"].get(
+                    "preflight.details_theme_bad",
+                    "⚠️ Theme ist unbekannt. Standard wird genutzt.",
+                )
+                + f" {theme_name}"
+            )
+
         writable = t.get("writable") or {}
         if writable:
             lines.append("")
@@ -1738,6 +1775,10 @@ class Main(QMainWindow):
                 "min_free_mb_invalid": self.texts["strings"].get(
                     "preflight.details_rec_min_free",
                     "• Mindest-Speicher (min_free_mb) als Zahl eintragen (z.B. 2048).",
+                ),
+                "theme_invalid": self.texts["strings"].get(
+                    "preflight.details_rec_theme",
+                    "• Theme auswählen, das in den Einstellungen verfügbar ist.",
                 ),
             }
             for rec in recs:

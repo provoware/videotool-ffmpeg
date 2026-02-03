@@ -56,7 +56,13 @@ else:
         "ffmpeg_install": "FFmpeg (Video-Werkzeug) installieren.",
         "set_watchfolder": "Watchfolder (Eingangsordner) wählen.",
         "free_space": "Speicher frei machen (nicht benötigte Dateien löschen).",
-        "install_font": "Schrift (Font) installieren, z.B. DejaVuSans."
+        "install_font": "Schrift (Font) installieren, z.B. DejaVuSans.",
+        "watchfolder_not_writable": "Watchfolder (Eingangsordner) braucht Schreibrechte (Rechte prüfen).",
+        "watchfolder_invalid": "Watchfolder-Eingabe prüfen und gültigen Ordner wählen.",
+        "min_free_mb_invalid": "Mindest-Speicher (min_free_mb) als Zahl setzen (z.B. 2048).",
+        "settings_schema_invalid": "Einstellungen prüfen (Eingaben müssen zum Schema passen).",
+        "settings_paths_invalid": "Einstellungen prüfen (Pfade müssen gültig sein).",
+        "theme_invalid": "Theme prüfen und ein verfügbares Theme auswählen."
     }
     if recs:
         print("[Modultool] Nächste Schritte:")
