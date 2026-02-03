@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.25
+- Version: 1.0.26
 - Fortschritt: 41/42 = **98%**
-- Nächster Schritt: **Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)**
+- Nächster Schritt: **Release-Pakete mit den neuen Skripten erstellen und testen (ZIP, .deb, Must-Pass)**
 
 ## ✅ Fertig
 1. Portable Struktur
