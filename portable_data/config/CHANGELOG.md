@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.5
+- Must-Pass Suite: automatischer Kontrast-Check für alle Themes.
+
+
 ## 1.0.4
 - Start-Routine: Werkstatt-Check mit klaren nächsten Schritten beim Start.
 
