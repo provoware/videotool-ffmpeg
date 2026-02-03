@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.32
-- Fortschritt: 51/52 = **98%**
+- Version: 1.0.33
+- Fortschritt: 54/55 = **98%**
 - Nächster Schritt: **main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)**
 
 ## ✅ Fertig
@@ -56,6 +56,9 @@
 49. Performance: Thread-Anzahl fällt dynamisch auf CPU-Kerne zurück (Eco halbiert)
 50. Reports/Quarantäne-Listen: Schema-Normalisierung ergänzt Titel/Summary/Statusfelder
 51. Plattform-Hinweise: Pfad-Öffnen unterstützt macOS/Windows, README ergänzt Start-Notizen
+52. Automatik: Fallback-Bild wird vorab geprüft und fehlende Bilder landen in Quarantäne
+53. Automatik: Ungültige Ausgabe-Pfade führen zu Quarantäne statt Abbruch
+54. Selftest: Fehlende Testassets brechen mit klarer Meldung ab
 
 ## 🔧 Offen
 1. main.py modularisieren (UI-Logik in eigene Klassen auslagern)
