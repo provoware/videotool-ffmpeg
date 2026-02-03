@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.44
+- Start-Routine: Start-Log wird in portable_data/logs gespeichert und beim Start angezeigt.
+- Start-Routine: Python-Umgebung wird geprüft und klare Reparatur-Hinweise ausgegeben.
+- Bootstrap: fehlende requirements.txt wird klar gemeldet, bevor die Installation startet.
+
 ## 1.0.43
 - Hilfe-Center erweitert: interaktive Themenliste + Schritt-für-Schritt-Anleitungen im Tool.
 - Internationalisierung vorbereitet: Sprachdateien für Deutsch/Englisch, UI lädt Sprache aus Settings.

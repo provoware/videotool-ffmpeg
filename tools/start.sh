@@ -5,15 +5,34 @@ APP_DIR="$ROOT/app"
 DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
 RUN_CHECKS="${MODULTOOL_RUN_CHECKS:-0}"
+LOG_DIR="$ROOT/portable_data/logs"
+LOG_FILE=""
+
+if mkdir -p "$LOG_DIR" 2>/dev/null; then
+  LOG_FILE="$LOG_DIR/start_last.log"
+fi
+
+if [ -n "$LOG_FILE" ]; then
+  exec > >(tee -a "$LOG_FILE") 2>&1
+fi
 
 echo "[Modultool] Start – Video-Werkstatt (Portable)"
 if [ "$DEBUG_MODE" = "1" ]; then
   echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
 fi
+if [ -n "$LOG_FILE" ]; then
+  echo "[Modultool] Start-Log: $LOG_FILE"
+fi
 
 echo "[Modultool] Abhängigkeiten prüfen …"
 "$ROOT/tools/bootstrap_python_env.sh"
 VENV_DIR="$ROOT/portable_data/.venv"
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  echo "[Modultool] Fehler: Python-Umgebung fehlt oder ist defekt."
+  echo "[Modultool] Tipp: Lösche $VENV_DIR und starte erneut."
+  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+  exit 1
+fi
 
 if ! command -v ffmpeg >/dev/null 2>&1; then
   echo "[Modultool] Hinweis: FFmpeg fehlt (Video-Werkzeug)."

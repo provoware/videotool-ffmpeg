@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.43
-- Fortschritt: 68/72 = **94%**
+- Version: 1.0.44
+- Fortschritt: 71/75 = **95%**
 - Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
 ## ✅ Fertig
@@ -73,6 +73,9 @@
 67. Hilfe-Center: interaktive Themenliste + Schritt-für-Schritt-Anleitungen
 68. Internationalisierung: Sprachdateien vorbereitet und UI lädt Sprache
 69. Validierung: Ordner/Report-Aktionen prüfen Pfade und melden Erfolg/Fehler
+70. Start-Routine: Start-Log in portable_data/logs mit Pfad-Hinweis
+71. Start-Routine: Python-Umgebung prüfen und Reparatur-Hinweise geben
+72. Bootstrap: requirements.txt-Fehler früh und klar melden
 
 ## 🔧 Offen
 1. main.py modularisieren: UI (Benutzeroberfläche) in klare Klassen trennen.
