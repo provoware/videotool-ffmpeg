@@ -1,4 +1,5 @@
 # todo.txt
+- [x] Preflight: Mindest-Speichergrenze robust parsen (Fallback bei ungültigen Werten).
 - [x] Autotest: Thumbnail-Erzeugung im Must-Pass integrieren.
 - [x] Werkstatt-Check Details: Klartext-Anzeige mit einfachen Empfehlungen.
 - [x] Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln.

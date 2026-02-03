@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
 - Version: 1.0.6
-- Fortschritt: 26/26 = **100%**
-- Nächster Schritt: **Debug-Modus (Log-Level) + gezielte Fehlerberichte**
+- Fortschritt: 25/25 = **100%**
+- Nächster Schritt: **Preflight weiter härten (Watchfolder-Validierung, klare Hinweise)**
 
 ## ✅ Fertig
 1. Portable Struktur
