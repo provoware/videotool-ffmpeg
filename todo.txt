@@ -1,4 +1,7 @@
 # todo.txt
+- [x] Start-Routine: Start-Log in portable_data/logs schreiben und Pfad ausgeben.
+- [x] Start-Routine: Python-Umgebung prüfen und klare Reparatur-Hinweise geben.
+- [x] Bootstrap: fehlende requirements.txt klar melden, statt still zu scheitern.
 - [x] Bereinigung: .deb- und ZIP-Release-Artefakte aus dem Repo entfernt.
 - [x] README: Entwicklungsfortschritt (%) ergänzt und offene Punkte nummeriert gelistet.
 - [x] AGENT.md: Release-Finalisierung ergänzt (Autostart, Checks, Barrierefreiheit, Struktur-Regeln).

@@ -26,6 +26,12 @@ if [ ! -d "$VENV_DIR" ]; then
   python3 -m venv "$VENV_DIR"
 fi
 
+if [ ! -f "$APP_DIR/requirements.txt" ]; then
+  echo "[Modultool] Fehler: requirements.txt fehlt." >&2
+  echo "[Modultool] Tipp: Prüfe das Installationspaket oder stelle die Datei wieder her." >&2
+  exit 1
+fi
+
 PIP_CMD=("$VENV_DIR/bin/python" -m pip)
 
 if [ "$DEBUG_MODE" = "1" ]; then
