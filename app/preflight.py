@@ -92,6 +92,16 @@ def run(settings_path: Path | None = None) -> dict:
     min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
 
     watch = Path(paths.get("watch_folder", str(Path.home() / "Downloads"))).expanduser()
+    watch_created = False
+    if not watch.exists():
+        try:
+            watch.mkdir(parents=True, exist_ok=True)
+            watch_created = True
+            if debug_enabled():
+                log_debug(f"Watchfolder created: {watch}")
+        except Exception as exc:
+            if debug_enabled():
+                log_debug(f"Watchfolder create failed: {watch} ({exc})", level="WARN")
     exports = data_dir() / paths.get("exports_dir", "exports")
     reports = data_dir() / paths.get("reports_dir", "reports")
     staging = data_dir() / paths.get("staging_dir", "staging")
@@ -152,6 +162,7 @@ def run(settings_path: Path | None = None) -> dict:
         "ffmpeg_ok": ok_ffmpeg,
         "watchfolder_ok": ok_watch,
         "watchfolder": str(watch),
+        "watchfolder_created": watch_created,
         "watchfolder_writable_ok": watch_writable_ok,
         "watchfolder_writable_error": watch_writable_error,
         "free_mb": free_mb,

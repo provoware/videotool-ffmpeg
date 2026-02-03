@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.17
+- Preflight: fehlenden Watchfolder automatisch anlegen (Self-Repair).
+
 ## 1.0.16
 - Maintenance: Dateifehler werden als Warnungen im Summary protokolliert (keine Silent-Fails).
 
