@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.12
+- Preflight: Debug-Log wird stabil geschrieben (Kontextmanager = sicheres Öffnen/Schließen).
+
 ## 1.0.11
 - Pfadlogik zentralisiert (paths = Speicherorte), weniger Duplikate.
 - Qualitäts-Checks: Format-Check (Formatprüfung) mit ruff, Dev-Tools werden automatisch installiert.

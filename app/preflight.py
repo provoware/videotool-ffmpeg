@@ -28,9 +28,9 @@ def log_debug(message: str, level: str = "DEBUG") -> None:
             "level": level,
             "message": message,
         }
-        (logs_dir() / "preflight_debug.jsonl").open("a", encoding="utf-8").write(
-            json.dumps(payload, ensure_ascii=False) + "\n"
-        )
+        log_path = logs_dir() / "preflight_debug.jsonl"
+        with log_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
     except Exception:
         return
 
