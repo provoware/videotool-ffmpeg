@@ -11,6 +11,7 @@
 - [x] Maintenance: ungültige Settings-Ints sicher parsen und im Summary warnen.
 - [x] Format-Prüfung (Code-Format) als optionaler Prüfschritt dokumentieren.
 - [x] Preflight: Debug-Log stabil schreiben (Kontextmanager).
+- [x] Start-Routine: Debug-Modus zeigt Pip- und Preflight-Details ohne Log-Unterdrückung.
 - [ ] Release: ZIP bauen und auf frischem System testen.
 - [ ] Release: .deb bauen und Installation testen.
 - [ ] Release: Must-Pass Suite auf Zielsystem ausführen.

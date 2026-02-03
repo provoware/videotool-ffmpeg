@@ -3,8 +3,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="$ROOT/app"
 VENV_DIR="$ROOT/portable_data/.venv"
+DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 
 echo "[Modultool] Start – Video-Werkstatt (Portable)"
+if [ "$DEBUG_MODE" = "1" ]; then
+  echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
+fi
 
 command -v python3 >/dev/null 2>&1 || { echo "Python3 fehlt. Bitte installieren."; exit 1; }
 
@@ -14,7 +18,11 @@ if [ ! -d "$VENV_DIR" ]; then
 fi
 
 echo "[Modultool] Abhängigkeiten prüfen …"
-"$VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
+if [ "$DEBUG_MODE" = "1" ]; then
+  "$VENV_DIR/bin/python" -m pip install --upgrade pip
+else
+  "$VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
+fi
 if ! "$VENV_DIR/bin/python" -m pip install -r "$APP_DIR/requirements.txt"; then
   echo "[Modultool] Fehler: Abhängigkeiten (Dependencies = Zusatzpakete) konnten nicht installiert werden."
   echo "[Modultool] Tipp: Internet prüfen, dann erneut starten."
@@ -22,7 +30,20 @@ if ! "$VENV_DIR/bin/python" -m pip install -r "$APP_DIR/requirements.txt"; then
 fi
 
 echo "[Modultool] Werkstatt-Check (Startprüfung) …"
-if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json 2>/dev/null); then
+if [ "$DEBUG_MODE" = "1" ]; then
+  if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json); then
+    :
+  else
+    PREFLIGHT_JSON=""
+  fi
+else
+  if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json 2>/dev/null); then
+    :
+  else
+    PREFLIGHT_JSON=""
+  fi
+fi
+if [ -n "${PREFLIGHT_JSON:-}" ]; then
   echo "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
 import json
 import sys
