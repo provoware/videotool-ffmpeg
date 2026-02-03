@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.45
+- Dokumentation erweitert: README, Entwicklerdoku und Projektstruktur-Info aktualisiert.
+- Release-Checks: neues Skript für vollständige, automatische Prüfsequenz.
+- Versionierung: SemVer-Regeln klar dokumentiert, inkl. Pflicht-Updates für Manifest/Status/Changelog.
+
 ## 1.0.44
 - Start-Routine: Start-Log wird in portable_data/logs gespeichert und beim Start angezeigt.
 - Start-Routine: Python-Umgebung wird geprüft und klare Reparatur-Hinweise ausgegeben.

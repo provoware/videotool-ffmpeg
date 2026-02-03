@@ -1,6 +1,6 @@
 # Entwicklerdoku – Modultool Video-Werkstatt (Portable)
 
-Stand: 2026-02-01T05:52:00Z
+Stand: 2026-02-20T10:00:00Z
 
 ## Ziel (kurz)
 Dieses Tool baut Videos aus Bild+Audio (Standbild-Modus) und kann automatisiert um eine Uhrzeit (globaler Zeitplan) den Downloads-Ordner abarbeiten.
@@ -21,6 +21,22 @@ Kernprinzip: **Zwischenablage → Temp → Validierung → Commit** (datensicher
    - Uhrzeit in `portable_data/config/automation_rules.json` → `start_time`
    - Timer einrichten: `tools/install_timer.sh`
    - Automatik-Runner: `tools/run_automation.sh`
+
+## Start-Routine (autonom, mit Nutzerfeedback)
+Die Start-Routine ist der **Standardweg**. Sie richtet alles ein und meldet klar, was passiert ist.
+
+- Einstieg: `tools/start.sh`
+- Prüft/Installiert Abhängigkeiten (Dependencies = Zusatzpakete)
+- Führt den Werkstatt-Check (Preflight = Startprüfung) aus
+- Schreibt Logs (Protokolle) nach `portable_data/logs/`
+- Debug-Modus: `MODULTOOL_DEBUG=1 tools/start.sh`
+
+## Release-Checks (vollautomatisch)
+Ein kompletter, reproduzierbarer Prüfablauf (mit klaren Meldungen):
+```bash
+tools/run_release_checks.sh
+```
+Enthält: Python-Compile, Bash-Check, Qualitäts-Checks (ruff), Must-Pass Suite und Release-Builds (ZIP/.deb).
 
 ## Ordnerstruktur (Portable)
 - Tool (unverändert):
@@ -43,8 +59,16 @@ Kernprinzip: **Zwischenablage → Temp → Validierung → Commit** (datensicher
     - `texte_de.json` Werkstatt-Texte (JSON, versioniert)
     - `themes.json` Sichtmodi (sehschwach)
     - `manifest.json` Features & Versionen
+    - `DEVELOPMENT_STATUS.md` Fortschritt + nächster Schritt
+    - `DEVELOPER_MANUAL.md` Entwicklerdoku (im Tool sichtbar)
+    - `HELP_CENTER.md` Hilfe-Center-Inhalte
     - `CHANGELOG.md` Änderungsverlauf
+    - `PROJECT_STRUCTURE.md` Projektverzeichnis (finaler Überblick)
     - `README.txt` Nutzer-Anleitung
+
+## Projektverzeichnis (finaler Überblick)
+Die vollständige Liste der Ordner/Dateien samt Zweck steht in:
+`portable_data/config/PROJECT_STRUCTURE.md`.
 
 ## Architektur (Schichten)
 1. **Core-Logik (CLI Runner)**
@@ -69,6 +93,11 @@ Kernprinzip: **Zwischenablage → Temp → Validierung → Commit** (datensicher
   - Ausgabe → `quarantine/...` mit `_quarantaene` Suffix
   - Quarantäne-Auftrag wird in Tagesliste geschrieben
 
+## Input/Output-Validierung (Pflicht)
+- Jede Funktion prüft Eingaben (Input = Nutzereingabe).
+- Jede Funktion bestätigt Ergebnisse (Output = Erfolg/Status).
+- Fehler liefern immer den **nächsten Schritt** (z. B. „Jetzt reparieren“, „Sicherer Standard“, „Details“).
+
 ## Qualitäts-Validierung (Ton)
 - Standard: AAC, 48kHz, 320k (Minimum 192k).
 - Nach Export prüft ffprobe:
@@ -89,11 +118,44 @@ Kernprinzip: **Zwischenablage → Temp → Validierung → Commit** (datensicher
 - Logs rotieren (später): Maxgröße, dann Archiv.
 - Fehler nie „still“: immer Report + Dashboard-Karte.
 
+## Automatisierte Tests & Qualität
+Pflicht für Releases (vollautomatisch):
+```bash
+tools/run_release_checks.sh
+```
+Enthält:
+- Python-Compile (Syntax-Check)
+- Bash-Check (Shell-Skripte)
+- Qualitäts-Checks (ruff check + format)
+- Must-Pass Suite (Funktionsprüfung)
+- Release-Builds (ZIP + .deb)
+
+Zusätzlich (bei Bedarf):
+- `tools/run_quality_checks.sh` (Codequalität + Format)
+- `tools/run_selftest.sh` (Funktionsprüfung mit Testdaten)
+
 ## Barrierefreiheit (Minimum)
 - 3 Themes (sehschwach) in `themes.json`.
 - Sichtbarer Fokusrahmen, Tastaturbedienung.
 - Buttontexte: kurz und eindeutig (deutsch).
 - Tooltips erklären Details.
+
+## Debugging & Logging (Pflicht)
+- Debug-Modus: `MODULTOOL_DEBUG=1 tools/start.sh` (Debug = Fehlersuche).
+- Logs trennen: Nutzer-Feedback (UI) vs. Entwickler-Log (`portable_data/logs/debug.log`).
+- Kein Silent-Fail: jede Abweichung wird protokolliert und erklärt.
+
+## Versionierung (Regel im Tool)
+Semantische Versionierung (SemVer) ist Pflicht:
+- **MAJOR**: breaking change (nicht abwärtskompatibel)
+- **MINOR**: neue Funktion (abwärtskompatibel)
+- **PATCH**: Bugfix oder Doku-Update
+
+Bei **jedem Release**:
+1) `portable_data/config/manifest.json`: `version` erhöhen, `build_date` aktualisieren.
+2) `portable_data/config/CHANGELOG.md`: neuer Abschnitt (ein Absatz).
+3) `portable_data/config/DEVELOPMENT_STATUS.md`: Fortschritt + nächster Schritt.
+4) Git-Tag setzen: `vMAJOR.MINOR.PATCH` (z. B. `v1.0.45`).
 
 ## Nächste Schritte (nach 0.9.0)
 - Voller Selftest (GUI startet CLI Runner mit Demo-Watchfolder).
