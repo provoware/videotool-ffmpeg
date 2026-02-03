@@ -46,3 +46,4 @@
 - [ ] Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln (ein Klick, klare Rückmeldung).
 - [x] JSON-IO vereinheitlichen: Atomic JSON Writes (atomar/sicher speichern) und IO-Helper einführen.
 - [x] Datei-Lock (Single-Writer) für Settings und Quarantäne-Listen ergänzen.
+- [x] Preflight-JSON-IO vereinheitlicht (IO-Helper) und Debug-Flag nur einmal ermittelt.

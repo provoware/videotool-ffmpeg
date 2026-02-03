@@ -22,6 +22,10 @@ def _validate_json_path(path: Path) -> bool:
     return isinstance(path, Path) and path.suffix.lower() == ".json"
 
 
+def _default_payload(default: Any | None) -> Any:
+    return default if default is not None else {}
+
+
 def load_json(
     path: Path,
     default: Any | None = None,
@@ -35,21 +39,21 @@ def load_json(
             ValueError("Ungültiger JSON-Pfad"),
             extra={"path": str(path)},
         )
-        return default if default is not None else {}
+        return _default_payload(default)
     if not path.exists():
-        return default if default is not None else {}
+        return _default_payload(default)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
         log_exception(context, exc, extra={"path": str(path)})
-        return default if default is not None else {}
+        return _default_payload(default)
     if expect_type and not isinstance(data, expect_type):
         log_exception(
             context,
             ValueError("Unerwarteter JSON-Typ"),
             extra={"path": str(path), "expected": str(expect_type)},
         )
-        return default if default is not None else {}
+        return _default_payload(default)
     return data
 
 
