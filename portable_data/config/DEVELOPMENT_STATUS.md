@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.1
-- Fortschritt: 22/24 = **92%**
-- Nächster Schritt: **Portable Edgecase-Härtung (Dialogs, Fallbacks)**
+- Version: 1.0.2
+- Fortschritt: 23/24 = **96%**
+- Nächster Schritt: **Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -27,6 +27,7 @@
 20. Must-Pass Suite
 21. Schonmodus Threads
 22. Preflight/Werkstatt-Check (neu)
+23. Thumbnail-Regressionstest in Must-Pass Suite
 
 ## 🔧 Offen
 1. Portable Edgecase-Härtung (Dialogs, Fallbacks)

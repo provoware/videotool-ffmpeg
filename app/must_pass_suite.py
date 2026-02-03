@@ -11,9 +11,11 @@ Outputs:
 Exit code 0 = pass, 1 = fail
 """
 from __future__ import annotations
-import json, subprocess, shutil, time, os, py_compile, wave, struct, math
+import json, subprocess, shutil, time, os, py_compile, wave, struct, math, hashlib
 from pathlib import Path
 from datetime import datetime
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QImageReader
 
 def root() -> Path:
     return Path(__file__).resolve().parents[1]
@@ -23,6 +25,9 @@ def cfg_dir() -> Path:
 
 def user_data() -> Path:
     return root()/"portable_data"/"user_data"
+
+def cache_dir() -> Path:
+    return root()/"portable_data"/"cache"
 
 def load_json(p: Path, default=None):
     try:
@@ -63,6 +68,24 @@ def make_test_assets(folder: Path):
         # minimal fallback using ImageMagick isn't allowed; just touch
         img_path.write_bytes(b"")
     return wav_path, img_path
+
+def make_thumbnail(image_path: Path, size: int = 96) -> Path|None:
+    if not image_path.exists():
+        return None
+    cache = cache_dir()/ "thumbs"
+    cache.mkdir(parents=True, exist_ok=True)
+    raw = image_path.read_bytes()
+    digest = hashlib.sha1(raw).hexdigest()
+    out = cache / f"mustpass_{digest}_{size}.png"
+    reader = QImageReader(str(image_path))
+    reader.setAutoTransform(True)
+    img = reader.read()
+    if img.isNull():
+        return None
+    scaled = img.scaled(size, size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    if not scaled.save(str(out), "PNG"):
+        return None
+    return out if out.exists() else None
 
 def ffprobe_audio_ok(file: Path, min_kbps: int, sr_target: int) -> tuple[bool, dict]:
     cmd = ["ffprobe","-v","error","-print_format","json","-show_streams","-show_format",str(file)]
@@ -176,6 +199,22 @@ def main():
             results["pass"] = False
     except Exception as e:
         results["checks"]["workbench"] = {"error": str(e)}
+        results["pass"] = False
+
+    # Thumbnail regression (load image and ensure thumb exists)
+    try:
+        thumb_sandbox = user_data()/"mustpass_thumbs"
+        if thumb_sandbox.exists():
+            shutil.rmtree(thumb_sandbox)
+        thumb_sandbox.mkdir(parents=True, exist_ok=True)
+        _, img = make_test_assets(thumb_sandbox)
+        thumb = make_thumbnail(img, 96)
+        thumb_ok = bool(thumb and thumb.exists() and thumb.stat().st_size > 0)
+        results["checks"]["thumbnail"] = {"ok": thumb_ok, "thumb": str(thumb) if thumb else "", "source": str(img)}
+        if not thumb_ok:
+            results["pass"] = False
+    except Exception as e:
+        results["checks"]["thumbnail"] = {"error": str(e)}
         results["pass"] = False
 
     # Automation sandbox pass + quarantine
