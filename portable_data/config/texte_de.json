@@ -4,7 +4,7 @@
     "paket_version": "1.0.0",
     "sprache": "de",
     "stil": "werkstatt",
-    "aktualisiert_am": "2026-02-01T05:37:58Z"
+    "aktualisiert_am": "2026-02-03T05:13:38Z"
   },
   "strings": {
     "app.titel": "Modultool – Video-Werkstatt",
@@ -137,11 +137,13 @@
     "preflight.space_low": "Wenig Speicher frei. Export kann scheitern.",
     "preflight.min_free_invalid": "Mindest-Speicher (min_free_mb) ist ungültig. Standard 1024 MB wird genutzt.",
     "preflight.watch_missing": "Watchfolder fehlt. Downloads-Pfad prüfen.",
+    "preflight.watch_not_writable": "Watchfolder ist nicht schreibbar. Rechte prüfen.",
     "preflight.details_header": "Werkstatt-Check – klar erklärt.",
     "preflight.details_ffmpeg_ok": "✅ FFmpeg (Video-Werkzeug) ist da.",
     "preflight.details_ffmpeg_bad": "⚠️ FFmpeg (Video-Werkzeug) fehlt. Bitte einrichten.",
     "preflight.details_watch_ok": "✅ Watchfolder (Eingangsordner) ist gesetzt.",
     "preflight.details_watch_bad": "⚠️ Watchfolder (Eingangsordner) fehlt. Bitte wählen.",
+    "preflight.details_watch_not_writable": "⚠️ Watchfolder (Eingangsordner) ist nicht schreibbar. Bitte Rechte prüfen.",
     "preflight.details_space_unknown": "Speicher frei: nicht messbar.",
     "preflight.details_space_ok": "✅ Genug Speicher frei.",
     "preflight.details_space_bad": "⚠️ Speicher knapp. Export kann scheitern.",
@@ -152,6 +154,7 @@
     "preflight.details_next_header": "Nächste Schritte (einfach):",
     "preflight.details_rec_ffmpeg": "• FFmpeg (Video-Werkzeug) installieren.",
     "preflight.details_rec_watch": "• Watchfolder (Eingangsordner) wählen.",
+    "preflight.details_rec_watch_write": "• Watchfolder (Eingangsordner) braucht Schreibrechte (Rechte prüfen).",
     "preflight.details_rec_space": "• Speicher frei machen (nicht benötigte Dateien löschen).",
     "preflight.details_rec_font": "• Schrift (Font) installieren, z.B. DejaVuSans.",
     "preflight.details_rec_min_free": "• Mindest-Speicher (min_free_mb) als Zahl eintragen (z.B. 2048).",

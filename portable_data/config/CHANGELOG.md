@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.9
+- Preflight: Watchfolder-Schreibrecht prüfen und klare Hinweise anzeigen.
+
+
 ## 1.0.8
 - Preflight: Debug-Modus mit Log-Leveln und Debug-Logausgabe ergänzt.
 

@@ -1883,6 +1883,8 @@ class Main(QMainWindow):
             msg_lines.append(self.texts["strings"].get("preflight.missing_ffmpeg","FFmpeg fehlt."))
         if not t.get("watchfolder_ok", True):
             msg_lines.append(self.texts["strings"].get("preflight.watch_missing","Watchfolder fehlt."))
+        if not t.get("watchfolder_writable_ok", True):
+            msg_lines.append(self.texts["strings"].get("preflight.watch_not_writable","Watchfolder ist nicht schreibbar."))
         if not t.get("space_ok", True):
             msg_lines.append(self.texts["strings"].get("preflight.space_low","Wenig Speicher frei.") + f" ({t.get('free_mb')} MB)")
         if not t.get("min_free_mb_ok", True):
@@ -1956,6 +1958,8 @@ class Main(QMainWindow):
             lines.append(self.texts["strings"].get("preflight.details_watch_ok","✅ Watchfolder (Eingangsordner) ist gesetzt.") + f"\n   {watchfolder}")
         else:
             lines.append(self.texts["strings"].get("preflight.details_watch_bad","⚠️ Watchfolder (Eingangsordner) fehlt. Bitte wählen.") + f"\n   {watchfolder}")
+        if t.get("watchfolder_ok", True) and not t.get("watchfolder_writable_ok", True):
+            lines.append(self.texts["strings"].get("preflight.details_watch_not_writable","⚠️ Watchfolder (Eingangsordner) ist nicht schreibbar. Bitte Rechte prüfen."))
 
         free_mb = t.get("free_mb", -1)
         min_mb = t.get("min_free_mb", 0)
@@ -1996,6 +2000,7 @@ class Main(QMainWindow):
             rec_map = {
                 "ffmpeg_install": self.texts["strings"].get("preflight.details_rec_ffmpeg","• FFmpeg (Video-Werkzeug) installieren."),
                 "set_watchfolder": self.texts["strings"].get("preflight.details_rec_watch","• Watchfolder (Eingangsordner) wählen."),
+                "watchfolder_not_writable": self.texts["strings"].get("preflight.details_rec_watch_write","• Watchfolder (Eingangsordner) braucht Schreibrechte (Rechte prüfen)."),
                 "free_space": self.texts["strings"].get("preflight.details_rec_space","• Speicher frei machen (nicht benötigte Dateien löschen)."),
                 "install_font": self.texts["strings"].get("preflight.details_rec_font","• Schrift (Font) installieren, z.B. DejaVuSans."),
                 "min_free_mb_invalid": self.texts["strings"].get("preflight.details_rec_min_free","• Mindest-Speicher (min_free_mb) als Zahl eintragen (z.B. 2048).")

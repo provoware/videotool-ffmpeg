@@ -104,6 +104,10 @@ def run(settings_path: Path|None = None) -> dict:
 
     ok_ffmpeg = have("ffmpeg") and have("ffprobe")
     ok_watch = watch.exists()
+    watch_writable_ok = True
+    watch_writable_error = ""
+    if ok_watch:
+        watch_writable_ok, watch_writable_error = writable_dir(watch)
 
     writable = {}
     for key, p in [("exports", exports), ("reports", reports), ("staging", staging), ("trash", trash), ("thumbs", thumbs), ("temp_renders", temp_r)]:
@@ -116,7 +120,7 @@ def run(settings_path: Path|None = None) -> dict:
     font = find_font()
     ok_font = font is not None
 
-    overall_ok = ok_ffmpeg and ok_watch and ok_space and all(v["ok"] for v in writable.values())
+    overall_ok = ok_ffmpeg and ok_watch and ok_space and watch_writable_ok and all(v["ok"] for v in writable.values())
 
     rec = []
     if not ok_ffmpeg:
@@ -129,6 +133,8 @@ def run(settings_path: Path|None = None) -> dict:
         rec.append("install_font")
     if not min_free_ok:
         rec.append("min_free_mb_invalid")
+    if ok_watch and not watch_writable_ok:
+        rec.append("watchfolder_not_writable")
 
     result = {
         "at": datetime.utcnow().isoformat(timespec="seconds")+"Z",
@@ -136,6 +142,8 @@ def run(settings_path: Path|None = None) -> dict:
         "ffmpeg_ok": ok_ffmpeg,
         "watchfolder_ok": ok_watch,
         "watchfolder": str(watch),
+        "watchfolder_writable_ok": watch_writable_ok,
+        "watchfolder_writable_error": watch_writable_error,
         "free_mb": free_mb,
         "min_free_mb_ok": min_free_ok,
         "min_free_mb_input": min_free_raw,
