@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.14
+- Debug-Log als Datei speicherbar dokumentiert (inkl. einfacher Start-Checkliste).
+
 ## 1.0.13
 - Start-Routine: Debug-Modus zeigt Pip- und Preflight-Details ohne Log-Unterdrückung.
 
