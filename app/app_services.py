@@ -63,11 +63,24 @@ def ensure_dirs():
     (cache_dir() / "thumbs").mkdir(parents=True, exist_ok=True)
 
 
-def activity(msg: str):
+def activity(msg: str) -> bool:
+    if not isinstance(msg, str) or not msg.strip():
+        log_exception(
+            "activity",
+            ValueError("Leere Aktivitätsmeldung"),
+            extra={"message": msg},
+        )
+        return False
     p = logs_dir() / "activity_log.jsonl"
     entry = {"at": datetime.utcnow().isoformat(timespec="seconds") + "Z", "msg": msg}
-    with p.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    try:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception as exc:
+        log_exception("activity", exc, extra={"path": str(p)})
+        return False
+    return True
 
 
 def have(cmd: str) -> bool:
@@ -76,23 +89,50 @@ def have(cmd: str) -> bool:
     return which(cmd) is not None
 
 
-def open_path(p: Path, parent: QWidget | None = None):
+def open_path(p: Path, parent: QWidget | None = None) -> bool:
+    if not isinstance(p, Path):
+        log_exception("open_path", ValueError("Ungültiger Pfadtyp"), extra={"path": p})
+        _show_process_message(
+            parent,
+            "Öffnen fehlgeschlagen",
+            "Der Pfad ist ungültig.",
+            details=str(p),
+            icon=QMessageBox.Warning,
+        )
+        return False
+    target = p.expanduser()
+    if not target.exists():
+        log_exception(
+            "open_path",
+            FileNotFoundError("Pfad nicht gefunden"),
+            extra={"path": str(target)},
+        )
+        _show_process_message(
+            parent,
+            "Pfad nicht gefunden",
+            "Der Pfad wurde nicht gefunden. Aktion: Pfad prüfen.",
+            details=str(target),
+            icon=QMessageBox.Warning,
+        )
+        return False
     try:
         if sys.platform.startswith("darwin"):
-            subprocess.Popen(["open", str(p)])
+            subprocess.Popen(["open", str(target)])
         elif os.name == "nt":
-            os.startfile(p)  # type: ignore[attr-defined]
+            os.startfile(target)  # type: ignore[attr-defined]
         else:
-            subprocess.Popen(["xdg-open", str(p)])
+            subprocess.Popen(["xdg-open", str(target)])
     except Exception as exc:
-        log_exception("open_path", exc, extra={"path": str(p)})
+        log_exception("open_path", exc, extra={"path": str(target)})
         _show_process_message(
             parent,
             "Öffnen fehlgeschlagen",
             "Der Pfad konnte nicht geöffnet werden.",
-            details=str(p),
+            details=str(target),
             icon=QMessageBox.Warning,
         )
+        return False
+    return True
 
 
 def run_quarantine_worker(job_id: str | None = None):
@@ -108,10 +148,21 @@ def run_quarantine_worker(job_id: str | None = None):
 
 def latest_report_file() -> Path | None:
     rdir = data_dir() / "reports"
-    files = sorted(
-        rdir.glob("run_*.json"), key=lambda p: p.stat().st_mtime, reverse=True
-    )
-    return files[0] if files else None
+    if not rdir.exists():
+        return None
+    candidates: list[tuple[float, Path]] = []
+    for report in rdir.glob("run_*.json"):
+        try:
+            candidates.append((report.stat().st_mtime, report))
+        except Exception as exc:
+            log_exception(
+                "latest_report_file",
+                exc,
+                extra={"path": str(report)},
+            )
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: item[0])[1]
 
 
 def today_quarantine_jobs() -> Path:
