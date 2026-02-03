@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 1.0.16
-- Preflight: Watchfolder wird nur als OK gewertet, wenn der Pfad ein Ordner ist.
+- Maintenance: Dateifehler werden als Warnungen im Summary protokolliert (keine Silent-Fails).
 
 ## 1.0.15
 - Logging: Ausnahmen in UI/Automation werden konsistent im Debug-Log protokolliert (mit Kontext).

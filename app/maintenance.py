@@ -56,24 +56,29 @@ def list_files_recursive(folder: Path):
             yield p
 
 
-def folder_size_bytes(folder: Path) -> int:
+def record_warning(warnings: list[dict], action: str, path: Path, error: Exception):
+    warnings.append({"action": action, "path": str(path), "error": str(error)})
+
+
+def folder_size_bytes(folder: Path, warnings: list[dict]) -> int:
     total = 0
     if not folder.exists():
         return 0
     for f in list_files_recursive(folder):
         try:
             total += f.stat().st_size
-        except Exception:
-            pass
+        except Exception as exc:
+            record_warning(warnings, "stat_size", f, exc)
     return total
 
 
-def rotate_file(path: Path, max_bytes: int, keep: int):
+def rotate_file(path: Path, max_bytes: int, keep: int, warnings: list[dict]):
     if not path.exists():
         return
     try:
         size = path.stat().st_size
-    except Exception:
+    except Exception as exc:
+        record_warning(warnings, "stat_size", path, exc)
         return
     if size <= max_bytes:
         return
@@ -86,26 +91,27 @@ def rotate_file(path: Path, max_bytes: int, keep: int):
             if older.exists():
                 try:
                     older.unlink()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    record_warning(warnings, "unlink_old_rotation", older, exc)
         if older.exists():
             try:
                 older.rename(newer)
-            except Exception:
-                pass
+            except Exception as exc:
+                record_warning(warnings, "rename_rotation", older, exc)
     # move current to .1
     try:
         path.rename(path.with_name(path.name + ".1"))
-    except Exception:
+    except Exception as exc:
+        record_warning(warnings, "rename_rotation", path, exc)
         return
     # create new empty file
     try:
         path.write_text("", encoding="utf-8")
-    except Exception:
-        pass
+    except Exception as exc:
+        record_warning(warnings, "write_rotated_log", path, exc)
 
 
-def prune_by_age(folder: Path, max_age_days: int):
+def prune_by_age(folder: Path, max_age_days: int, warnings: list[dict]):
     if not folder.exists():
         return 0
     cutoff = time.time() - max_age_days * 86400
@@ -115,12 +121,12 @@ def prune_by_age(folder: Path, max_age_days: int):
             if f.stat().st_mtime < cutoff:
                 f.unlink()
                 removed += 1
-        except Exception:
-            pass
+        except Exception as exc:
+            record_warning(warnings, "prune_by_age", f, exc)
     return removed
 
 
-def prune_to_size(folder: Path, max_bytes: int):
+def prune_to_size(folder: Path, max_bytes: int, warnings: list[dict]):
     if not folder.exists():
         return 0
     # delete oldest files until under limit
@@ -129,8 +135,8 @@ def prune_to_size(folder: Path, max_bytes: int):
         try:
             st = f.stat()
             files.append((st.st_mtime, st.st_size, f))
-        except Exception:
-            pass
+        except Exception as exc:
+            record_warning(warnings, "stat_prune_candidate", f, exc)
     files.sort(key=lambda x: x[0])  # oldest first
     removed = 0
     total = sum(s for _, s, _ in files)
@@ -141,12 +147,12 @@ def prune_to_size(folder: Path, max_bytes: int):
             f.unlink()
             total -= sz
             removed += 1
-        except Exception:
-            pass
+        except Exception as exc:
+            record_warning(warnings, "prune_to_size", f, exc)
     return removed
 
 
-def prune_reports(reports_dir: Path, keep_days: int):
+def prune_reports(reports_dir: Path, keep_days: int, warnings: list[dict]):
     if not reports_dir.exists():
         return 0
     cutoff = time.time() - keep_days * 86400
@@ -156,8 +162,8 @@ def prune_reports(reports_dir: Path, keep_days: int):
             if f.stat().st_mtime < cutoff:
                 f.unlink()
                 removed += 1
-        except Exception:
-            pass
+        except Exception as exc:
+            record_warning(warnings, "prune_reports", f, exc)
     return removed
 
 
@@ -201,42 +207,46 @@ def main():
     }
 
     # sizes before
-    summary["sizes_before"]["logs"] = folder_size_bytes(logs_dir())
-    summary["sizes_before"]["cache"] = folder_size_bytes(cache_dir())
-    summary["sizes_before"]["thumbs"] = folder_size_bytes(cache_dir() / "thumbs")
+    summary["sizes_before"]["logs"] = folder_size_bytes(logs_dir(), warnings)
+    summary["sizes_before"]["cache"] = folder_size_bytes(cache_dir(), warnings)
+    summary["sizes_before"]["thumbs"] = folder_size_bytes(
+        cache_dir() / "thumbs", warnings
+    )
     summary["sizes_before"]["temp_renders"] = folder_size_bytes(
-        cache_dir() / "temp_renders"
+        cache_dir() / "temp_renders", warnings
     )
 
     # rotate key logs
     for fn in ["activity_log.jsonl", "debug.log"]:
         p = logs_dir() / fn
-        rotate_file(p, logs_max, logs_keep)
+        rotate_file(p, logs_max, logs_keep, warnings)
         if p.with_name(p.name + ".1").exists():
             summary["rotated"].append(fn)
 
     # prune temp by age
-    removed_temp = prune_by_age(cache_dir() / "temp_renders", temp_age)
+    removed_temp = prune_by_age(cache_dir() / "temp_renders", temp_age, warnings)
     summary["pruned"]["temp_renders_by_age"] = removed_temp
 
     # prune thumbs to size
-    removed_thumbs = prune_to_size(cache_dir() / "thumbs", thumbs_max)
+    removed_thumbs = prune_to_size(cache_dir() / "thumbs", thumbs_max, warnings)
     summary["pruned"]["thumbs_to_size"] = removed_thumbs
 
     # prune total cache to max (after temp/thumbs)
-    removed_cache = prune_to_size(cache_dir(), cache_max)
+    removed_cache = prune_to_size(cache_dir(), cache_max, warnings)
     summary["pruned"]["cache_to_size"] = removed_cache
 
     # prune reports
-    removed_reports = prune_reports(data_dir() / "reports", reports_keep_days)
+    removed_reports = prune_reports(data_dir() / "reports", reports_keep_days, warnings)
     summary["pruned"]["reports_by_age"] = removed_reports
 
     # sizes after
-    summary["sizes_after"]["logs"] = folder_size_bytes(logs_dir())
-    summary["sizes_after"]["cache"] = folder_size_bytes(cache_dir())
-    summary["sizes_after"]["thumbs"] = folder_size_bytes(cache_dir() / "thumbs")
+    summary["sizes_after"]["logs"] = folder_size_bytes(logs_dir(), warnings)
+    summary["sizes_after"]["cache"] = folder_size_bytes(cache_dir(), warnings)
+    summary["sizes_after"]["thumbs"] = folder_size_bytes(
+        cache_dir() / "thumbs", warnings
+    )
     summary["sizes_after"]["temp_renders"] = folder_size_bytes(
-        cache_dir() / "temp_renders"
+        cache_dir() / "temp_renders", warnings
     )
 
     # write summary to logs
@@ -245,8 +255,8 @@ def main():
         out.write_text(
             json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
         )
-    except Exception:
-        pass
+    except Exception as exc:
+        record_warning(warnings, "write_summary", out, exc)
 
     print(json.dumps(summary, ensure_ascii=False))
     return 0
