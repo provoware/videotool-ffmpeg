@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from perf import get_threads
 from paths import config_dir, logs_dir, cache_dir, repo_root
+from logging_utils import log_exception
 
 
 def default_settings_path() -> Path:
@@ -283,6 +284,8 @@ def run(settings_path: Path, rules_path: Path) -> Path:
         "repairs": [],
         "summary": {},
     }
+
+    report_path: Path | None = None
 
     try:
         audio_exts = set(
@@ -593,8 +596,37 @@ def run(settings_path: Path, rules_path: Path) -> Path:
     finally:
         try:
             lock.unlink()
-        except Exception:
-            pass
+        except Exception as exc:
+            log_exception(
+                "automation_runner.lock_cleanup",
+                exc,
+                logs_path=logs_dir_path,
+                extra={"lock_path": str(lock)},
+            )
+            log_line(
+                logs_dir_path,
+                f"Automatik: Lock konnte nicht entfernt werden ({lock}). Bitte prüfen.",
+            )
+            if report_path and report_path.exists():
+                try:
+                    report_doc = load_json(report_path, {})
+                    repairs = report_doc.get("repairs", [])
+                    repairs.append(
+                        {
+                            "type": "lock_cleanup_failed",
+                            "lock_path": str(lock),
+                            "error": str(exc),
+                        }
+                    )
+                    report_doc["repairs"] = repairs
+                    save_json(report_path, report_doc)
+                except Exception as report_exc:
+                    log_exception(
+                        "automation_runner.report_update",
+                        report_exc,
+                        logs_path=logs_dir_path,
+                        extra={"report_path": str(report_path)},
+                    )
 
 
 def main():

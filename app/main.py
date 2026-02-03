@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from preflight import run as preflight_run
 from datetime import datetime
+from logging_utils import log_exception
 from paths import (
     app_dir,
     repo_root,
@@ -87,11 +88,18 @@ def have(cmd: str) -> bool:
     return which(cmd) is not None
 
 
-def open_path(p: Path):
+def open_path(p: Path, parent: QWidget | None = None):
     try:
         subprocess.Popen(["xdg-open", str(p)])
-    except Exception:
-        pass
+    except Exception as exc:
+        log_exception("open_path", exc, extra={"path": str(p)})
+        _show_process_message(
+            parent,
+            "Öffnen fehlgeschlagen",
+            "Der Pfad konnte nicht geöffnet werden.",
+            details=str(p),
+            icon=QMessageBox.Warning,
+        )
 
 
 def run_quarantine_worker(job_id: str | None = None):
@@ -333,8 +341,8 @@ def get_thumb_pixmap(p: Path, size: int = 96) -> QPixmap | None:
     )
     try:
         pm.save(str(cache_file), "PNG")
-    except Exception:
-        pass
+    except Exception as exc:
+        log_exception("thumb_cache.save", exc, extra={"path": str(cache_file)})
     return pm
 
 
@@ -455,8 +463,12 @@ def _scale_font(app: QApplication, zoom_percent: int):
             base = 10
         f.setPointSize(max(8, int(round(base * (zoom_percent / 100.0)))))
         app.setFont(f)
-    except Exception:
-        pass
+    except Exception as exc:
+        log_exception(
+            "scale_font",
+            exc,
+            extra={"zoom_percent": zoom_percent},
+        )
 
 
 def _apply_label_role(label: QLabel, role: str):
@@ -466,8 +478,12 @@ def _apply_label_role(label: QLabel, role: str):
     try:
         label.style().unpolish(label)
         label.style().polish(label)
-    except Exception:
-        pass
+    except Exception as exc:
+        log_exception(
+            "apply_label_role",
+            exc,
+            extra={"role": role, "label": label.objectName()},
+        )
 
 
 class Main(QMainWindow):
@@ -2619,8 +2635,16 @@ class Main(QMainWindow):
             widget.setAccessibleName(name)
             if desc:
                 widget.setAccessibleDescription(desc)
-        except Exception:
-            pass
+        except Exception as exc:
+            log_exception(
+                "accessibility.set",
+                exc,
+                extra={
+                    "name": name,
+                    "desc": desc,
+                    "widget_type": type(widget).__name__,
+                },
+            )
 
     def run_mustpass(self):
         script = repo_root() / "tools" / "run_must_pass.sh"
