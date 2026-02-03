@@ -331,6 +331,29 @@ def load_or_create_quarantine_list(base: Path, qjobs_rel: str, day: str) -> Path
     return qfile
 
 
+def normalize_quarantine_doc(doc: dict, day: str) -> dict:
+    now = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    if not isinstance(doc, dict):
+        doc = {}
+    if not isinstance(doc.get("items"), list):
+        doc["items"] = []
+    if not isinstance(doc.get("summary"), dict):
+        doc["summary"] = {}
+    if not isinstance(doc.get("schema_version"), int):
+        doc["schema_version"] = 1
+    if not doc.get("date"):
+        doc["date"] = day
+    if not doc.get("title"):
+        doc["title"] = f"Quarantäne-Aufträge – {doc['date']}"
+    if not doc.get("created_at"):
+        doc["created_at"] = now
+    if "list_status" not in doc:
+        doc["list_status"] = "offen"
+    if "closed_at" not in doc:
+        doc["closed_at"] = None
+    return update_list_status(doc)
+
+
 def update_list_status(doc: dict) -> dict:
     total = len(doc.get("items", []))
     done = sum(1 for it in doc.get("items", []) if it.get("status") == "erledigt")
@@ -362,6 +385,7 @@ def update_list_status(doc: dict) -> dict:
 
 def append_quarantine_job(
     qfile: Path,
+    day: str,
     run_id: str,
     nr: int,
     preset: str,
@@ -372,6 +396,7 @@ def append_quarantine_job(
     validation: dict,
 ):
     doc = load_json(qfile, default={})
+    doc = normalize_quarantine_doc(doc, day)
     items = doc.get("items", [])
     job_id = f"q_{run_id}_{nr:04d}"
     item = {
@@ -699,6 +724,7 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 )
                 append_quarantine_job(
                     qfile,
+                    day,
                     run_id,
                     idx,
                     preset_id,
@@ -760,6 +786,7 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 )
                 append_quarantine_job(
                     qfile,
+                    day,
                     run_id,
                     idx,
                     preset_id,

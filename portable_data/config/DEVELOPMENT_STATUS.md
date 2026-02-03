@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.31
-- Fortschritt: 48/49 = **98%**
+- Version: 1.0.32
+- Fortschritt: 51/52 = **98%**
 - Nächster Schritt: **main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)**
 
 ## ✅ Fertig
@@ -53,6 +53,9 @@
 46. Preflight: settings_ok blockt ungültige Konfigurationen inkl. min_free_mb
 47. Quarantäne-Worker: fehlendes ffmpeg/ffprobe wird klar gemeldet
 48. Werkbank: fehlender Font meldet Hinweis statt still zu überspringen
+49. Performance: Thread-Anzahl fällt dynamisch auf CPU-Kerne zurück (Eco halbiert)
+50. Reports/Quarantäne-Listen: Schema-Normalisierung ergänzt Titel/Summary/Statusfelder
+51. Plattform-Hinweise: Pfad-Öffnen unterstützt macOS/Windows, README ergänzt Start-Notizen
 
 ## 🔧 Offen
 1. main.py modularisieren (UI-Logik in eigene Klassen auslagern)

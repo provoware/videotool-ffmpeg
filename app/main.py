@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -56,6 +57,27 @@ def load_json(p: Path, default=None):
         return default if default is not None else {}
 
 
+def normalize_report_doc(doc: dict) -> dict:
+    if not isinstance(doc, dict):
+        return {}
+    if not isinstance(doc.get("schema_version"), int):
+        doc["schema_version"] = 1
+    if not isinstance(doc.get("jobs"), list):
+        doc["jobs"] = []
+    if not isinstance(doc.get("repairs"), list):
+        doc["repairs"] = []
+    if not isinstance(doc.get("errors"), list):
+        doc["errors"] = []
+    summary = doc.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    summary.setdefault("fertig", 0)
+    summary.setdefault("quarantaene", 0)
+    summary.setdefault("gesamt", 0)
+    doc["summary"] = summary
+    return doc
+
+
 def ensure_dirs():
     base = data_dir()
     for rel in [
@@ -90,7 +112,12 @@ def have(cmd: str) -> bool:
 
 def open_path(p: Path, parent: QWidget | None = None):
     try:
-        subprocess.Popen(["xdg-open", str(p)])
+        if sys.platform.startswith("darwin"):
+            subprocess.Popen(["open", str(p)])
+        elif os.name == "nt":
+            os.startfile(p)  # type: ignore[attr-defined]
+        else:
+            subprocess.Popen(["xdg-open", str(p)])
     except Exception as exc:
         log_exception("open_path", exc, extra={"path": str(p)})
         _show_process_message(
@@ -126,17 +153,36 @@ def today_quarantine_jobs() -> Path:
     return data_dir() / "quarantine_jobs" / f"quarantine_jobs_{today}.json"
 
 
+def normalize_quarantine_doc(doc: dict, day: str) -> dict:
+    now = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    if not isinstance(doc, dict):
+        doc = {}
+    if not isinstance(doc.get("items"), list):
+        doc["items"] = []
+    if not isinstance(doc.get("summary"), dict):
+        doc["summary"] = {}
+    if not isinstance(doc.get("schema_version"), int):
+        doc["schema_version"] = 1
+    if not doc.get("date"):
+        doc["date"] = day
+    if not doc.get("title"):
+        doc["title"] = f"Quarantäne-Aufträge – {doc['date']}"
+    if not doc.get("created_at"):
+        doc["created_at"] = now
+    if "list_status" not in doc:
+        doc["list_status"] = "offen"
+    if "closed_at" not in doc:
+        doc["closed_at"] = None
+    return update_quarantine_list_status(doc)
+
+
 def load_today_quarantine_jobs():
+    day = datetime.now().strftime("%Y-%m-%d")
     p = today_quarantine_jobs()
     if p.exists():
-        return load_json(p, {})
-    return {
-        "schema_version": 1,
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "items": [],
-        "list_status": "offen",
-        "summary": {},
-    }
+        doc = load_json(p, {})
+        return normalize_quarantine_doc(doc, day)
+    return normalize_quarantine_doc({}, day)
 
 
 def save_today_quarantine_jobs(doc: dict):
@@ -1846,7 +1892,7 @@ class Main(QMainWindow):
             self.list_q.addItem("Quarantäne heute: abgehakt ✅")
             return
 
-        rep = load_json(rf, {})
+        rep = normalize_report_doc(load_json(rf, {}))
         summ = rep.get("summary", {})
         errors = rep.get("errors", []) if isinstance(rep, dict) else []
         summary_text = (

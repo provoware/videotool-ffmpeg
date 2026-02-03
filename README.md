@@ -92,6 +92,20 @@ Es prüft u. a.:
   chmod +x tools/*.sh
   ```
 
+## Hinweise für macOS & Windows (experimentell)
+- Die `tools/*.sh` Skripte sind für Linux ausgelegt. Auf macOS/Windows bitte **Python direkt** verwenden.
+- **Abhängigkeiten installieren** (Beispiel, manuell):
+  ```bash
+  python3 -m venv portable_data/.venv
+  portable_data/.venv/bin/pip install -r app/requirements.txt
+  ```
+  *Unter Windows entspricht der Pfad meist `portable_data\\.venv\\Scripts\\pip.exe`.*
+- **Starten (GUI)**:
+  ```bash
+  portable_data/.venv/bin/python app/main.py
+  ```
+- **FFmpeg installieren** (Pflicht): z. B. via Homebrew (`brew install ffmpeg`) oder Chocolatey (`choco install ffmpeg`).
+
 ## Weiterführende Laien-Tipps (einfach erklärt)
 - **Wenn FFmpeg fehlt:** Installiere es über den Paketmanager deiner Linux-Distribution.
 - **Wenn zu wenig Speicher frei ist:** Alte Export-Dateien oder Cache löschen.

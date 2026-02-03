@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.32
+- Performance: Thread-Anzahl fällt bei 0-Werten dynamisch auf CPU-Kerne zurück (Eco halbiert).
+- Reports/Quarantäne-Listen: Schema wird beim Laden normalisiert (Version, Titel, Summary, Status).
+- Plattform-Hinweise: Öffnen von Pfaden unterstützt macOS/Windows, README ergänzt Start-Notizen.
+
 ## 1.0.31
 - Preflight: ungültige Settings (inkl. min_free_mb) blocken overall_ok und liefern settings_ok.
 - Quarantäne-Worker: fehlendes ffmpeg/ffprobe wird als klarer Abbruch gemeldet.
