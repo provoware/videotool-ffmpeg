@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -11,6 +12,11 @@ from datetime import datetime
 from perf import get_threads
 from paths import config_dir, logs_dir, cache_dir, repo_root
 from logging_utils import log_exception
+from validation_utils import (
+    PathValidationError,
+    ensure_existing_file,
+    ensure_output_path,
+)
 
 
 class AutomationAbort(Exception):
@@ -46,6 +52,47 @@ def log_line(logs_dir: Path, msg: str):
     entry = {"at": datetime.utcnow().isoformat(timespec="seconds") + "Z", "msg": msg}
     with p.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def record_report_error(report: dict, message: str, details: str | None = None):
+    entry = {
+        "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "message": message,
+    }
+    if details:
+        entry["details"] = details
+    report.setdefault("errors", []).append(entry)
+
+
+def write_error_report(
+    settings_path: Path, rules_path: Path, message: str, details: str | None = None
+) -> Path | None:
+    settings = load_json(settings_path, {})
+    paths = settings.get("paths", {}) if isinstance(settings, dict) else {}
+    base_raw = paths.get("base_data_dir") if isinstance(paths, dict) else None
+    if not base_raw:
+        return None
+    base = Path(base_raw)
+    run_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    report = {
+        "schema_version": 1,
+        "run_id": f"error_{run_id}",
+        "started_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "watch_folder": str(paths.get("watch_folder", "")),
+        "settings_path": str(settings_path),
+        "rules_path": str(rules_path),
+        "jobs": [],
+        "repairs": [],
+        "summary": {"fertig": 0, "quarantaene": 0, "gesamt": 0},
+        "errors": [],
+        "finished_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+    }
+    record_report_error(report, message, details)
+    rdir = base / paths.get("reports_dir", "reports")
+    rdir.mkdir(parents=True, exist_ok=True)
+    report_path = rdir / f"run_{report['run_id']}.json"
+    save_json(report_path, report)
+    return report_path
 
 
 LOCK_TIMEOUT_SECONDS = 8 * 60 * 60
@@ -140,12 +187,38 @@ def have(cmd: str) -> bool:
     return which(cmd) is not None
 
 
-def stable_file(p: Path, seconds: int = 8) -> bool:
+def _file_fingerprint(p: Path, hash_limit_mb: int) -> dict | None:
     try:
-        s1 = p.stat().st_size
+        stat = p.stat()
+    except Exception:
+        return None
+    size = stat.st_size
+    if size <= 0:
+        return {"size": size, "mtime_ns": stat.st_mtime_ns, "hash": None}
+    hash_value = None
+    if size <= hash_limit_mb * 1024 * 1024:
+        hasher = hashlib.sha256()
+        with p.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                hasher.update(chunk)
+        hash_value = hasher.hexdigest()
+    return {"size": size, "mtime_ns": stat.st_mtime_ns, "hash": hash_value}
+
+
+def stable_file(p: Path, seconds: int = 8, hash_limit_mb: int = 64) -> bool:
+    try:
+        first = _file_fingerprint(p, hash_limit_mb)
+        if not first or first["size"] <= 0:
+            return False
         time.sleep(seconds)
-        s2 = p.stat().st_size
-        return s1 == s2 and s2 > 0
+        second = _file_fingerprint(p, hash_limit_mb)
+        if not second or second["size"] <= 0:
+            return False
+        if first["size"] != second["size"] or first["mtime_ns"] != second["mtime_ns"]:
+            return False
+        if first["hash"] and second["hash"] and first["hash"] != second["hash"]:
+            return False
+        return True
     except Exception:
         return False
 
@@ -163,6 +236,7 @@ def safe_slug(s: str, maxlen: int = 120, fallback: str = "unbenannt") -> str:
 
 
 def ffprobe_json(path: Path) -> dict:
+    path = ensure_existing_file(path, "FFprobe-Eingabe")
     cmd = [
         "ffprobe",
         "-v",
@@ -368,6 +442,7 @@ def run(settings_path: Path, rules_path: Path) -> Path:
         "rules_path": str(rules_path),
         "jobs": [],
         "repairs": [],
+        "errors": [],
         "summary": {},
     }
 
@@ -437,6 +512,17 @@ def run(settings_path: Path, rules_path: Path) -> Path:
 
         staged_images = []
         for img in images:
+            try:
+                img = ensure_existing_file(img, "Bild")
+            except PathValidationError as exc:
+                report["repairs"].append(
+                    {
+                        "type": "invalid_image_path",
+                        "file": str(img),
+                        "error": str(exc),
+                    }
+                )
+                continue
             if not stable_file(img):
                 report["repairs"].append(
                     {"type": "skip_unstable_image", "file": str(img)}
@@ -460,6 +546,19 @@ def run(settings_path: Path, rules_path: Path) -> Path:
 
         for idx, aud in enumerate(audios, start=1):
             job = {"nr": idx, "preset": preset_id, "status": "bereit"}
+            try:
+                aud = ensure_existing_file(aud, "Audio")
+            except PathValidationError as exc:
+                job.update(
+                    {
+                        "status": "uebersprungen",
+                        "reason": "ungueltiger_pfad",
+                        "audio": str(aud),
+                        "error": str(exc),
+                    }
+                )
+                report["jobs"].append(job)
+                continue
             if not stable_file(aud):
                 job.update(
                     {
@@ -496,10 +595,24 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 if (idx - 1) < len(staged_images)
                 else fallback_img
             )
+            try:
+                img_use = ensure_existing_file(Path(img_use), "Bild")
+            except PathValidationError as exc:
+                job.update(
+                    {
+                        "status": "quarantaene",
+                        "reason": "ungueltiger_bildpfad",
+                        "error": str(exc),
+                    }
+                )
+                report["jobs"].append(job)
+                qn += 1
+                continue
 
             out_name = build_output_name(aud_dst, preset_id, False, idx, settings)
-            out_tmp = cache_dir() / "temp_renders" / out_name
-            out_tmp.parent.mkdir(parents=True, exist_ok=True)
+            out_tmp = ensure_output_path(
+                cache_dir() / "temp_renders" / out_name, "Zwischenausgabe"
+            )
             out_final = exports_day / out_name
 
             cmd = [
@@ -725,6 +838,13 @@ def main() -> int:
     except AutomationAbort as exc:
         if exc.message:
             print(exc.message)
+        report_path = write_error_report(
+            Path(args.settings),
+            Path(args.rules),
+            exc.message or "Automatik abgebrochen.",
+        )
+        if report_path:
+            print(str(report_path))
         return exc.code
     except Exception as exc:
         log_exception(
@@ -733,6 +853,14 @@ def main() -> int:
             logs_path=logs_dir(),
             extra={"settings": args.settings, "rules": args.rules},
         )
+        report_path = write_error_report(
+            Path(args.settings),
+            Path(args.rules),
+            "Automatik abgebrochen: Unbekannter Fehler.",
+            details=str(exc),
+        )
+        if report_path:
+            print(str(report_path))
         print("Automatik abgebrochen: Unbekannter Fehler. Details im Debug-Log.")
         return 1
     # Print report path for callers (selftest)
@@ -741,4 +869,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

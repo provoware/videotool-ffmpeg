@@ -1848,9 +1848,22 @@ class Main(QMainWindow):
 
         rep = load_json(rf, {})
         summ = rep.get("summary", {})
-        self.lbl_last_summary.setText(
-            f"Lauf {rep.get('run_id', '?')}: fertig={summ.get('fertig', 0)} | quarantäne={summ.get('quarantaene', 0)} | gesamt={summ.get('gesamt', 0)}"
+        errors = rep.get("errors", []) if isinstance(rep, dict) else []
+        summary_text = (
+            f"Lauf {rep.get('run_id', '?')}: fertig={summ.get('fertig', 0)} | "
+            f"quarantäne={summ.get('quarantaene', 0)} | gesamt={summ.get('gesamt', 0)}"
         )
+        if errors:
+            summary_text += f" | Fehler={len(errors)}"
+        self.lbl_last_summary.setText(summary_text)
+
+        for err in errors[:3]:
+            msg = err.get("message", "Unbekannter Fehler")
+            detail = err.get("details", "")
+            if detail:
+                self.list_q.addItem(f"Fehler: {msg} ({detail})")
+            else:
+                self.list_q.addItem(f"Fehler: {msg}")
 
         finished = [
             j
