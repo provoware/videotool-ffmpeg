@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.5
+- Version: 1.0.6
 - Fortschritt: 25/25 = **100%**
-- Nächster Schritt: **Portable Edgecase-Härtung (Dialogs, Fallbacks)**
+- Nächster Schritt: **Preflight weiter härten (Watchfolder-Validierung, klare Hinweise)**
 
 ## ✅ Fertig
 1. Portable Struktur

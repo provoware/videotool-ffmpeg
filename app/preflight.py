@@ -22,6 +22,12 @@ def load_json(p: Path, default=None):
     except Exception:
         return default if default is not None else {}
 
+def safe_int(value, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
 def have(cmd: str) -> bool:
     return shutil.which(cmd) is not None
 
@@ -59,7 +65,9 @@ def run(settings_path: Path|None = None) -> dict:
         settings_path = cfg_dir()/ "settings.json"
     settings = load_json(settings_path, {})
     paths = settings.get("paths", {})
-    min_free_mb = int(settings.get("maintenance", {}).get("min_free_mb", 1024))
+    min_free_mb = safe_int(settings.get("maintenance", {}).get("min_free_mb", 1024), 1024)
+    if min_free_mb < 0:
+        min_free_mb = 1024
 
     watch = Path(paths.get("watch_folder", str(Path.home()/ "Downloads"))).expanduser()
     exports = data_dir()/paths.get("exports_dir","exports")

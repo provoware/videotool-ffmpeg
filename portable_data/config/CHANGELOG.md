@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.6
+- Preflight: robustes Parsen der Mindest-Speichergrenze, inkl. Fallback bei ungültigen Werten.
+
+
 ## 1.0.5
 - Must-Pass Suite: automatischer Kontrast-Check für alle Themes.
 
