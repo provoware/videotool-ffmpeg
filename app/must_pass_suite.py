@@ -208,6 +208,16 @@ def _extract_widget_colors(qss: str) -> dict:
     fg_match = re.search(r"color\\s*:\\s*(#[0-9a-fA-F]{6})", block)
     return {"background": bg_match.group(1) if bg_match else "", "color": fg_match.group(1) if fg_match else ""}
 
+def _extract_role_colors(qss: str, role: str) -> dict:
+    if not isinstance(qss, str) or not isinstance(role, str) or not role:
+        return {}
+    role_block = re.search(rf"QLabel\\[role=\\\"{re.escape(role)}\\\"\\]\\s*\\{{([^}}]*)\\}}", qss, re.DOTALL)
+    if not role_block:
+        return {}
+    block = role_block.group(1)
+    fg_match = re.search(r"color\\s*:\\s*(#[0-9a-fA-F]{6})", block)
+    return {"color": fg_match.group(1) if fg_match else ""}
+
 def check_theme_contrast(themes_path: Path, min_ratio: float = 4.5) -> dict:
     doc = load_json(themes_path, {})
     qss_map = doc.get("qss", {}) or {}
@@ -217,12 +227,25 @@ def check_theme_contrast(themes_path: Path, min_ratio: float = 4.5) -> dict:
         fg = _hex_to_rgb(colors.get("color", ""))
         bg = _hex_to_rgb(colors.get("background", ""))
         if fg is None or bg is None:
-            results["themes"][name] = {"ok": False, "ratio": None, "colors": colors}
+            results["themes"][name] = {"ok": False, "ratio": None, "colors": colors, "roles": {}}
             results["ok"] = False
             continue
         ratio = _contrast_ratio(fg, bg)
         ok = ratio >= min_ratio
-        results["themes"][name] = {"ok": ok, "ratio": round(ratio, 2), "colors": colors}
+        role_results = {}
+        for role in ("hint", "muted"):
+            role_colors = _extract_role_colors(qss, role)
+            role_fg = _hex_to_rgb(role_colors.get("color", ""))
+            if role_fg is None:
+                role_results[role] = {"ok": False, "ratio": None, "colors": role_colors}
+                ok = False
+                continue
+            role_ratio = _contrast_ratio(role_fg, bg)
+            role_ok = role_ratio >= min_ratio
+            role_results[role] = {"ok": role_ok, "ratio": round(role_ratio, 2), "colors": role_colors}
+            if not role_ok:
+                ok = False
+        results["themes"][name] = {"ok": ok, "ratio": round(ratio, 2), "colors": colors, "roles": role_results}
         if not ok:
             results["ok"] = False
     return results

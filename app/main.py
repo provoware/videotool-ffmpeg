@@ -339,6 +339,16 @@ def _scale_font(app: QApplication, zoom_percent: int):
     except Exception:
         pass
 
+def _apply_label_role(label: QLabel, role: str):
+    if not isinstance(role, str) or not role:
+        return
+    label.setProperty("role", role)
+    try:
+        label.style().unpolish(label)
+        label.style().polish(label)
+    except Exception:
+        pass
+
 class Main(QMainWindow):
     def apply_theme(self):
         theme = self.settings.get("ui", {}).get("theme", "hochkontrast_dunkel")
@@ -411,7 +421,7 @@ class Main(QMainWindow):
         self.preview_img.setMinimumWidth(280)
         self.preview_img.setMinimumHeight(240)
         self.preview_img.setFrameShape(QFrame.StyledPanel)
-        self.preview_info = QLabel(""); self.preview_info.setWordWrap(True); self.preview_info.setStyleSheet("color:#666;")
+        self.preview_info = QLabel(""); self.preview_info.setWordWrap(True); _apply_label_role(self.preview_info, "muted")
         pv.addWidget(title)
         pv.addWidget(self.preview_img, 1)
         pv.addWidget(self.preview_info)
@@ -422,7 +432,7 @@ class Main(QMainWindow):
 
         lm.addWidget(material_split)
         hint = QLabel("Tipp: Bild anklicken = Vorschau. Checkboxen = Auswahlkorb. Suche/Filter oben.")
-        hint.setStyleSheet("color:#777;")
+        _apply_label_role(hint, "hint")
         lm.addWidget(hint)
 
         self.left.addTab(tab_material, self.texts["strings"].get("sidebar.material","Material"))
@@ -461,7 +471,7 @@ class Main(QMainWindow):
         lb.addLayout(fav_btns)
 
         hint = QLabel("Tipp: Favoriten sind Referenzen. Wenn die Datei fehlt, bleibt der Eintrag sichtbar.")
-        hint.setStyleSheet("color:#777;")
+        _apply_label_role(hint, "hint")
         lb.addWidget(hint)
 
         self.left.addTab(tab_box, self.texts["strings"].get("sidebar.werkzeugkasten","Werkzeugkasten"))
@@ -571,7 +581,7 @@ class Main(QMainWindow):
         tab_quar = QWidget(); lq = QVBoxLayout(tab_quar)
         lq.addWidget(QLabel(self.texts["strings"].get("quar_tab.titel","Quarantäne-Aufträge (heute)")))
         hint = QLabel(self.texts["strings"].get("quar_tab.hinweis",""))
-        hint.setStyleSheet("color:#777;")
+        _apply_label_role(hint, "hint")
         hint.setWordWrap(True)
         lq.addWidget(hint)
 
@@ -623,7 +633,7 @@ class Main(QMainWindow):
         self.btn_selftest = QPushButton("Werkstatt-Prüfung (Selftest) – Volltest")
         self.btn_mustpass = QPushButton(self.texts["strings"].get("tests.mustpass","Must-Pass Suite"))
         self.lbl_mustpass = QLabel(self.texts["strings"].get("tests.mustpass_hint",""))
-        self.lbl_mustpass.setStyleSheet("color:#777;")
+        _apply_label_role(self.lbl_mustpass, "hint")
         self.btn_open_reports = QPushButton("Arbeitsberichte öffnen")
         lt.addWidget(QLabel("Selftest: 1 Erfolg + 1 Quarantäne, danach wird 'Letzte Nacht' aktualisiert."))
         lt.addWidget(self.btn_selftest)
@@ -731,7 +741,7 @@ class Main(QMainWindow):
         wb.addLayout(wpair)
 
         pair_hint = QLabel(self.texts["strings"].get("workbench.pairing_hint",""))
-        pair_hint.setStyleSheet("color:#777;")
+        _apply_label_role(pair_hint, "hint")
         pair_hint.setWordWrap(True)
         wb.addWidget(pair_hint)
 
