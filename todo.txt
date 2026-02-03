@@ -46,7 +46,7 @@
 - [ ] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
 - [ ] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.
 - [ ] Eingabe-/Ausgabe-Validierung weiter vereinheitlichen: pro Funktion klare Checks mit Erfolgsmeldung, damit Laien immer wissen, was passiert.
-- [ ] Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln (ein Klick, klare Rückmeldung).
+- [x] Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln (ein Klick, klare Rückmeldung).
 - [x] JSON-IO vereinheitlichen: Atomic JSON Writes (atomar/sicher speichern) und IO-Helper einführen.
 - [x] Datei-Lock (Single-Writer) für Settings und Quarantäne-Listen ergänzen.
 - [x] Preflight-JSON-IO vereinheitlicht (IO-Helper) und Debug-Flag nur einmal ermittelt.

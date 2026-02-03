@@ -18,8 +18,17 @@ class FileLockTimeoutError(RuntimeError):
     pass
 
 
-def _validate_json_path(path: Path) -> bool:
-    return isinstance(path, Path) and path.suffix.lower() == ".json"
+def _validate_json_path(path: Path) -> tuple[bool, str]:
+    if not isinstance(path, Path):
+        return False, "not_a_path"
+    raw = str(path)
+    if "\x00" in raw:
+        return False, "null_byte"
+    if not path.name:
+        return False, "empty_name"
+    if path.suffix.lower() != ".json":
+        return False, "wrong_suffix"
+    return True, ""
 
 
 def _default_payload(default: Any | None) -> Any:
@@ -33,11 +42,12 @@ def load_json(
     expect_type: type | tuple[type, ...] | None = dict,
     context: str = "load_json",
 ) -> Any:
-    if not _validate_json_path(path):
+    valid, reason = _validate_json_path(path)
+    if not valid:
         log_exception(
             context,
             ValueError("Ungültiger JSON-Pfad"),
-            extra={"path": str(path)},
+            extra={"path": str(path), "reason": reason},
         )
         return _default_payload(default)
     if not path.exists():
@@ -100,11 +110,12 @@ def atomic_write_json(
     stale_lock_s: float = 60.0,
     verify: bool = True,
 ) -> bool:
-    if not _validate_json_path(path):
+    valid, reason = _validate_json_path(path)
+    if not valid:
         log_exception(
             context,
             ValueError("Ungültiger JSON-Pfad"),
-            extra={"path": str(path)},
+            extra={"path": str(path), "reason": reason},
         )
         return False
     try:

@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.41
-- Fortschritt: 64/72 = **89%**
+- Version: 1.0.42
+- Fortschritt: 65/72 = **90%**
 - Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
 ## ✅ Fertig
@@ -69,6 +69,7 @@
 63. IO: Atomic JSON Writes über einen zentralen IO-Helper
 64. Locking: Single-Writer für Settings und Quarantäne-Listen
 65. Preflight: JSON-IO vereinheitlicht und Debug-Flag einmalig ermittelt
+66. Start-Option: Release-Checks per MODULTOOL_RUN_CHECKS bündeln
 
 ## 🔧 Offen
 1. main.py modularisieren: UI (Benutzeroberfläche) in klare Klassen trennen.
@@ -78,4 +79,3 @@
 5. Hilfe-Center integrieren: interaktive Hilfe mit Suche und Schritt-für-Schritt-Anleitungen.
 6. Internationalisierung (Übersetzungen) hinzufügen und Oberfläche vorbereiten.
 7. Eingabe-/Ausgabe-Validierung vereinheitlichen: pro Funktion klare Checks mit Erfolgsmeldung.
-8. Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln.
