@@ -1,4 +1,7 @@
 # todo.txt
+- [x] Preflight: Zeitstempel zeitzonen-sicher machen (keine Warnungen).
+- [x] Start-Routine: Preflight-JSON robust abfangen und laienfreundliche Debug-Befehle ausgeben.
+- [x] Qualitäts-Checks: klare Installationsbefehle ausgeben, wenn rg (ripgrep) fehlt.
 - [x] Start-Routine: Start-Log in portable_data/logs schreiben und Pfad ausgeben.
 - [x] Start-Routine: Python-Umgebung prüfen und klare Reparatur-Hinweise geben.
 - [x] Bootstrap: fehlende requirements.txt klar melden, statt still zu scheitern.

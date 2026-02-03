@@ -4,7 +4,7 @@ import json
 import os
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 from io_utils import load_json
 from logging_utils import log_message
@@ -203,7 +203,9 @@ def run(settings_path: Path | None = None) -> dict:
         rec.append("settings_paths_invalid")
 
     result = {
-        "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "at": datetime.now(timezone.utc)
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z"),
         "overall_ok": overall_ok,
         "ffmpeg_ok": ok_ffmpeg,
         "watchfolder_ok": ok_watch,

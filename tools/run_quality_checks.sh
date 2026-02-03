@@ -5,7 +5,11 @@ VENV_DIR="$ROOT/portable_data/.venv"
 PYTHON_BIN="$VENV_DIR/bin/python"
 
 if ! command -v rg >/dev/null 2>&1; then
-  echo "[Modultool] Fehler: rg (ripgrep) fehlt."
+  echo "[Modultool] Fehler: rg (ripgrep = schnelle Dateisuche) fehlt."
+  echo "[Modultool] Tipp (Ubuntu/Debian): sudo apt install ripgrep"
+  echo "[Modultool] Tipp (Fedora): sudo dnf install ripgrep"
+  echo "[Modultool] Tipp (Arch): sudo pacman -S ripgrep"
+  echo "[Modultool] Tipp (macOS/Homebrew): brew install ripgrep"
   exit 1
 fi
 
