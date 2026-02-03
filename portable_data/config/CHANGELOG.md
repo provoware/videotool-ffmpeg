@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.10
+- Maintenance: Settings-Ints werden sicher geparst, mit Warnung und Fallback im Summary-Log.
+
+
 ## 1.0.9
 - Preflight: Watchfolder-Schreibrecht prüfen und klare Hinweise anzeigen.
 
