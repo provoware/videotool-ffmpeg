@@ -17,6 +17,9 @@
 - [x] Logging: Exceptions im UI/Automation konsistent ins Debug-Log schreiben.
 - [x] Maintenance: Dateifehler als Warnungen sammeln und im Summary ausgeben.
 - [x] Automatik: sichere Fallback-Logik für leere Dateinamen-Slugs ergänzen.
+- [x] Validierung: Ausgabe-Pfade prüfen, Schreibrechte sicherstellen und Ordnerpfade abweisen.
+- [x] Fehlerberichte: base_data_dir validieren und bei Fehlern sauber im Debug-Log erfassen.
+- [x] Preflight: Settings-JSON auf gültige Struktur (Dict) prüfen und sauber fallbacken.
 - [ ] Release-Pakete erstellen und testen: automatisierten Build für ZIP-Archiv und .deb-Paket einrichten; Must-Pass-Suite auf Zielsystem ausführen.
 - [ ] main.py modularisieren: UI-Logik in getrennte Klassen (Materialliste, Favoriten, Einstellungen, Quarantäne-UI) auslagern, um Wartbarkeit zu erhöhen.
 - [x] Parallele Läufe robuster sperren: zuverlässige Datei-Locks mit Zeitüberschreitung und PID-Erkennung implementieren, um gleichzeitige GUI- und CLI-Läufe zu verhindern.

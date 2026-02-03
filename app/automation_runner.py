@@ -14,6 +14,7 @@ from paths import config_dir, logs_dir, cache_dir, repo_root
 from logging_utils import log_exception
 from validation_utils import (
     PathValidationError,
+    ensure_existing_dir,
     ensure_existing_file,
     ensure_output_path,
 )
@@ -72,7 +73,18 @@ def write_error_report(
     base_raw = paths.get("base_data_dir") if isinstance(paths, dict) else None
     if not base_raw:
         return None
-    base = Path(base_raw)
+    try:
+        base = ensure_existing_dir(
+            Path(base_raw).expanduser(), "Basis-Ordner", create=True
+        )
+    except PathValidationError as exc:
+        log_exception(
+            "automation_runner.error_report_base",
+            exc,
+            logs_path=logs_dir(),
+            extra={"base_data_dir": str(base_raw)},
+        )
+        return None
     run_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     report = {
         "schema_version": 1,

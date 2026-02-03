@@ -10,9 +10,12 @@ from paths import config_dir, data_dir, cache_dir, logs_dir
 
 def load_json(p: Path, default=None):
     try:
-        return json.loads(p.read_text(encoding="utf-8"))
+        data = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return default if default is not None else {}
+    if not isinstance(data, dict):
+        return default if default is not None else {}
+    return data
 
 
 def debug_enabled() -> bool:
