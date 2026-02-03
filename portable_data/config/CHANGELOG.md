@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.10
+- System-/Automations-Skripte prüfen jetzt Existenz, laufen per QProcess und melden Exit-Code/Fehler mit klaren nächsten Schritten.
+
+
 ## 1.0.9
 - Preflight: Watchfolder-Schreibrecht prüfen und klare Hinweise anzeigen.
 
