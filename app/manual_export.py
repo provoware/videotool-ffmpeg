@@ -40,12 +40,26 @@ def load_json(p: Path, default=None):
         return default if default is not None else {}
 
 
-def safe_slug(s: str, maxlen: int = 120) -> str:
+def safe_slug(s: str, maxlen: int = 120, fallback: str = "unbenannt") -> str:
     s = s.lower().strip()
     s = re.sub(r"\s+", "_", s)
     s = re.sub(r"[^a-z0-9._-]+", "", s)
     s = s.strip("._-")
+    if not s:
+        s = fallback
     return s[:maxlen] if len(s) > maxlen else s
+
+
+def parse_int(value, default: int, label: str) -> int:
+    try:
+        if isinstance(value, bool):
+            raise ValueError("bool is not a valid int")
+        return int(value)
+    except Exception:
+        print(
+            f"WARNUNG: {label} ungültig ({value}), nutze Standard {default}."
+        )
+        return default
 
 
 def unique_path(p: Path) -> Path:
@@ -195,8 +209,10 @@ def main() -> int:
     settings = load_json(Path(args.settings), {})
     threads = get_threads(Path(args.settings))
     a_cfg = settings.get("audio", {})
-    a_bitrate = int(a_cfg.get("target_bitrate_kbps", 320))
-    a_sr = int(a_cfg.get("target_samplerate_hz", 48000))
+    a_bitrate = parse_int(a_cfg.get("target_bitrate_kbps", 320), 320, "Audio-Bitrate")
+    a_sr = parse_int(
+        a_cfg.get("target_samplerate_hz", 48000), 48000, "Audio-Samplerate"
+    )
 
     filter_complex, out_label, W, H, FPS = build_filters(
         args.preset,

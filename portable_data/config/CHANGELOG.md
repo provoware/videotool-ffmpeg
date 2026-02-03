@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.24
+- Preflight: ungültige Watchfolder-Eingaben werden klar als Empfehlung gemeldet.
+- Werkbank: sichere Fallback-Slugs verhindern leere Dateinamen.
+- Werkbank: Audio-Parameter werden robust geparst und warnen bei ungültigen Werten.
+
 ## 1.0.23
 - Validierung: Ausgabe-Pfade prüfen Schreibrechte und verhindern Ordner-Zielpfade.
 - Fehlerberichte: base_data_dir wird validiert, Fehler landen im Debug-Log.
