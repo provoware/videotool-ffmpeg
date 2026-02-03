@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from io_utils import atomic_write_json, load_json
 from logging_utils import log_exception
 from paths import (
     app_dir,
@@ -20,13 +21,6 @@ from paths import (
 from PySide6.QtCore import Qt, QProcess
 from PySide6.QtGui import QPixmap, QImageReader
 from PySide6.QtWidgets import QMessageBox, QWidget
-
-
-def load_json(p: Path, default=None):
-    try:
-        return json.loads(p.read_text(encoding="utf-8"))
-    except Exception:
-        return default if default is not None else {}
 
 
 def normalize_report_doc(doc: dict) -> dict:
@@ -159,8 +153,13 @@ def load_today_quarantine_jobs():
 
 def save_today_quarantine_jobs(doc: dict):
     p = today_quarantine_jobs()
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    ok = atomic_write_json(p, doc, context="save_today_quarantine_jobs")
+    if not ok:
+        log_exception(
+            "save_today_quarantine_jobs",
+            RuntimeError("Quarantäne-Liste konnte nicht gespeichert werden."),
+            extra={"path": str(p)},
+        )
 
 
 def update_quarantine_list_status(doc: dict) -> dict:

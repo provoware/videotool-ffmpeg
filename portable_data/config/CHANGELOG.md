@@ -5,6 +5,11 @@
 - UI-Logik: Quarantäne-Tab in einen eigenen Controller modularisiert.
 - Rückmeldungen: Statusleiste bestätigt Quarantäne-Updates klar und verständlich.
 
+## 1.0.38
+- CI: GitHub Actions liegen korrekt unter .github/workflows und führen Qualitäts-Checks automatisch aus.
+- IO: Atomic JSON Writes über einen zentralen IO-Helper für konsistente, sichere Schreibvorgänge.
+- Locking: Single-Writer-Locks für Settings und Quarantäne-Listen verhindern konkurrierende Schreibzugriffe.
+
 ## 1.0.36
 - Preflight: Theme-Auswahl wird geprüft und meldet unbekannte Themes mit Empfehlung.
 - UI: Theme-Fallback mit Warn-Log sorgt für stabile Barrierefreiheit bei ungültigen Einstellungen.

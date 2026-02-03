@@ -23,6 +23,7 @@ Dieses Projekt verarbeitet Videos mit FFmpeg (Video-Werkzeug). Der Fokus liegt a
 ## Vollautomatische Prüfungen & Abhängigkeiten
 - **Abhängigkeiten werden automatisch installiert** (Python-Umgebung + Pakete), inkl. Nutzerfeedback bei Problemen.
 - **Werkstatt-Check (Preflight = Startprüfung)** prüft u. a. FFmpeg, Speicherplatz und notwendige Einstellungen.
+- **Start-Routine löst Abhängigkeiten automatisch** (auto-fix = selbstständig reparieren) und meldet **klar verständlich**, was funktioniert hat oder wo Hilfe nötig ist.
 
 ## Qualitäts- und Formatprüfungen (Codequalität)
 Für eine automatische Qualitätsprüfung gibt es ein eigenes Skript:
@@ -37,6 +38,11 @@ Es prüft u. a.:
 - Format-Check (Formatprüfung) mit **ruff** (Code-Format und Stilprüfung)
 
 *Hinweis:* Das Skript richtet eine venv (virtuelle Umgebung) ein und installiert notwendige Prüf-Tools automatisch.
+
+## CI (GitHub Actions = automatischer Build-Server)
+- **Pfad korrekt:** Workflows liegen unter `.github/workflows/`.
+- **CI-Workflow:** `ci.yml` führt **Qualitäts-Checks** automatisch aus (Compile, Bash-Check, Marker-Scan, Format-Check, Must-Pass).
+- **Release-Workflow:** `release.yml` baut ZIP + .deb und erstellt ein Release bei Tags `v*`.
 
 ## Tests & Checks
 - **Must-Pass Suite (Pflicht)**
@@ -54,12 +60,14 @@ Es prüft u. a.:
 - `tools/` → Start- und Prüfskripte (Werkzeuge)
 - `portable_data/` → **Variable Daten** (Logs, Cache, Reports)
 - `portable_data/config/` → **Konfiguration** (Settings, Manifest, Status)
+- `app/io_utils.py` → **Einheitliche JSON-IO** (atomic writes = atomar/sicher speichern, inkl. Lock)
 
 *Ziel:* Systemdateien (Code) sind getrennt von variablen Daten (Logs/Cache). Das erleichtert Backups, Updates und Wartung.
 
 ## Barrierefreiheit & Themes
-- Mehrere **Hochkontrast-Themes** sind verfügbar.
+- Mehrere **Hochkontrast-Themes** sind verfügbar (besserer Kontrast = bessere Lesbarkeit).
 - Kontrast-Checks sind automatisiert in der Must-Pass Suite integriert.
+- **Perfektes Kontrastverhalten:** Themes werden geprüft, ungültige Auswahl fällt auf sicheren Standard zurück.
 
 ## Logging & Debugging (Fehlersuche)
 - Logs (Protokolle) liegen unter `portable_data/logs/`.

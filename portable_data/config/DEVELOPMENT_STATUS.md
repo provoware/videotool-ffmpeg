@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.37
-- Fortschritt: 61/61 = **100%**
-- Nächster Schritt: **CI-Workflow (Continuous Integration = automatischer Build-Server) für die Must-Pass-Suite einrichten**
+- Version: 1.0.38
+- Fortschritt: 64/64 = **100%**
+- Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -66,6 +66,9 @@
 59. Preflight: Theme-Auswahl wird geprüft und meldet unbekannte Themes
 60. UI/Start: Theme-Fallback & Preflight-Empfehlungen erweitert
 61. Quarantäne-Tabelle: Inline-Bearbeitung mit Validierung und modularer Controller-Logik
+62. CI: GitHub Actions korrekt unter .github/workflows, automatisierte Qualitäts-Checks
+63. IO: Atomic JSON Writes über einen zentralen IO-Helper
+64. Locking: Single-Writer für Settings und Quarantäne-Listen
 
 ## 🔧 Offen
 - (keine)

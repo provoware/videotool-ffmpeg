@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from datetime import datetime
 from perf import get_threads
+from io_utils import atomic_write_json, load_json
 from paths import config_dir, logs_dir, cache_dir, repo_root
 from logging_utils import log_exception
 from validation_utils import (
@@ -35,16 +36,15 @@ def default_rules_path() -> Path:
     return config_dir() / "automation_rules.json"
 
 
-def load_json(p: Path, default=None):
-    try:
-        return json.loads(p.read_text(encoding="utf-8"))
-    except Exception:
-        return default if default is not None else {}
-
-
-def save_json(p: Path, obj):
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+def save_json(p: Path, obj, context: str = "automation_runner.save_json") -> bool:
+    ok = atomic_write_json(p, obj, context=context)
+    if not ok:
+        log_exception(
+            context,
+            RuntimeError("JSON konnte nicht gespeichert werden."),
+            extra={"path": str(p)},
+        )
+    return ok
 
 
 def log_line(logs_dir: Path, msg: str):
