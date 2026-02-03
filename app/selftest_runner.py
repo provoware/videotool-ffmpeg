@@ -30,6 +30,11 @@ def save_json(p: Path, obj):
     p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def require_asset(path: Path, label: str) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"{label} fehlt: {path}")
+
+
 def run_runner(settings_path: Path, rules_path: Path) -> Path:
     # returns report path printed by automation_runner
     cmd = [
@@ -49,10 +54,14 @@ def prepare_watch(folder: Path):
     folder.mkdir(parents=True, exist_ok=True)
 
     assets = assets_dir() / "default_assets"
+    image_asset = assets / "test_image.jpg"
+    audio_asset = assets / "test_audio_10s.wav"
+    require_asset(image_asset, "Testbild")
+    require_asset(audio_asset, "Testaudio")
     # Copy one image
-    shutil.copy(assets / "test_image.jpg", folder / "test_image.jpg")
+    shutil.copy(image_asset, folder / "test_image.jpg")
     # Copy audio (wav)
-    shutil.copy(assets / "test_audio_10s.wav", folder / "test_audio_10s.wav")
+    shutil.copy(audio_asset, folder / "test_audio_10s.wav")
 
 
 def make_overrides(
@@ -97,8 +106,12 @@ def main():
     watch_bad = base_bad / "watch"
 
     # Prepare watch folders
-    prepare_watch(watch_ok)
-    prepare_watch(watch_bad)
+    try:
+        prepare_watch(watch_ok)
+        prepare_watch(watch_bad)
+    except FileNotFoundError as exc:
+        print(f"Selftest abgebrochen: {exc}")
+        return 1
 
     # Create overrides:
     # A) OK: target 320, min 192
@@ -157,7 +170,8 @@ def main():
     save_json(main_reports / f"selftest_summary_{ts}.json", summary)
 
     print(str(rep_bad_copy))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

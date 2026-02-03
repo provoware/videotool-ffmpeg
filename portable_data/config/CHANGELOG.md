@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.33
+- Automatik: Fallback-Bild wird vorab geprüft und fehlende Bilder landen sauber in Quarantäne.
+- Automatik: Ungültige Ausgabe-Pfade führen zu Quarantäne statt Abbruch.
+- Selftest: fehlende Testassets brechen mit klarer Meldung ab.
+
 ## 1.0.32
 - Performance: Thread-Anzahl fällt bei 0-Werten dynamisch auf CPU-Kerne zurück (Eco halbiert).
 - Reports/Quarantäne-Listen: Schema wird beim Laden normalisiert (Version, Titel, Summary, Status).

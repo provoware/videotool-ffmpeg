@@ -527,6 +527,18 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 "fallback_image", "assets/default_assets/preset_cover.jpg"
             )
         ).resolve()
+        fallback_img_valid = True
+        try:
+            fallback_img = ensure_existing_file(Path(fallback_img), "Fallback-Bild")
+        except PathValidationError as exc:
+            fallback_img_valid = False
+            report["errors"].append(
+                {
+                    "type": "fallback_image_missing",
+                    "path": str(fallback_img),
+                    "error": str(exc),
+                }
+            )
         preset_id = rules.get("presets", {}).get(
             "default_preset_id", "youtube_hd_ton_safe"
         )
@@ -636,11 +648,37 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 qn += 1
                 continue
 
-            img_use = (
-                staged_images[idx - 1]
-                if (idx - 1) < len(staged_images)
-                else fallback_img
-            )
+            img_use = staged_images[idx - 1] if (idx - 1) < len(staged_images) else None
+            if img_use is None and fallback_img_valid:
+                img_use = fallback_img
+            if img_use is None:
+                qn += 1
+                marker = quarantine_day / (aud_dst.stem + "_quarantaene.txt")
+                marker.write_text(
+                    "Kein Bild vorhanden: Fallback-Bild fehlt. Siehe Report.\n",
+                    encoding="utf-8",
+                )
+                job.update(
+                    {
+                        "status": "quarantaene",
+                        "reason": "fallback_image_missing",
+                        "output_quarantine": str(marker),
+                    }
+                )
+                append_quarantine_job(
+                    qfile,
+                    day,
+                    run_id,
+                    idx,
+                    preset_id,
+                    marker,
+                    aud_dst,
+                    None,
+                    "fallback_image_missing",
+                    {},
+                )
+                report["jobs"].append(job)
+                continue
             try:
                 img_use = ensure_existing_file(Path(img_use), "Bild")
             except PathValidationError as exc:
@@ -656,9 +694,38 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 continue
 
             out_name = build_output_name(aud_dst, preset_id, False, idx, settings)
-            out_tmp = ensure_output_path(
-                cache_dir() / "temp_renders" / out_name, "Zwischenausgabe"
-            )
+            try:
+                out_tmp = ensure_output_path(
+                    cache_dir() / "temp_renders" / out_name, "Zwischenausgabe"
+                )
+            except PathValidationError as exc:
+                qn += 1
+                marker = quarantine_day / (Path(out_name).stem + "_quarantaene.txt")
+                marker.write_text(
+                    "Ungültiger Ausgabe-Pfad. Siehe Report.\n", encoding="utf-8"
+                )
+                job.update(
+                    {
+                        "status": "quarantaene",
+                        "reason": "output_path_invalid",
+                        "error": str(exc),
+                        "output_quarantine": str(marker),
+                    }
+                )
+                append_quarantine_job(
+                    qfile,
+                    day,
+                    run_id,
+                    idx,
+                    preset_id,
+                    marker,
+                    aud_dst,
+                    img_use if img_use != fallback_img else None,
+                    "output_path_invalid",
+                    {"error": str(exc)},
+                )
+                report["jobs"].append(job)
+                continue
             out_final = exports_day / out_name
 
             cmd = [
