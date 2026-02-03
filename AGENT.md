@@ -13,7 +13,7 @@ Jede Iteration besteht aus exakt diesen Schritten:
    - Kein Umbau ohne belegbaren Grund.
 
 2) **Kleinster sinnvoller Schritt (Pflicht)**
-   - Genau 1 Optimierung oder 1 Bugfix pro Iteration.
+   - Genau 3 Optimierung oder 3 Bugfix pro Iteration.
    - Keine Nebenbaustellen.
    - Keine „schon mal mitmachen“-Änderungen.
 
