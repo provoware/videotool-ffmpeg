@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.15
+- Logging: Ausnahmen in UI/Automation werden konsistent im Debug-Log protokolliert (mit Kontext).
+
 ## 1.0.14
 - Debug-Log als Datei speicherbar dokumentiert (inkl. einfacher Start-Checkliste).
 
