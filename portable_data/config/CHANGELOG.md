@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 1.0.10
+- System-/Automations-Skripte prüfen jetzt Existenz, laufen per QProcess und melden Exit-Code/Fehler mit klaren nächsten Schritten.
 - Automatik: Pflicht-Pfade in settings prüfen, klare Aktion im Log bei Fehlern.
 - Maintenance: Settings-Ints werden sicher geparst, mit Warnung und Fallback im Summary-Log.
 
