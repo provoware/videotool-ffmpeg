@@ -540,18 +540,20 @@ def build_main_layout(main) -> None:
     main.help_search.setPlaceholderText(
         main.texts["strings"].get("help.suchen", "Suchen …")
     )
+    main.help_topics_label = QLabel(
+        main.texts["strings"].get("help.themen", "Anleitungen (Schritte)")
+    )
+    main.help_topics = QListWidget()
+    main.help_topics.setMinimumHeight(140)
     main.help_view = QTextEdit()
     main.help_view.setReadOnly(True)
-    help_path = config_dir() / "HELP_CENTER.md"
-    main.help_view.setPlainText(
-        help_path.read_text(encoding="utf-8")
-        if help_path.exists()
-        else "HELP_CENTER.md fehlt."
-    )
+    main.help_view.setPlainText("")
     main.btn_help_open = QPushButton(
         main.texts["strings"].get("help.open_file", "Hilfe-Datei öffnen")
     )
     lh.addWidget(main.help_search)
+    lh.addWidget(main.help_topics_label)
+    lh.addWidget(main.help_topics)
     lh.addWidget(main.help_view, 1)
     lh.addWidget(main.btn_help_open)
 

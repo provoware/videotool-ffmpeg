@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.43
+- Hilfe-Center erweitert: interaktive Themenliste + Schritt-für-Schritt-Anleitungen im Tool.
+- Internationalisierung vorbereitet: Sprachdateien für Deutsch/Englisch, UI lädt Sprache aus Settings.
+- Ordner/Report-Aktionen validieren Pfade und geben klare Erfolgs- oder Fehlermeldungen.
+
 ## 1.0.42
 - Start-Routine: optionale Release-Checks per MODULTOOL_RUN_CHECKS mit klarer Rückmeldung.
 - IO: JSON-Pfadprüfung liefert konkrete Gründe im Debug-Log.

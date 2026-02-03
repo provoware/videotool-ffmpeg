@@ -121,6 +121,7 @@ def validate_settings_schema(settings: dict) -> list[str]:
     expect_type(performance.get("normal_threads"), "performance.normal_threads", int)
 
     expect_type(ui.get("zoom_percent"), "ui.zoom_percent", int)
+    expect_type(ui.get("language"), "ui.language", str)
     return errors
 
 

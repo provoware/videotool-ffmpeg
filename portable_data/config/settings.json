@@ -2,6 +2,7 @@
   "schema_version": 1,
   "ui": {
     "theme": "hochkontrast_dunkel",
+    "language": "de",
     "zoom_percent": 110,
     "show_checkboxes_always": true,
     "selection_basket_auto_show": true,

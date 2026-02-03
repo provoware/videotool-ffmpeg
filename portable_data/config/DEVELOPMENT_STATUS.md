@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.42
-- Fortschritt: 65/72 = **90%**
+- Version: 1.0.43
+- Fortschritt: 68/72 = **94%**
 - Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
 ## ✅ Fertig
@@ -70,12 +70,12 @@
 64. Locking: Single-Writer für Settings und Quarantäne-Listen
 65. Preflight: JSON-IO vereinheitlicht und Debug-Flag einmalig ermittelt
 66. Start-Option: Release-Checks per MODULTOOL_RUN_CHECKS bündeln
+67. Hilfe-Center: interaktive Themenliste + Schritt-für-Schritt-Anleitungen
+68. Internationalisierung: Sprachdateien vorbereitet und UI lädt Sprache
+69. Validierung: Ordner/Report-Aktionen prüfen Pfade und melden Erfolg/Fehler
 
 ## 🔧 Offen
 1. main.py modularisieren: UI (Benutzeroberfläche) in klare Klassen trennen.
 2. Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste editierbar, Plugin-Schnittstelle (Erweiterungs-Anschluss) für Presets.
 3. Selftest (automatische Prüfung) um Bitraten-, Fehler- und Großdatei-Szenarien erweitern.
 4. Performance (Leistung) optimieren: parallele Audio-Verarbeitung einführen.
-5. Hilfe-Center integrieren: interaktive Hilfe mit Suche und Schritt-für-Schritt-Anleitungen.
-6. Internationalisierung (Übersetzungen) hinzufügen und Oberfläche vorbereiten.
-7. Eingabe-/Ausgabe-Validierung vereinheitlichen: pro Funktion klare Checks mit Erfolgsmeldung.
