@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.16
+- Maintenance: Dateifehler werden als Warnungen im Summary protokolliert (keine Silent-Fails).
+
 ## 1.0.15
 - Logging: Ausnahmen in UI/Automation werden konsistent im Debug-Log protokolliert (mit Kontext).
 

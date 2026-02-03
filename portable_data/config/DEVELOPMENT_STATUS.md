@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.15
-- Fortschritt: 31/34 = **91%**
+- Version: 1.0.16
+- Fortschritt: 32/34 = **94%**
 - Nächster Schritt: **Release-Checks (ZIP, .deb, Must-Pass) auf frischem System**
 
 ## ✅ Fertig
@@ -36,6 +36,7 @@
 29. Maintenance: Settings-Ints sicher parsen und Warnungen im Summary loggen
 30. Pfadlogik zentralisiert (paths = Speicherorte) für weniger Duplikate
 31. Qualitäts-Checks: Formatprüfung mit ruff integriert
+32. Maintenance: Dateifehler werden als Warnungen im Summary protokolliert
 
 ## 🔧 Offen
 1. Release: ZIP bauen und starten
