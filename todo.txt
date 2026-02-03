@@ -22,6 +22,9 @@
 - [x] Dokumentation: Debug-Log speichern + Checkliste für Startprobleme auf neuen Systemen.
 - [x] Logging: Exceptions im UI/Automation konsistent ins Debug-Log schreiben.
 - [x] Maintenance: Dateifehler als Warnungen sammeln und im Summary ausgeben.
+- [x] Quarantäne-UI: Aktionen brauchen Auswahl-Check mit klarer Rückmeldung und Log.
+- [x] Quarantäne-UI: Ordner öffnen mit Validierung und Nutzer-Feedback.
+- [x] Einstellungen: Namensvorschau zeigt verständlichen Hinweis bei Vorlagen-Fehler.
 - [x] Preflight: Theme-Validierung ergänzen und bei unbekanntem Theme klaren Hinweis geben.
 - [x] Start-Routine: Preflight-Empfehlungen für Theme und Pfad-Fehler ergänzen.
 - [x] Automatik: sichere Fallback-Logik für leere Dateinamen-Slugs ergänzen.

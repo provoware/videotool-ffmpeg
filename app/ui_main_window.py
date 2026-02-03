@@ -147,40 +147,10 @@ class Main(QMainWindow):
         self.btn_quar_open_json.clicked.connect(self.open_qjobs_today)
         self.btn_quar_open_folder.clicked.connect(self._quar_open_folder)
         self.btn_quar_all_rerun.clicked.connect(self.rerun_all_quarantine_ready)
-        self.btn_quar_rerun.clicked.connect(
-            lambda: (
-                lambda jid=self._selected_quar_job_id(): (
-                    run_quarantine_worker(jid) if jid else None
-                )
-            )()
-        )
-        self.btn_quar_replace.clicked.connect(
-            lambda: (
-                lambda jid=self._selected_quar_job_id(): (
-                    self._quar_replace_source_simple(jid) if jid else None
-                )
-            )()
-        )
-        self.btn_quar_postpone.clicked.connect(
-            lambda: (
-                lambda jid=self._selected_quar_job_id(): (
-                    self._update_quar_status(jid, "zurueckgestellt")
-                    and self._load_quarantine_table()
-                    if jid
-                    else None
-                )
-            )()
-        )
-        self.btn_quar_done.clicked.connect(
-            lambda: (
-                lambda jid=self._selected_quar_job_id(): (
-                    self._update_quar_status(jid, "erledigt")
-                    and self._load_quarantine_table()
-                    if jid
-                    else None
-                )
-            )()
-        )
+        self.btn_quar_rerun.clicked.connect(self._quar_rerun_selected)
+        self.btn_quar_replace.clicked.connect(self._quar_replace_selected)
+        self.btn_quar_postpone.clicked.connect(self._quar_postpone_selected)
+        self.btn_quar_done.clicked.connect(self._quar_done_selected)
         # Initial load
         self._load_quarantine_table()
         self.quar_table.itemChanged.connect(self._quar_controller.on_item_changed)
@@ -1159,6 +1129,9 @@ class Main(QMainWindow):
             )
         except Exception:
             example = "(Vorlage hat Fehler)"
+            self.statusBar().showMessage(
+                "Vorlage hat Fehler. Nächster Schritt: Felder prüfen."
+            )
         self.lbl_preview_name.setText(example + ".mp4")
 
     # --- Quarantäne Tabelle (0.9.9) ---
@@ -1180,7 +1153,53 @@ class Main(QMainWindow):
             / self.settings.get("paths", {}).get("quarantine_dir", "quarantine")
             / datetime.now().strftime("%Y-%m-%d")
         )
-        open_path(qdir)
+        self._open_dir_with_feedback(qdir, "Quarantäne-Ordner")
+
+    def _require_quar_job_id(self, action_label: str) -> str | None:
+        job_id = self._selected_quar_job_id()
+        if job_id:
+            return job_id
+        msg = (
+            f"{action_label}: Kein Eintrag gewählt. Nächster Schritt: Zeile anklicken."
+        )
+        QMessageBox.information(self, action_label, msg)
+        self.statusBar().showMessage(msg)
+        log_message(
+            "Quarantäne-Aktion ohne Auswahl.",
+            level="WARN",
+            context="ui.quarantine",
+            user_message=msg,
+        )
+        return None
+
+    def _quar_rerun_selected(self):
+        job_id = self._require_quar_job_id("Quarantäne neu starten")
+        if not job_id:
+            return
+        run_quarantine_worker(job_id)
+        self.statusBar().showMessage("Quarantäne-Auftrag gestartet.")
+        activity("Quarantäne-Worker gestartet (Einzelauftrag).")
+        self.refresh_last_night()
+
+    def _quar_replace_selected(self):
+        job_id = self._require_quar_job_id("Quelle ersetzen")
+        if not job_id:
+            return
+        self._quar_replace_source_simple(job_id)
+
+    def _quar_postpone_selected(self):
+        job_id = self._require_quar_job_id("Quarantäne zurückstellen")
+        if not job_id:
+            return
+        if self._update_quar_status(job_id, "zurueckgestellt"):
+            self._load_quarantine_table()
+
+    def _quar_done_selected(self):
+        job_id = self._require_quar_job_id("Quarantäne erledigt")
+        if not job_id:
+            return
+        if self._update_quar_status(job_id, "erledigt"):
+            self._load_quarantine_table()
 
     def _quar_replace_source_simple(self, job_id: str):
         # minimal: open JSON and let user use existing dashboard replace flow later
