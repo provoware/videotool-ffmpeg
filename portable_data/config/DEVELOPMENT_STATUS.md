@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.8
-- Fortschritt: 27/27 = **100%**
+- Version: 1.0.9
+- Fortschritt: 28/28 = **100%**
 - Nächster Schritt: **Deb-Paket vorbereiten und testen**
 
 ## ✅ Fertig
@@ -32,6 +32,7 @@
 25. Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren
 26. Qualitäts-Checks: Compile, Bash-Check, Marker-Scan, Must-Pass
 27. Debug-Modus (Log-Level) + gezielte Fehlerberichte
+28. Preflight: Watchfolder-Schreibrecht prüfen und melden
 
 ## 🔧 Offen
 1. Deb-Paket (später)
