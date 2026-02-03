@@ -1,8 +1,8 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.27",
-  "build_date": "2026-02-08T09:00:00Z",
+  "version": "1.0.28",
+  "build_date": "2026-02-09T09:00:00Z",
   "schema_versions": {
     "settings": 1,
     "automation_rules": 1,

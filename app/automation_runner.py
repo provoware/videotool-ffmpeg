@@ -142,6 +142,8 @@ def lock_is_stale(lock_path: Path, lock_info: dict) -> tuple[bool, str]:
     except Exception:
         age = LOCK_TIMEOUT_SECONDS + 1
     pid = lock_info.get("pid")
+    if isinstance(pid, str) and pid.isdigit():
+        pid = int(pid)
     if pid and not process_alive(pid):
         return True, "pid_not_running"
     if age > LOCK_TIMEOUT_SECONDS:
@@ -266,7 +268,14 @@ def ffprobe_json(path: Path) -> dict:
 def build_output_name(
     audio_path: Path, preset: str, sw: bool, idx: int, settings: dict
 ) -> str:
-    tmpl = settings["naming"]["template_batch"]
+    naming = settings.get("naming", {})
+    tmpl = (
+        naming.get("template_batch")
+        if isinstance(naming, dict)
+        else "{audio}_{vorlage}_{datum}_{nummer}{sw}"
+    )
+    if not tmpl:
+        tmpl = "{audio}_{vorlage}_{datum}_{nummer}{sw}"
     dt = datetime.now().strftime("%Y-%m-%d")
     tm = datetime.now().strftime("%H%M%S")
     audio = safe_slug(audio_path.stem)

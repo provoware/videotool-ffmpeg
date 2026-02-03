@@ -85,6 +85,12 @@ def rotate_file(path: Path, max_bytes: int, keep: int, warnings: list[dict]):
         return
     if size <= max_bytes:
         return
+    if keep <= 0:
+        try:
+            path.write_text("", encoding="utf-8")
+        except Exception as exc:
+            record_warning(warnings, "truncate_log", path, exc)
+        return
     # rotate: file -> file.1, .1 -> .2, ... up to keep
     for i in range(keep, 0, -1):
         older = path.with_name(path.name + f".{i}")
