@@ -37,6 +37,20 @@ def load_json(p: Path, default=None):
     except Exception:
         return default if default is not None else {}
 
+def parse_int(value, default: int, field: str, warnings: list[dict]) -> int:
+    try:
+        if isinstance(value, bool):
+            raise ValueError("bool is not a valid int")
+        return int(value)
+    except Exception:
+        warnings.append({
+            "field": field,
+            "value": value,
+            "default": default,
+            "message": f"Invalid int for {field}; using default {default}."
+        })
+        return default
+
 def bytes_from_mb(mb: int|float) -> int:
     return int(float(mb) * 1024 * 1024)
 
@@ -152,12 +166,16 @@ def main():
 
     settings = load_json(settings_path(), {})
     m = settings.get("maintenance", {})
-    logs_max = bytes_from_mb(m.get("logs_max_mb", 5))
-    logs_keep = int(m.get("logs_keep", 5))
-    cache_max = bytes_from_mb(m.get("cache_max_mb", 200))
-    thumbs_max = bytes_from_mb(m.get("thumbs_max_mb", 150))
-    temp_age = int(m.get("temp_max_age_days", 3))
-    reports_keep_days = int(m.get("reports_keep_days", 30))
+    warnings: list[dict] = []
+    logs_max_mb = parse_int(m.get("logs_max_mb", 5), 5, "logs_max_mb", warnings)
+    logs_keep = parse_int(m.get("logs_keep", 5), 5, "logs_keep", warnings)
+    cache_max_mb = parse_int(m.get("cache_max_mb", 200), 200, "cache_max_mb", warnings)
+    thumbs_max_mb = parse_int(m.get("thumbs_max_mb", 150), 150, "thumbs_max_mb", warnings)
+    temp_age = parse_int(m.get("temp_max_age_days", 3), 3, "temp_max_age_days", warnings)
+    reports_keep_days = parse_int(m.get("reports_keep_days", 30), 30, "reports_keep_days", warnings)
+    logs_max = bytes_from_mb(logs_max_mb)
+    cache_max = bytes_from_mb(cache_max_mb)
+    thumbs_max = bytes_from_mb(thumbs_max_mb)
 
     logs_dir().mkdir(parents=True, exist_ok=True)
     cache_dir().mkdir(parents=True, exist_ok=True)
@@ -166,6 +184,7 @@ def main():
 
     summary = {
         "at": datetime.utcnow().isoformat(timespec="seconds")+"Z",
+        "warnings": warnings,
         "rotated": [],
         "pruned": {},
         "sizes_before": {},

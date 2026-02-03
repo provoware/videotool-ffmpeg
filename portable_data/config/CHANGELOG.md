@@ -2,6 +2,7 @@
 
 ## 1.0.10
 - Automatik: Pflicht-Pfade in settings prüfen, klare Aktion im Log bei Fehlern.
+- Maintenance: Settings-Ints werden sicher geparst, mit Warnung und Fallback im Summary-Log.
 
 
 ## 1.0.9
