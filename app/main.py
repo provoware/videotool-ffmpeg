@@ -165,6 +165,17 @@ def get_thumb_pixmap(p: Path, size: int = 96) -> QPixmap|None:
         pm = QPixmap(str(cache_file))
         if not pm.isNull():
             return pm
+    reader = QImageReader(str(p))
+    reader.setAutoTransform(True)
+    img = reader.read()
+    if img.isNull():
+        return None
+    pm = QPixmap.fromImage(img).scaled(size, size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    try:
+        pm.save(str(cache_file), "PNG")
+    except Exception:
+        pass
+    return pm
 
 
 # --- Favoriten (Werkzeugkasten) ---
@@ -212,18 +223,6 @@ def norm_tags(s: str) -> list[str]:
         if t not in seen:
             out.append(t); seen.add(t)
     return out
-
-    reader = QImageReader(str(p))
-    reader.setAutoTransform(True)
-    img = reader.read()
-    if img.isNull():
-        return None
-    pm = QPixmap.fromImage(img).scaled(size, size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-    try:
-        pm.save(str(cache_file), "PNG")
-    except Exception:
-        pass
-    return pm
 
 class FileDropListWidget(QListWidget):
     def __init__(self, on_paths, *args, **kwargs):

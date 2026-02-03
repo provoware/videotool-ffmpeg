@@ -1,6 +1,6 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.0
+- Version: 1.0.1
 - Fortschritt: 22/24 = **92%**
 - Nächster Schritt: **Portable Edgecase-Härtung (Dialogs, Fallbacks)**
 
