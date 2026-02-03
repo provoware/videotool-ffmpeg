@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.33
-- Fortschritt: 54/55 = **98%**
-- Nächster Schritt: **main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)**
+- Version: 1.0.34
+- Fortschritt: 55/55 = **100%**
+- Nächster Schritt: **Release-Checks & Packaging prüfen**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -59,6 +59,7 @@
 52. Automatik: Fallback-Bild wird vorab geprüft und fehlende Bilder landen in Quarantäne
 53. Automatik: Ungültige Ausgabe-Pfade führen zu Quarantäne statt Abbruch
 54. Selftest: Fehlende Testassets brechen mit klarer Meldung ab
+55. main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)
 
 ## 🔧 Offen
-1. main.py modularisieren (UI-Logik in eigene Klassen auslagern)
+- (keine)
