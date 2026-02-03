@@ -16,6 +16,8 @@
 - [x] Dokumentation: Debug-Log speichern + Checkliste für Startprobleme auf neuen Systemen.
 - [x] Logging: Exceptions im UI/Automation konsistent ins Debug-Log schreiben.
 - [x] Maintenance: Dateifehler als Warnungen sammeln und im Summary ausgeben.
+- [x] Preflight: Theme-Validierung ergänzen und bei unbekanntem Theme klaren Hinweis geben.
+- [x] Start-Routine: Preflight-Empfehlungen für Theme und Pfad-Fehler ergänzen.
 - [x] Automatik: sichere Fallback-Logik für leere Dateinamen-Slugs ergänzen.
 - [x] Validierung: Ausgabe-Pfade prüfen, Schreibrechte sicherstellen und Ordnerpfade abweisen.
 - [x] Fehlerberichte: base_data_dir validieren und bei Fehlern sauber im Debug-Log erfassen.
@@ -39,3 +41,5 @@
 - [ ] Performance optimieren: parallele Audio-Verarbeitung einführen.
 - [ ] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
 - [ ] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.
+- [ ] Eingabe-/Ausgabe-Validierung weiter vereinheitlichen: pro Funktion klare Checks mit Erfolgsmeldung, damit Laien immer wissen, was passiert.
+- [ ] Automatische Release-Checks als Start-Option für Nicht-Entwickler bündeln (ein Klick, klare Rückmeldung).

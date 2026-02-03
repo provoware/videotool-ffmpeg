@@ -79,6 +79,18 @@ def find_font() -> str | None:
     return None
 
 
+def load_theme_names() -> set[str]:
+    data = load_json(config_dir() / "themes.json", {})
+    names: set[str] = set()
+    themes = data.get("themes")
+    if isinstance(themes, dict):
+        names.update(k for k in themes.keys() if isinstance(k, str) and k.strip())
+    qss = data.get("qss")
+    if isinstance(qss, dict):
+        names.update(k for k in qss.keys() if isinstance(k, str) and k.strip())
+    return names
+
+
 def run(settings_path: Path | None = None) -> dict:
     if settings_path is None:
         settings_path = config_dir() / "settings.json"
@@ -86,9 +98,20 @@ def run(settings_path: Path | None = None) -> dict:
         log_debug(f"Preflight start (settings={settings_path})")
     settings = load_json(settings_path, {})
     paths = settings.get("paths", {})
+    ui = settings.get("ui", {})
     schema_errors = validate_settings_schema(settings)
     path_errors = validate_settings_paths(settings)
     min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
+    theme_input = ui.get("theme", "hochkontrast_dunkel")
+    theme_names = load_theme_names()
+    theme_ok = True
+    theme = "hochkontrast_dunkel"
+    if isinstance(theme_input, str) and theme_input.strip():
+        theme = theme_input.strip()
+        if theme_names and theme not in theme_names:
+            theme_ok = False
+    elif theme_names:
+        theme_ok = False
 
     raw_watch = paths.get("watch_folder")
     watch_invalid = False
@@ -172,6 +195,8 @@ def run(settings_path: Path | None = None) -> dict:
         rec.append("install_font")
     if not min_free_ok:
         rec.append("min_free_mb_invalid")
+    if not theme_ok:
+        rec.append("theme_invalid")
     if ok_watch and not watch_writable_ok:
         rec.append("watchfolder_not_writable")
     if watch_invalid:
@@ -199,6 +224,9 @@ def run(settings_path: Path | None = None) -> dict:
         "min_free_mb_ok": min_free_ok,
         "min_free_mb_input": min_free_raw,
         "min_free_mb": min_free_mb,
+        "theme_ok": theme_ok,
+        "theme": theme,
+        "theme_input": "" if theme_input is None else str(theme_input),
         "settings_ok": settings_ok,
         "space_ok": ok_space,
         "font_ok": ok_font,

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.36
+- Preflight: Theme-Auswahl wird geprüft und meldet unbekannte Themes mit Empfehlung.
+- UI: Theme-Fallback mit Warn-Log sorgt für stabile Barrierefreiheit bei ungültigen Einstellungen.
+- Start-Routine: Preflight-Empfehlungen erweitert (Theme-, Pfad- und min_free-Hinweise).
+
 ## 1.0.35
 - Start-Routine: zentrale Bootstrap-Logik für Python-Abhängigkeiten mit klaren Hinweisen ergänzt.
 - Start-Routine: optionaler FFmpeg-Autoinstall per MODULTOOL_AUTO_INSTALL mit verständlicher Rückmeldung.

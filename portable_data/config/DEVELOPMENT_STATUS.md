@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.35
-- Fortschritt: 58/58 = **100%**
-- Nächster Schritt: **Automatisierte Start-Checks und Release-Tests auf Zielsystemen prüfen**
+- Version: 1.0.36
+- Fortschritt: 60/60 = **100%**
+- Nächster Schritt: **Release-Checks auf Zielsystemen durchführen (inkl. Theme-Fallback prüfen)**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -63,6 +63,8 @@
 56. Start-Routine: Bootstrap-Logik für Python-Abhängigkeiten zentralisiert
 57. Start-Routine: optionaler FFmpeg-Autoinstall mit laienfreundlichem Hinweis
 58. Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap validiert
+59. Preflight: Theme-Auswahl wird geprüft und meldet unbekannte Themes
+60. UI/Start: Theme-Fallback & Preflight-Empfehlungen erweitert
 
 ## 🔧 Offen
 - (keine)
