@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.45
-- Fortschritt: 75/79 = **95%**
-- Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
+- Version: 1.0.46
+- Fortschritt: 76/79 = **96%**
+- Nächster Schritt: **main.py modularisieren (UI in klare Klassen trennen)**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -80,9 +80,9 @@
 74. Entwicklerdoku: Start-Routine, Release-Checks, Validierung und Versionierung ergänzt
 75. Projektstruktur: finale Ordner-/Dateiübersicht als eigene Info-Datei erstellt
 76. Prüfautomatik: Vollständigen Release-Check als Skript bereitgestellt
+77. Selftest: Bitraten-, Fehler- und Großdatei-Szenarien ergänzt
 
 ## 🔧 Offen
 1. main.py modularisieren: UI (Benutzeroberfläche) in klare Klassen trennen.
 2. Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste editierbar, Plugin-Schnittstelle (Erweiterungs-Anschluss) für Presets.
-3. Selftest (automatische Prüfung) um Bitraten-, Fehler- und Großdatei-Szenarien erweitern.
-4. Performance (Leistung) optimieren: parallele Audio-Verarbeitung einführen.
+3. Performance (Leistung) optimieren: parallele Audio-Verarbeitung einführen.

@@ -42,7 +42,7 @@
 - [x] Konfigurationsvalidierung erweitern: Pfade auf tatsächliche Erreichbarkeit und Schreibrechte prüfen; JSON-Schema-Validierung einführen.
 - [ ] Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste als Tabelle editierbar machen (Teil erledigt: Inline-Bearbeitung + Validierung), Plugin-Schnittstelle für Presets umsetzen und Kontrast-Checks automatisieren.
 - [x] CI-Workflow: GitHub Actions unter .github/workflows mit Qualitäts-Checks und Must-Pass-Suite automatisieren.
-- [ ] Testabdeckung erhöhen: Selftest um Szenarien mit verschiedenen Bitraten, fehlerhaften Dateien und großen Dateien erweitern.
+- [x] Testabdeckung erhöht: Selftest um Szenarien mit verschiedenen Bitraten, fehlerhaften Dateien und großen Dateien erweitert.
 - [x] Plattform-Unabhängigkeit verbessern: Skripte portabel gestalten und Installationshinweise für nicht-Linux-Plattformen ergänzen.
 - [x] Datenstrukturen versionieren: Migrationslogik für Reports und Quarantäne-Listen entwickeln, um Schema-Änderungen zu unterstützen.
 - [x] Performance optimieren: Thread-Anzahl dynamisch an CPU-Kerne anpassen.
