@@ -1,6 +1,6 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.2
+- Version: 1.0.3
 - Fortschritt: 23/24 = **96%**
 - Nächster Schritt: **Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln**
 
