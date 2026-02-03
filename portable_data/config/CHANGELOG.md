@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.23
+- Validierung: Ausgabe-Pfade prüfen Schreibrechte und verhindern Ordner-Zielpfade.
+- Fehlerberichte: base_data_dir wird validiert, Fehler landen im Debug-Log.
+- Preflight: Settings-JSON nur bei gültiger Dict-Struktur übernehmen.
+
 ## 1.0.22
 - Automatik: Download-Stabilität prüft zusätzlich Hash/MTime, bevor Dateien verarbeitet werden.
 - Subprozess-Schutz: FFmpeg-Aufrufe validieren Eingabepfade/Outputs strikt (kein Shell-Injection-Risiko).

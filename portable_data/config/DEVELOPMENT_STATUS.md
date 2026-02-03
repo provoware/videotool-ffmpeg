@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.22
-- Fortschritt: 38/39 = **97%**
+- Version: 1.0.23
+- Fortschritt: 41/42 = **98%**
 - Nächster Schritt: **Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)**
 
 ## ✅ Fertig
@@ -43,6 +43,9 @@
 36. Automatik: Download-Stabilität per Hash/MTime absichern
 37. Subprozess-Schutz: Pfade/Dateien vor FFmpeg strikt validieren
 38. Fehlerberichte: Report + GUI zeigen Abbrüche ohne SystemExit
+39. Validierung: Ausgabe-Pfade prüfen Schreibrechte und verhindern Ordner-Zielpfade
+40. Fehlerberichte: base_data_dir validieren und Fehler im Debug-Log erfassen
+41. Preflight: Settings-JSON nur bei gültiger Dict-Struktur übernehmen
 
 ## 🔧 Offen
 1. Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)
