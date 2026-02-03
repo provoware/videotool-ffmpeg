@@ -1,6 +1,6 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.26
+- Version: 1.0.27
 - Fortschritt: 41/42 = **98%**
 - Nächster Schritt: **Release-Pakete mit den neuen Skripten erstellen und testen (ZIP, .deb, Must-Pass)**
 

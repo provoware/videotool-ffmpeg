@@ -5,6 +5,7 @@ import os
 import shutil
 from pathlib import Path
 from datetime import datetime
+from uuid import uuid4
 from paths import config_dir, data_dir, cache_dir, logs_dir
 
 
@@ -56,7 +57,7 @@ def have(cmd: str) -> bool:
 def writable_dir(p: Path) -> tuple[bool, str]:
     try:
         p.mkdir(parents=True, exist_ok=True)
-        test = p / ".modultool_write_test.tmp"
+        test = p / f".modultool_write_test_{uuid4().hex}.tmp"
         test.write_text("ok", encoding="utf-8")
         test.unlink(missing_ok=True)
         return True, ""
