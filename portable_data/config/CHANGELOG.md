@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.27
+- Preflight: Schreibtest nutzt eindeutige Temp-Dateien, damit parallele Checks nicht kollidieren.
+- Maintenance: Settings-JSON wird nur als Dict akzeptiert, sonst wird sauber auf Standard zurückgefallen.
+- Maintenance: negative MB-Grenzen werden als 0 behandelt, damit Cleanup-Regeln stabil bleiben.
+
 ## 1.0.26
 - Release: ZIP-Build-Skript ergänzt (lokaler Build mit Version aus Manifest).
 - Release: .deb-Build-Skript ergänzt (Template + Launcher, Desktop-Entry).

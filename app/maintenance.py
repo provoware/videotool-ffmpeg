@@ -24,9 +24,12 @@ def settings_path() -> Path:
 
 def load_json(p: Path, default=None):
     try:
-        return json.loads(p.read_text(encoding="utf-8"))
+        data = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return default if default is not None else {}
+    if not isinstance(data, dict):
+        return default if default is not None else {}
+    return data
 
 
 def parse_int(value, default: int, field: str, warnings: list[dict]) -> int:
@@ -47,7 +50,7 @@ def parse_int(value, default: int, field: str, warnings: list[dict]) -> int:
 
 
 def bytes_from_mb(mb: int | float) -> int:
-    return int(float(mb) * 1024 * 1024)
+    return max(0, int(float(mb) * 1024 * 1024))
 
 
 def list_files_recursive(folder: Path):
