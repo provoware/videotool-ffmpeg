@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 from perf import get_threads
@@ -97,6 +98,10 @@ def find_font() -> str | None:
         if Path(c).exists():
             return c
     return None
+
+
+def have(cmd: str) -> bool:
+    return shutil.which(cmd) is not None
 
 
 def escape_drawtext_text(t: str) -> str:
@@ -256,6 +261,10 @@ def main() -> int:
     out_final = unique_path(outdir / f"{name_stem}.mp4")
     out_tmp = ensure_output_path(out_final.with_suffix(".tmp.mp4"), "Zwischenausgabe")
 
+    if not have("ffmpeg"):
+        print("Fehler: ffmpeg nicht gefunden. Aktion: ffmpeg installieren.")
+        return 2
+
     # Inputs: 0=image, 1=audio, 2=logo (optional)
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y"]
     if threads:
@@ -293,7 +302,16 @@ def main() -> int:
     ]
 
     # Run ffmpeg
-    subprocess.check_call(cmd)
+    try:
+        subprocess.check_call(cmd)
+    except subprocess.CalledProcessError as exc:
+        out_tmp.unlink(missing_ok=True)
+        print(f"Fehler: FFmpeg fehlgeschlagen (Exit {exc.returncode}).")
+        return exc.returncode or 1
+    except Exception as exc:
+        out_tmp.unlink(missing_ok=True)
+        print(f"Fehler: Export abgebrochen ({exc}).")
+        return 1
 
     # Atomic move to final
     out_tmp.replace(out_final)

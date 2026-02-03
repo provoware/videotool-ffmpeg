@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.29
-- Fortschritt: 44/45 = **98%**
+- Version: 1.0.30
+- Fortschritt: 45/46 = **98%**
 - Nächster Schritt: **main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)**
 
 ## ✅ Fertig
@@ -49,6 +49,7 @@
 42. Release-Pakete automatisieren (ZIP, .deb, Must-Pass)
 43. Zentrales Logging-Modul mit getrenntem User-Feedback
 44. Konfigurationsvalidierung mit Schema- und Pfad-Checks
+45. Werkbank-Export: FFmpeg-Fehler klar melden und Temp-Dateien sicher bereinigen
 
 ## 🔧 Offen
 1. main.py modularisieren (UI-Logik in eigene Klassen auslagern)
