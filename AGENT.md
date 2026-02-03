@@ -29,6 +29,94 @@ Jede Iteration besteht aus exakt diesen Schritten:
 
 ---
 
+## 0.1) Release-Finalisierung (finale Freigabe)
+Ziel: Release sauber abschließen, ohne Risiko. Alles ist automatisiert, nachvollziehbar und barrierefrei.
+
+### A) Release-Freeze (Stabilitätsfenster)
+- Keine neuen Features, nur Fixes und Dokumentation.
+- Alle Änderungen klein halten (max. 3 Fixes oder 3 Verbesserungen).
+- Jede Änderung braucht einen belegbaren Grund (Datei + Abschnitt).
+
+### B) Vollautomatische Start-Routine (Autostart)
+Die Start-Routine muss alles prüfen, reparieren und dem Nutzer klare Rückmeldungen geben.
+
+**Pflicht-Ablauf (mit einfachen Worten + Begriffserklärung):**
+1. `tools/start.sh` starten (Start-Routine = automatischer Start-Check).
+2. Abhängigkeiten prüfen und installieren (Dependencies = Zusatzpakete).
+3. Status und nächste Schritte zeigen (Feedback = verständliche Rückmeldung).
+4. Ergebnis in Log-Datei schreiben (Log = Protokoll).
+
+### C) Release-Checks (vollautomatisch)
+Alle Checks laufen als feste Reihenfolge (keine Ausnahmen):
+```bash
+python3 -m py_compile app/*.py
+bash -n tools/*.sh
+tools/run_quality_checks.sh
+tools/run_must_pass.sh
+tools/build_release.sh
+```
+- Jeder Check zeigt **klaren Erfolg** oder **klaren Fehler**.
+- Fehler werden in einfachen Worten erklärt (Fachbegriff in Klammern).
+
+### D) Packaging-Validierung
+- ZIP und .deb müssen bauen.
+- Portable-Template wird nach `~/.local/share/modultool_portable` kopiert.
+- Ergebnis wird geprüft und protokolliert.
+
+### E) Abschluss-Block (Dokumentation)
+- `CHANGELOG.md`: Ein Absatz pro Release.
+- `manifest.json`: Version bump + build_date.
+- `DEVELOPMENT_STATUS.md`: Fortschritt + nächster Schritt.
+
+---
+
+## 0.2) Barrierefreiheit & klare Sprache (Pflicht)
+- Einfache Sprache, Fachbegriffe in Klammern erklären.
+- Kontraste prüfen (Kontrast = Lesbarkeit).
+- Themes müssen immer verfügbar sein (hochkontrast dunkel/hell + dämmerung).
+- Jede Nutzeraktion muss eine klare Rückmeldung geben (Erfolg/Fehler).
+
+---
+
+## 0.3) Vollautomatische Tests & Qualität (Pflicht)
+- **Codequalität**: `tools/run_quality_checks.sh` (ruff check + ruff format --check).
+- **Funktion**: `tools/run_must_pass.sh`.
+- **Struktur**: `bash -n tools/*.sh` und `python3 -m py_compile app/*.py`.
+- **Marker-Scan**: Kein TODO/FIXME/placeholder/Platzhalter in `.py`/`.sh`.
+
+---
+
+## 0.4) Struktur-Regeln für Wartbarkeit
+Ziel: Trenne Logik, Systemdateien und variablen Daten klar.
+- `app/` = Programm-Logik (Logik = Kernfunktionen).
+- `tools/` = Skripte/Automationen (Skripte = Hilfsprogramme).
+- `portable_data/config/` = feste Konfiguration (Config = feste Einstellungen).
+- `portable_data/` = variable Nutzerdaten (Daten = veränderliche Inhalte).
+- Nie mischen: Logik nicht in Config, Config nicht in Logs.
+
+---
+
+## 0.5) Input/Output-Validierung (Pflicht)
+- Jede Funktion prüft Eingaben (Input = Nutzereingabe).
+- Jede Funktion bestätigt Ergebnis (Output = Ergebnis/Status).
+- Fehler immer mit nächstem Schritt erklären.
+
+---
+
+## 0.6) Debugging & Logging (Pflicht)
+- Debug-Modus muss klar schaltbar sein (Debug = Fehlersuche).
+- Logs trennen: Nutzer-Feedback vs. Entwickler-Log.
+- Kein Silent-Fail: jede Abweichung wird protokolliert und erklärt.
+
+---
+
+## 0.7) Laien-Tipps (weiterführend)
+- Wenn etwas scheitert: zuerst den Standardweg anbieten.
+- Bei Fehlern: „Jetzt reparieren“, „Sicherer Standard“, „Details“ anbieten.
+- Tests sind wie TÜV: erst bestehen, dann ausliefern.
+
+---
+
 ## 1) Nicht verhandelbare Regeln
 1) **Keine Qualitäts-Reduktion**
    - Schonmodus steuert nur Threads/Last. Keine Bitrate/CRF/Format-Senkung.

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.40
+- Release-Doku: AGENT.md um Release-Finalisierung, Autostart, Qualität und Barrierefreiheit ergänzt.
+- Struktur-Regeln: klare Trennung von Logik, Tools und Config dokumentiert.
+- Laienführung: einfache Sprache mit Begriffserklärungen in den Regeln ergänzt.
+
 ## 1.0.39
 - Preflight: JSON-Laden über zentralen IO-Helper vereinheitlicht.
 - Preflight: Debug-Flag nur einmal ermittelt, weniger Streuung im Ablauf.
