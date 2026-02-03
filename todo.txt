@@ -1,5 +1,5 @@
 # todo.txt
 - [x] Autotest: Thumbnail-Erzeugung im Must-Pass integrieren.
 - [x] Werkstatt-Check Details: Klartext-Anzeige mit einfachen Empfehlungen.
-- [ ] Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln.
+- [x] Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln.
 - [ ] Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren.
