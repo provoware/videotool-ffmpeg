@@ -98,9 +98,7 @@ def build_main_layout(main) -> None:
     main.material_type_combo = QComboBox()
     main.material_type_combo.addItems(["Typ: alle", "Typ: audio", "Typ: bilder"])
     main.sort_combo = QComboBox()
-    main.sort_combo.addItems(
-        ["Sortieren: Datum (neu zuerst)", "Sortieren: Name (A-Z)"]
-    )
+    main.sort_combo.addItems(["Sortieren: Datum (neu zuerst)", "Sortieren: Name (A-Z)"])
     row1.addWidget(main.material_search_box, 2)
     row1.addWidget(main.material_type_combo)
     row1.addWidget(main.sort_combo)
@@ -148,9 +146,7 @@ def build_main_layout(main) -> None:
     lb = QVBoxLayout(tab_box)
     lb.addWidget(
         QLabel(
-            main.texts["strings"].get(
-                "favoriten.titel", "Werkzeugkasten – Favoriten"
-            )
+            main.texts["strings"].get("favoriten.titel", "Werkzeugkasten – Favoriten")
         )
     )
 
@@ -424,7 +420,9 @@ def build_main_layout(main) -> None:
     tab_quar = QWidget()
     lq = QVBoxLayout(tab_quar)
     lq.addWidget(
-        QLabel(main.texts["strings"].get("quar_tab.titel", "Quarantäne-Aufträge (heute)"))
+        QLabel(
+            main.texts["strings"].get("quar_tab.titel", "Quarantäne-Aufträge (heute)")
+        )
     )
     hint = QLabel(main.texts["strings"].get("quar_tab.hinweis", ""))
     _apply_label_role(hint, "hint")
@@ -661,7 +659,9 @@ def build_main_layout(main) -> None:
         main.texts["strings"].get("workbench.text_on", "Lauftext aktiv")
     )
     main.wb_text = QLineEdit()
-    main.wb_text.setPlaceholderText(main.texts["strings"].get("workbench.text", "Lauftext"))
+    main.wb_text.setPlaceholderText(
+        main.texts["strings"].get("workbench.text", "Lauftext")
+    )
     wrow2 = QHBoxLayout()
     main.wb_text_pos = QComboBox()
     main.wb_text_pos.addItems(["bottom", "top"])
@@ -684,20 +684,18 @@ def build_main_layout(main) -> None:
     )
     wrow3 = QHBoxLayout()
     main.wb_logo_path = QLineEdit()
-    main.wb_logo_path.setPlaceholderText(main.texts["strings"].get("workbench.logo", "Logo"))
+    main.wb_logo_path.setPlaceholderText(
+        main.texts["strings"].get("workbench.logo", "Logo")
+    )
     main.wb_logo_pick = QPushButton("…")
     main.wb_logo_pos = QComboBox()
-    main.wb_logo_pos.addItems(
-        ["bottom-right", "bottom-left", "top-right", "top-left"]
-    )
+    main.wb_logo_pos.addItems(["bottom-right", "bottom-left", "top-right", "top-left"])
     main.wb_logo_scale = QSpinBox()
     main.wb_logo_scale.setRange(5, 50)
     main.wb_logo_scale.setValue(14)
     wrow3.addWidget(main.wb_logo_path, 2)
     wrow3.addWidget(main.wb_logo_pick)
-    wrow3.addWidget(
-        QLabel(main.texts["strings"].get("workbench.logo_pos", "Position"))
-    )
+    wrow3.addWidget(QLabel(main.texts["strings"].get("workbench.logo_pos", "Position")))
     wrow3.addWidget(main.wb_logo_pos)
     wrow3.addWidget(
         QLabel(main.texts["strings"].get("workbench.logo_size", "Größe (%)"))
@@ -727,7 +725,9 @@ def build_main_layout(main) -> None:
 
     md.addWidget(main.grp_workbench)
 
-    main.grp_last = QGroupBox(main.texts["strings"].get("reports.karte_titel", "Letzte Nacht"))
+    main.grp_last = QGroupBox(
+        main.texts["strings"].get("reports.karte_titel", "Letzte Nacht")
+    )
     lnl = QVBoxLayout(main.grp_last)
     main.lbl_last_summary = QLabel("Noch kein Lauf gefunden.")
     lnl.addWidget(main.lbl_last_summary)
@@ -759,7 +759,9 @@ def build_main_layout(main) -> None:
 
     lnl.addWidget(
         QLabel(
-            main.texts["strings"].get("reports.block_fertig_kurz", "Frisch aus der Werkbank")
+            main.texts["strings"].get(
+                "reports.block_fertig_kurz", "Frisch aus der Werkbank"
+            )
             + " (letzte 3):"
         )
     )

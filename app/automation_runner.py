@@ -440,7 +440,9 @@ def run(settings_path: Path, rules_path: Path) -> Path:
 
     watch = Path(settings["paths"]["watch_folder"]).expanduser()
     if not watch.exists() or not watch.is_dir():
-        message = f"Automatik abgebrochen: Watchfolder fehlt oder ist kein Ordner: {watch}"
+        message = (
+            f"Automatik abgebrochen: Watchfolder fehlt oder ist kein Ordner: {watch}"
+        )
         log_line(logs_dir_path, message)
         raise AutomationAbort(1, message)
 

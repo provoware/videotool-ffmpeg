@@ -57,18 +57,14 @@ def parse_int(value, default: int, label: str) -> int:
             raise ValueError("bool is not a valid int")
         return int(value)
     except Exception:
-        print(
-            f"WARNUNG: {label} ungültig ({value}), nutze Standard {default}."
-        )
+        print(f"WARNUNG: {label} ungültig ({value}), nutze Standard {default}.")
         return default
 
 
 def parse_positive_int(value, default: int, label: str) -> int:
     parsed = parse_int(value, default, label)
     if parsed <= 0:
-        print(
-            f"WARNUNG: {label} ungültig ({value}), nutze Standard {default}."
-        )
+        print(f"WARNUNG: {label} ungültig ({value}), nutze Standard {default}.")
         return default
     return parsed
 

@@ -179,7 +179,9 @@ def run(job_id: str | None = None) -> int:
     if not (have("ffmpeg") and have("ffprobe")):
         job["status"] = "fest"
         job["summary"] = "FFmpeg fehlt"
-        job["error"] = "ffmpeg oder ffprobe nicht gefunden. Aktion: ffmpeg installieren."
+        job["error"] = (
+            "ffmpeg oder ffprobe nicht gefunden. Aktion: ffmpeg installieren."
+        )
         save_json(qjobs, update_list_status(doc))
         return 1
 

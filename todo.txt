@@ -33,6 +33,9 @@
 - [x] Plattform-Unabhängigkeit verbessern: Skripte portabel gestalten und Installationshinweise für nicht-Linux-Plattformen ergänzen.
 - [x] Datenstrukturen versionieren: Migrationslogik für Reports und Quarantäne-Listen entwickeln, um Schema-Änderungen zu unterstützen.
 - [x] Performance optimieren: Thread-Anzahl dynamisch an CPU-Kerne anpassen.
+- [x] Start-Routine: Abhängigkeiten über zentrale Bootstrap-Logik prüfen und installieren, mit klaren Nutzerhinweisen.
+- [x] Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap-Skript validieren.
+- [x] Start-Routine: optionaler Auto-Install von FFmpeg per MODULTOOL_AUTO_INSTALL mit laienfreundlichem Hinweis.
 - [ ] Performance optimieren: parallele Audio-Verarbeitung einführen.
 - [ ] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
 - [ ] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.

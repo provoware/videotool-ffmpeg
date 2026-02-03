@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.35
+- Start-Routine: zentrale Bootstrap-Logik für Python-Abhängigkeiten mit klaren Hinweisen ergänzt.
+- Start-Routine: optionaler FFmpeg-Autoinstall per MODULTOOL_AUTO_INSTALL mit verständlicher Rückmeldung.
+- Qualitäts-Checks: Bootstrap-Validierung für Dev-Abhängigkeiten und Pflichtpakete vereinheitlicht.
+
 ## 1.0.34
 - UI-Layout in ein eigenes Modul ausgelagert, damit main.py übersichtlicher bleibt und die Wartbarkeit steigt.
 
