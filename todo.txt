@@ -4,3 +4,6 @@
 - [x] Werkstatt-Check Details: Klartext-Anzeige mit einfachen Empfehlungen.
 - [x] Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln.
 - [x] Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren.
+- [x] Qualitäts-Checks: eigenes Skript für Compile, Bash-Check, Marker-Scan und Must-Pass.
+- [ ] Debug-Modus (erweiterte Fehlersuche) mit klaren Log-Leveln ergänzen.
+- [ ] Format-Prüfung (Code-Format) als optionaler Prüfschritt dokumentieren.

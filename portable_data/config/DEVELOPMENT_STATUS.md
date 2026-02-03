@@ -30,7 +30,8 @@
 23. Thumbnail-Regressionstest in Must-Pass Suite
 24. Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln
 25. Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren
+26. Qualitäts-Checks: Compile, Bash-Check, Marker-Scan, Must-Pass
 
 ## 🔧 Offen
-1. Portable Edgecase-Härtung (Dialogs, Fallbacks)
+1. Debug-Modus (Log-Level) + gezielte Fehlerberichte
 2. Deb-Paket (später)
