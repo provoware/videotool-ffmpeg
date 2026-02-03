@@ -70,12 +70,18 @@ else
     PREFLIGHT_JSON=""
   fi
 fi
-if [ -n "${PREFLIGHT_JSON:-}" ]; then
+if [ -n "${PREFLIGHT_JSON:-}" ] && [ -n "${PREFLIGHT_JSON//[[:space:]]/}" ]; then
   echo "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
 import json
 import sys
 
-data = json.load(sys.stdin)
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    print("[Modultool] Werkstatt-Check: Ergebnis unlesbar (JSON = strukturierte Textdaten).")
+    print("[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh")
+    print("[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json")
+    sys.exit(0)
 overall_ok = bool(data.get("overall_ok", False))
 if overall_ok:
     print("[Modultool] Werkstatt-Check: Alles bereit.")
@@ -101,6 +107,8 @@ else:
 PY
 else
   echo "[Modultool] Werkstatt-Check: fehlgeschlagen (weiter mit Standardstart)."
+  echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+  echo "[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json"
 fi
 
 echo "[Modultool] Werkstatt-Aufräumen …"
