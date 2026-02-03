@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.10
+- Themes: Hint/Muted-Farben zentral in themes.json, Kontrast-Check erweitert.
+
+
 ## 1.0.9
 - Preflight: Watchfolder-Schreibrecht prüfen und klare Hinweise anzeigen.
 
