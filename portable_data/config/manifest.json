@@ -1,8 +1,8 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.9",
-  "build_date": "2026-02-03T05:13:38Z",
+  "version": "1.0.10",
+  "build_date": "2026-02-04T08:42:00Z",
   "schema_versions": {
     "settings": 1,
     "automation_rules": 1,
@@ -67,6 +67,6 @@
   },
   "release": {
     "channel": "release",
-    "notes": "Preflight: Watchfolder-Schreibrecht prüfen und klare Hinweise anzeigen."
+    "notes": "Automatik prüft Pflicht-Pfade in settings und bricht mit klarer Aktion ab."
   }
 }

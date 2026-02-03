@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.10
+- Automatik: Pflicht-Pfade in settings prüfen, klare Aktion im Log bei Fehlern.
+
+
 ## 1.0.9
 - Preflight: Watchfolder-Schreibrecht prüfen und klare Hinweise anzeigen.
 

@@ -8,4 +8,5 @@
 - [x] Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen.
 - [x] Debug-Modus (erweiterte Fehlersuche) mit klaren Log-Leveln ergänzen.
 - [x] Preflight: Watchfolder-Schreibrecht prüfen und klar melden.
+- [x] Automatik: Pflicht-Pfade in settings prüfen und klare Abbruch-Aktion loggen.
 - [ ] Format-Prüfung (Code-Format) als optionaler Prüfschritt dokumentieren.
