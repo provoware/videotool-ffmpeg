@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.18
+- Todo-Liste um neue Roadmap-Punkte erweitert.
+
 ## 1.0.17
 - Preflight: fehlenden Watchfolder automatisch anlegen (Self-Repair).
 
