@@ -25,6 +25,12 @@ from pathlib import Path
 from perf import get_threads
 from datetime import datetime
 from paths import config_dir
+from validation_utils import (
+    PathValidationError,
+    ensure_existing_dir,
+    ensure_existing_file,
+    ensure_output_path,
+)
 
 
 def load_json(p: Path, default=None):
@@ -154,7 +160,7 @@ def build_filters(
     return ";".join(filters), out_label, W, H, FPS
 
 
-def main():
+def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--audio", required=True)
     ap.add_argument("--image", required=True)
@@ -175,18 +181,22 @@ def main():
     ap.add_argument("--settings", default=str(config_dir() / "settings.json"))
     args = ap.parse_args()
 
-    audio = Path(args.audio).expanduser()
-    image = Path(args.image).expanduser()
-    outdir = Path(args.outdir).expanduser()
-    outdir.mkdir(parents=True, exist_ok=True)
+    try:
+        audio = ensure_existing_file(Path(args.audio), "Audio-Datei")
+        image = ensure_existing_file(Path(args.image), "Bild-Datei")
+        outdir = ensure_existing_dir(Path(args.outdir), "Ausgabe-Ordner", create=True)
+        logo_path = (
+            ensure_existing_file(Path(args.logo), "Logo-Datei") if args.logo else None
+        )
+    except PathValidationError as exc:
+        print(f"Fehler: {exc}")
+        return 2
 
     settings = load_json(Path(args.settings), {})
     threads = get_threads(Path(args.settings))
     a_cfg = settings.get("audio", {})
     a_bitrate = int(a_cfg.get("target_bitrate_kbps", 320))
     a_sr = int(a_cfg.get("target_samplerate_hz", 48000))
-
-    logo_path = Path(args.logo).expanduser() if args.logo else None
 
     filter_complex, out_label, W, H, FPS = build_filters(
         args.preset,
@@ -216,7 +226,7 @@ def main():
     )
     name_stem = safe_slug(name_stem)
     out_final = unique_path(outdir / f"{name_stem}.mp4")
-    out_tmp = out_final.with_suffix(".tmp.mp4")
+    out_tmp = ensure_output_path(out_final.with_suffix(".tmp.mp4"), "Zwischenausgabe")
 
     # Inputs: 0=image, 1=audio, 2=logo (optional)
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y"]
@@ -260,6 +270,7 @@ def main():
     # Atomic move to final
     out_tmp.replace(out_final)
     print(str(out_final))
+    return 0
 
 
 if __name__ == "__main__":

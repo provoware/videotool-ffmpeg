@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.22
+- Automatik: Download-Stabilität prüft zusätzlich Hash/MTime, bevor Dateien verarbeitet werden.
+- Subprozess-Schutz: FFmpeg-Aufrufe validieren Eingabepfade/Outputs strikt (kein Shell-Injection-Risiko).
+- Fehlerberichte: Abbrüche schreiben jetzt einen Report und erscheinen im Dashboard.
+
 ## 1.0.21
 - Automatik: Abbrüche laufen jetzt über klare Fehlercodes statt SystemExit im Ablauf.
 - Quarantäne-Worker: Einstellungen werden vor dem Start validiert und ins Debug-Log geschrieben.

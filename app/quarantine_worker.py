@@ -18,6 +18,11 @@ from pathlib import Path
 from datetime import datetime
 from paths import assets_dir, config_dir, cache_dir
 from logging_utils import log_exception
+from validation_utils import (
+    PathValidationError,
+    ensure_existing_file,
+    ensure_output_path,
+)
 
 
 def load_json(p: Path, default=None):
@@ -45,6 +50,7 @@ def safe_slug(s: str, maxlen: int = 120, fallback: str = "unbenannt") -> str:
 
 
 def ffprobe_json(path: Path) -> dict:
+    path = ensure_existing_file(path, "FFprobe-Eingabe")
     cmd = [
         "ffprobe",
         "-v",
@@ -174,16 +180,20 @@ def run(job_id: str | None = None) -> int:
     image_target = (
         Path(job["paths"].get("staging_image", "")) if job.get("paths") else Path()
     )
-    if not audio_target.exists():
+    try:
+        audio_target = ensure_existing_file(audio_target, "Audio-Quelle")
+    except PathValidationError as exc:
         job["status"] = "fest"
         job["summary"] = "Quelle fehlt (Audio nicht gefunden)"
+        job["error"] = str(exc)
         save_json(qjobs, update_list_status(doc))
         return 1
 
-    if not image_target.exists():
+    try:
+        image_target = ensure_existing_file(image_target, "Bild-Quelle")
+    except PathValidationError:
         # fallback preset cover
-        fallback = assets_dir() / "default_assets" / "preset_cover.jpg"
-        image_target = fallback
+        image_target = assets_dir() / "default_assets" / "preset_cover.jpg"
 
     day = today
     exports_day = base / settings["paths"]["exports_dir"] / day
@@ -199,7 +209,17 @@ def run(job_id: str | None = None) -> int:
         safe_slug(Path(job.get("output_file", "")).stem or f"rework_{job['job_id']}")
         + ".mp4"
     )
-    out_tmp = cache_dir() / "temp_renders" / out_name
+    try:
+        image_target = ensure_existing_file(image_target, "Bild-Quelle")
+    except PathValidationError as exc:
+        job["status"] = "fest"
+        job["summary"] = "Bildquelle ungültig"
+        job["error"] = str(exc)
+        save_json(qjobs, update_list_status(doc))
+        return 1
+    out_tmp = ensure_output_path(
+        cache_dir() / "temp_renders" / out_name, "Zwischenausgabe"
+    )
     out_final = exports_day / out_name
 
     cmd = [
@@ -306,4 +326,4 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--job-id", default=None)
     args = ap.parse_args()
-    raise SystemExit(run(args.job_id))
+    run(args.job_id)

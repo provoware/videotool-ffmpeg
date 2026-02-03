@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.21
-- Fortschritt: 35/36 = **97%**
+- Version: 1.0.22
+- Fortschritt: 38/39 = **97%**
 - Nächster Schritt: **Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)**
 
 ## ✅ Fertig
@@ -40,6 +40,9 @@
 33. Preflight: fehlenden Watchfolder automatisch anlegen (Self-Repair)
 34. Automatik: leere Dateinamen-Slugs mit sicherem Fallback absichern
 35. Automatik: Lock-Datei mit Timeout und PID-Erkennung gegen parallele Läufe härten
+36. Automatik: Download-Stabilität per Hash/MTime absichern
+37. Subprozess-Schutz: Pfade/Dateien vor FFmpeg strikt validieren
+38. Fehlerberichte: Report + GUI zeigen Abbrüche ohne SystemExit
 
 ## 🔧 Offen
 1. Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)
