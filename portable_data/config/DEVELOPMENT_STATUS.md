@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.5
-- Fortschritt: 25/25 = **100%**
-- Nächster Schritt: **Portable Edgecase-Härtung (Dialogs, Fallbacks)**
+- Version: 1.0.6
+- Fortschritt: 26/26 = **100%**
+- Nächster Schritt: **Debug-Modus (Log-Level) + gezielte Fehlerberichte**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -30,7 +30,8 @@
 23. Thumbnail-Regressionstest in Must-Pass Suite
 24. Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln
 25. Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren
+26. Qualitäts-Checks: Compile, Bash-Check, Marker-Scan, Must-Pass
 
 ## 🔧 Offen
-1. Portable Edgecase-Härtung (Dialogs, Fallbacks)
+1. Debug-Modus (Log-Level) + gezielte Fehlerberichte
 2. Deb-Paket (später)

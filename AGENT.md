@@ -17,16 +17,14 @@ Jede Iteration besteht aus exakt diesen Schritten:
    - Keine Nebenbaustellen.
    - Keine „schon mal mitmachen“-Änderungen.
 
-3) **Prüfen (Pflicht vor Ausgabe)**
+3) **Prüfen + Dokumentieren (Pflicht vor Ausgabe)**
    - Python Compile: `python3 -m py_compile app/*.py`
    - Marker-Scan: kein `TODO`, `FIXME`, `placeholder`, `Platzhalter` in `.py`/`.sh`
    - Must-Pass Suite: `tools/run_must_pass.sh` (wenn ffmpeg vorhanden)
-   - Ergebnis dokumentieren (kurz).
-
-4) **Dokumentieren (Pflicht)**
-   - `CHANGELOG.md` aktualisieren (ein Absatz).
-   - `manifest.json` Version bump.
-   - `DEVELOPMENT_STATUS.md` Fortschritt + nächster Schritt.
+   - Ergebnis dokumentieren (kurz)
+   - `CHANGELOG.md` aktualisieren (ein Absatz)
+   - `manifest.json` Version bump
+   - `DEVELOPMENT_STATUS.md` Fortschritt + nächster Schritt
 
 ---
 
