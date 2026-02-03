@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.20
+- Automatik: Lock-Datei mit Timeout und PID-Erkennung gegen parallele Läufe gehärtet.
+
 ## 1.0.19
 - Automatik: leere Dateinamen-Slugs erhalten einen sicheren Fallback.
 
