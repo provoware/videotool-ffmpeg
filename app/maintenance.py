@@ -8,28 +8,19 @@ Safety rules:
 - Never delete exports/, library/, projects/, favorites/ content
 - Only operates on cache/, logs/, reports/ by age/size rules from config/settings.json
 """
+
 from __future__ import annotations
-import argparse, json, os, shutil, time
+import argparse
+import json
+import time
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
+from paths import config_dir, data_dir, logs_dir, cache_dir
 
-def root() -> Path:
-    return Path(__file__).resolve().parents[1]
-
-def cfg_dir() -> Path:
-    return root() / "portable_data" / "config"
 
 def settings_path() -> Path:
-    return cfg_dir() / "settings.json"
+    return config_dir() / "settings.json"
 
-def data_dir() -> Path:
-    return root() / "portable_data" / "user_data"
-
-def logs_dir() -> Path:
-    return root() / "portable_data" / "logs"
-
-def cache_dir() -> Path:
-    return root() / "portable_data" / "cache"
 
 def load_json(p: Path, default=None):
     try:
@@ -37,27 +28,33 @@ def load_json(p: Path, default=None):
     except Exception:
         return default if default is not None else {}
 
+
 def parse_int(value, default: int, field: str, warnings: list[dict]) -> int:
     try:
         if isinstance(value, bool):
             raise ValueError("bool is not a valid int")
         return int(value)
     except Exception:
-        warnings.append({
-            "field": field,
-            "value": value,
-            "default": default,
-            "message": f"Invalid int for {field}; using default {default}."
-        })
+        warnings.append(
+            {
+                "field": field,
+                "value": value,
+                "default": default,
+                "message": f"Invalid int for {field}; using default {default}.",
+            }
+        )
         return default
 
-def bytes_from_mb(mb: int|float) -> int:
+
+def bytes_from_mb(mb: int | float) -> int:
     return int(float(mb) * 1024 * 1024)
+
 
 def list_files_recursive(folder: Path):
     for p in folder.rglob("*"):
         if p.is_file():
             yield p
+
 
 def folder_size_bytes(folder: Path) -> int:
     total = 0
@@ -69,6 +66,7 @@ def folder_size_bytes(folder: Path) -> int:
         except Exception:
             pass
     return total
+
 
 def rotate_file(path: Path, max_bytes: int, keep: int):
     if not path.exists():
@@ -82,7 +80,7 @@ def rotate_file(path: Path, max_bytes: int, keep: int):
     # rotate: file -> file.1, .1 -> .2, ... up to keep
     for i in range(keep, 0, -1):
         older = path.with_name(path.name + f".{i}")
-        newer = path.with_name(path.name + f".{i+1}")
+        newer = path.with_name(path.name + f".{i + 1}")
         if i == keep:
             # drop the last
             if older.exists():
@@ -106,6 +104,7 @@ def rotate_file(path: Path, max_bytes: int, keep: int):
     except Exception:
         pass
 
+
 def prune_by_age(folder: Path, max_age_days: int):
     if not folder.exists():
         return 0
@@ -119,6 +118,7 @@ def prune_by_age(folder: Path, max_age_days: int):
         except Exception:
             pass
     return removed
+
 
 def prune_to_size(folder: Path, max_bytes: int):
     if not folder.exists():
@@ -145,6 +145,7 @@ def prune_to_size(folder: Path, max_bytes: int):
             pass
     return removed
 
+
 def prune_reports(reports_dir: Path, keep_days: int):
     if not reports_dir.exists():
         return 0
@@ -159,57 +160,67 @@ def prune_reports(reports_dir: Path, keep_days: int):
             pass
     return removed
 
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--auto", action="store_true", help="Run maintenance with settings.json rules")
-    args = ap.parse_args()
-
+    ap.add_argument(
+        "--auto", action="store_true", help="Run maintenance with settings.json rules"
+    )
+    ap.parse_args()
     settings = load_json(settings_path(), {})
     m = settings.get("maintenance", {})
     warnings: list[dict] = []
     logs_max_mb = parse_int(m.get("logs_max_mb", 5), 5, "logs_max_mb", warnings)
     logs_keep = parse_int(m.get("logs_keep", 5), 5, "logs_keep", warnings)
     cache_max_mb = parse_int(m.get("cache_max_mb", 200), 200, "cache_max_mb", warnings)
-    thumbs_max_mb = parse_int(m.get("thumbs_max_mb", 150), 150, "thumbs_max_mb", warnings)
-    temp_age = parse_int(m.get("temp_max_age_days", 3), 3, "temp_max_age_days", warnings)
-    reports_keep_days = parse_int(m.get("reports_keep_days", 30), 30, "reports_keep_days", warnings)
+    thumbs_max_mb = parse_int(
+        m.get("thumbs_max_mb", 150), 150, "thumbs_max_mb", warnings
+    )
+    temp_age = parse_int(
+        m.get("temp_max_age_days", 3), 3, "temp_max_age_days", warnings
+    )
+    reports_keep_days = parse_int(
+        m.get("reports_keep_days", 30), 30, "reports_keep_days", warnings
+    )
     logs_max = bytes_from_mb(logs_max_mb)
     cache_max = bytes_from_mb(cache_max_mb)
     thumbs_max = bytes_from_mb(thumbs_max_mb)
 
     logs_dir().mkdir(parents=True, exist_ok=True)
     cache_dir().mkdir(parents=True, exist_ok=True)
-    (cache_dir()/ "thumbs").mkdir(parents=True, exist_ok=True)
-    (cache_dir()/ "temp_renders").mkdir(parents=True, exist_ok=True)
+    (cache_dir() / "thumbs").mkdir(parents=True, exist_ok=True)
+    (cache_dir() / "temp_renders").mkdir(parents=True, exist_ok=True)
 
     summary = {
-        "at": datetime.utcnow().isoformat(timespec="seconds")+"Z",
+        "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "warnings": warnings,
         "rotated": [],
         "pruned": {},
         "sizes_before": {},
-        "sizes_after": {}
+        "sizes_after": {},
     }
 
     # sizes before
     summary["sizes_before"]["logs"] = folder_size_bytes(logs_dir())
     summary["sizes_before"]["cache"] = folder_size_bytes(cache_dir())
-    summary["sizes_before"]["thumbs"] = folder_size_bytes(cache_dir()/ "thumbs")
-    summary["sizes_before"]["temp_renders"] = folder_size_bytes(cache_dir()/ "temp_renders")
+    summary["sizes_before"]["thumbs"] = folder_size_bytes(cache_dir() / "thumbs")
+    summary["sizes_before"]["temp_renders"] = folder_size_bytes(
+        cache_dir() / "temp_renders"
+    )
 
     # rotate key logs
     for fn in ["activity_log.jsonl", "debug.log"]:
-        p = logs_dir()/fn
+        p = logs_dir() / fn
         rotate_file(p, logs_max, logs_keep)
         if p.with_name(p.name + ".1").exists():
             summary["rotated"].append(fn)
 
     # prune temp by age
-    removed_temp = prune_by_age(cache_dir()/ "temp_renders", temp_age)
+    removed_temp = prune_by_age(cache_dir() / "temp_renders", temp_age)
     summary["pruned"]["temp_renders_by_age"] = removed_temp
 
     # prune thumbs to size
-    removed_thumbs = prune_to_size(cache_dir()/ "thumbs", thumbs_max)
+    removed_thumbs = prune_to_size(cache_dir() / "thumbs", thumbs_max)
     summary["pruned"]["thumbs_to_size"] = removed_thumbs
 
     # prune total cache to max (after temp/thumbs)
@@ -217,24 +228,29 @@ def main():
     summary["pruned"]["cache_to_size"] = removed_cache
 
     # prune reports
-    removed_reports = prune_reports(data_dir()/ "reports", reports_keep_days)
+    removed_reports = prune_reports(data_dir() / "reports", reports_keep_days)
     summary["pruned"]["reports_by_age"] = removed_reports
 
     # sizes after
     summary["sizes_after"]["logs"] = folder_size_bytes(logs_dir())
     summary["sizes_after"]["cache"] = folder_size_bytes(cache_dir())
-    summary["sizes_after"]["thumbs"] = folder_size_bytes(cache_dir()/ "thumbs")
-    summary["sizes_after"]["temp_renders"] = folder_size_bytes(cache_dir()/ "temp_renders")
+    summary["sizes_after"]["thumbs"] = folder_size_bytes(cache_dir() / "thumbs")
+    summary["sizes_after"]["temp_renders"] = folder_size_bytes(
+        cache_dir() / "temp_renders"
+    )
 
     # write summary to logs
-    out = logs_dir()/ "maintenance_last.json"
+    out = logs_dir() / "maintenance_last.json"
     try:
-        out.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+        out.write_text(
+            json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     except Exception:
         pass
 
     print(json.dumps(summary, ensure_ascii=False))
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

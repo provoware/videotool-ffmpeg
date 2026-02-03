@@ -15,7 +15,11 @@ fi
 
 echo "[Modultool] Abhängigkeiten prüfen …"
 "$VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
-"$VENV_DIR/bin/python" -m pip install -r "$APP_DIR/requirements.txt"
+if ! "$VENV_DIR/bin/python" -m pip install -r "$APP_DIR/requirements.txt"; then
+  echo "[Modultool] Fehler: Abhängigkeiten (Dependencies = Zusatzpakete) konnten nicht installiert werden."
+  echo "[Modultool] Tipp: Internet prüfen, dann erneut starten."
+  exit 1
+fi
 
 echo "[Modultool] Werkstatt-Check (Startprüfung) …"
 if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json 2>/dev/null); then

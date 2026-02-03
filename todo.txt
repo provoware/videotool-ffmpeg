@@ -9,4 +9,7 @@
 - [x] Debug-Modus (erweiterte Fehlersuche) mit klaren Log-Leveln ergänzen.
 - [x] Preflight: Watchfolder-Schreibrecht prüfen und klar melden.
 - [x] Maintenance: ungültige Settings-Ints sicher parsen und im Summary warnen.
-- [ ] Format-Prüfung (Code-Format) als optionaler Prüfschritt dokumentieren.
+- [x] Format-Prüfung (Code-Format) als optionaler Prüfschritt dokumentieren.
+- [ ] Release: ZIP bauen und auf frischem System testen.
+- [ ] Release: .deb bauen und Installation testen.
+- [ ] Release: Must-Pass Suite auf Zielsystem ausführen.
