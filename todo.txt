@@ -14,6 +14,7 @@
 - [x] Start-Routine: Debug-Modus zeigt Pip- und Preflight-Details ohne Log-Unterdrückung.
 - [x] Dokumentation: Debug-Log speichern + Checkliste für Startprobleme auf neuen Systemen.
 - [x] Logging: Exceptions im UI/Automation konsistent ins Debug-Log schreiben.
+- [x] Maintenance: Dateifehler als Warnungen sammeln und im Summary ausgeben.
 - [ ] Release: ZIP bauen und auf frischem System testen.
 - [ ] Release: .deb bauen und Installation testen.
 - [ ] Release: Must-Pass Suite auf Zielsystem ausführen.
