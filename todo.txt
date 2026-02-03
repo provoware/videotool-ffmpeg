@@ -38,6 +38,7 @@
 - [x] Projektstruktur: finale Ordner-/Dateiübersicht als eigene Info-Datei erstellt.
 - [x] Prüfautomatik: Vollständigen Release-Check als Skript bereitgestellt.
 - [ ] main.py modularisieren: UI-Logik in getrennte Klassen (Materialliste, Favoriten, Einstellungen, Quarantäne-UI) auslagern, um Wartbarkeit zu erhöhen.
+- [x] main.py: UI-Start in eigenständige Klassen (App/Window/Runner) modularisiert und mit Logging/Validierung ergänzt.
 - [x] Parallele Läufe robuster sperren: zuverlässige Datei-Locks mit Zeitüberschreitung und PID-Erkennung implementieren, um gleichzeitige GUI- und CLI-Läufe zu verhindern.
 - [x] Fehlerbehandlung verbessern: SystemExit durch Ausnahme-Handling ersetzen und Fehler im Report sowie in der GUI anzeigen. (Teilweise erledigt: Automatik/Quarantäne-Worker)
 - [x] Sichere Subprozess-Aufrufe: Dateinamen und Pfade strikt validieren und bevorzugt FFmpeg-Bibliotheken verwenden, um Shell-Injection zu vermeiden.
