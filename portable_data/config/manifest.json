@@ -1,8 +1,8 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.23",
-  "build_date": "2026-02-04T10:15:00Z",
+  "version": "1.0.24",
+  "build_date": "2026-02-05T09:00:00Z",
   "schema_versions": {
     "settings": 1,
     "automation_rules": 1,
@@ -67,6 +67,6 @@
   },
   "release": {
     "channel": "release",
-    "notes": "Validierung: Ausgabe-Pfade prüfen Schreibrechte; Fehlerberichte validieren base_data_dir; Preflight prüft Settings-JSON."
+    "notes": "Preflight meldet ungültige Watchfolder-Werte; Werkbank parst Audio-Werte robust und setzt sichere Dateinamen-Fallbacks."
   }
 }

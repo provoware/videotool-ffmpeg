@@ -94,7 +94,20 @@ def run(settings_path: Path | None = None) -> dict:
     paths = settings.get("paths", {})
     min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
 
-    watch = Path(paths.get("watch_folder", str(Path.home() / "Downloads"))).expanduser()
+    raw_watch = paths.get("watch_folder")
+    watch_invalid = False
+    if isinstance(raw_watch, Path):
+        watch_value = raw_watch
+    elif isinstance(raw_watch, str) and raw_watch.strip():
+        watch_value = raw_watch.strip()
+    else:
+        watch_value = str(Path.home() / "Downloads")
+        if raw_watch is not None and raw_watch != "":
+            watch_invalid = True
+        if raw_watch == "":
+            watch_invalid = True
+
+    watch = Path(watch_value).expanduser()
     watch_created = False
     if not watch.exists():
         try:
@@ -158,6 +171,8 @@ def run(settings_path: Path | None = None) -> dict:
         rec.append("min_free_mb_invalid")
     if ok_watch and not watch_writable_ok:
         rec.append("watchfolder_not_writable")
+    if watch_invalid:
+        rec.append("watchfolder_invalid")
 
     result = {
         "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -165,6 +180,7 @@ def run(settings_path: Path | None = None) -> dict:
         "ffmpeg_ok": ok_ffmpeg,
         "watchfolder_ok": ok_watch,
         "watchfolder": str(watch),
+        "watchfolder_input": "" if raw_watch is None else str(raw_watch),
         "watchfolder_created": watch_created,
         "watchfolder_writable_ok": watch_writable_ok,
         "watchfolder_writable_error": watch_writable_error,
