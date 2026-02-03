@@ -22,11 +22,15 @@ def load_json(p: Path, default=None):
     except Exception:
         return default if default is not None else {}
 
-def safe_int(value, default: int) -> int:
+def parse_min_free_mb(settings: dict) -> tuple[int, bool, str]:
+    raw = settings.get("maintenance", {}).get("min_free_mb", 1024)
     try:
-        return int(value)
+        value = int(raw)
     except (TypeError, ValueError):
-        return default
+        return 1024, False, str(raw)
+    if value < 0:
+        return 1024, False, str(raw)
+    return value, True, str(raw)
 
 def have(cmd: str) -> bool:
     return shutil.which(cmd) is not None
@@ -65,9 +69,7 @@ def run(settings_path: Path|None = None) -> dict:
         settings_path = cfg_dir()/ "settings.json"
     settings = load_json(settings_path, {})
     paths = settings.get("paths", {})
-    min_free_mb = safe_int(settings.get("maintenance", {}).get("min_free_mb", 1024), 1024)
-    if min_free_mb < 0:
-        min_free_mb = 1024
+    min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
 
     watch = Path(paths.get("watch_folder", str(Path.home()/ "Downloads"))).expanduser()
     exports = data_dir()/paths.get("exports_dir","exports")
@@ -102,6 +104,8 @@ def run(settings_path: Path|None = None) -> dict:
         rec.append("free_space")
     if not ok_font:
         rec.append("install_font")
+    if not min_free_ok:
+        rec.append("min_free_mb_invalid")
 
     return {
         "at": datetime.utcnow().isoformat(timespec="seconds")+"Z",
@@ -110,6 +114,8 @@ def run(settings_path: Path|None = None) -> dict:
         "watchfolder_ok": ok_watch,
         "watchfolder": str(watch),
         "free_mb": free_mb,
+        "min_free_mb_ok": min_free_ok,
+        "min_free_mb_input": min_free_raw,
         "min_free_mb": min_free_mb,
         "space_ok": ok_space,
         "font_ok": ok_font,
