@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.34
+- UI-Layout in ein eigenes Modul ausgelagert, damit main.py übersichtlicher bleibt und die Wartbarkeit steigt.
+
 ## 1.0.33
 - Automatik: Fallback-Bild wird vorab geprüft und fehlende Bilder landen sauber in Quarantäne.
 - Automatik: Ungültige Ausgabe-Pfade führen zu Quarantäne statt Abbruch.
