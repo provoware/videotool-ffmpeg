@@ -100,7 +100,7 @@ def run(settings_path: Path | None = None) -> dict:
     temp_r = cache_dir() / "temp_renders"
 
     ok_ffmpeg = have("ffmpeg") and have("ffprobe")
-    ok_watch = watch.exists()
+    ok_watch = watch.exists() and watch.is_dir()
     watch_writable_ok = True
     watch_writable_error = ""
     if ok_watch:

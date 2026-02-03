@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.16
+- Preflight: Watchfolder wird nur als OK gewertet, wenn der Pfad ein Ordner ist.
+
 ## 1.0.15
 - Logging: Ausnahmen in UI/Automation werden konsistent im Debug-Log protokolliert (mit Kontext).
 

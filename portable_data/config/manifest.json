@@ -1,8 +1,8 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.15",
-  "build_date": "2026-02-06T10:30:00Z",
+  "version": "1.0.16",
+  "build_date": "2026-02-07T10:30:00Z",
   "schema_versions": {
     "settings": 1,
     "automation_rules": 1,
@@ -67,6 +67,6 @@
   },
   "release": {
     "channel": "release",
-    "notes": "Logging: Ausnahmen in UI/Automation werden konsistent im Debug-Log protokolliert."
+    "notes": "Preflight: Watchfolder gilt nur als bereit, wenn der Pfad ein Ordner ist."
   }
 }
