@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "enabled": false,
+  "start_time": "22:00",
+  "persistent_catch_up": false,
+  "mode": "erst_um_uhrzeit",
+  "scan": {
+    "include_subfolders": false,
+    "audio_extensions": [
+      ".mp3",
+      ".wav",
+      ".flac",
+      ".m4a"
+    ],
+    "image_extensions": [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".webp"
+    ]
+  },
+  "pairing": {
+    "order": "erstelldatum",
+    "fallback_image": "assets/default_assets/preset_cover.jpg"
+  },
+  "presets": {
+    "default_preset_id": "youtube_hd_ton_safe"
+  }
+}

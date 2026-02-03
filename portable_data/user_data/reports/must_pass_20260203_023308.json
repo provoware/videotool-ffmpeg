@@ -1,0 +1,48 @@
+{
+  "at": "2026-02-03T02:32:21Z",
+  "pass": true,
+  "checks": {
+    "prereq": {
+      "ffmpeg": true,
+      "ffprobe": true
+    },
+    "compile": {
+      "errors": [],
+      "ok": true
+    },
+    "workbench": {
+      "normal": {
+        "eco_mode": false,
+        "output": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/exports/mustpass/tone_5s_youtube_hd_ton_safe_2026-02-03_023224.mp4",
+        "audio_ok": true,
+        "audio_meta": {
+          "audio_bitrate_kbps": 234,
+          "audio_samplerate_hz": 48000
+        }
+      },
+      "eco": {
+        "eco_mode": true,
+        "output": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/exports/mustpass/tone_5s_youtube_hd_ton_safe_2026-02-03_023227.mp4",
+        "audio_ok": true,
+        "audio_meta": {
+          "audio_bitrate_kbps": 234,
+          "audio_samplerate_hz": 48000
+        }
+      }
+    },
+    "automation": {
+      "ok": {
+        "force_bad_bitrate": false,
+        "report": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/mustpass_auto/data/reports/run_20260203_023230.json",
+        "fertig": 1,
+        "quarantaene": 0
+      },
+      "bad": {
+        "force_bad_bitrate": true,
+        "report": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/mustpass_auto/data/reports/run_20260203_023250.json",
+        "fertig": 0,
+        "quarantaene": 1
+      }
+    }
+  }
+}

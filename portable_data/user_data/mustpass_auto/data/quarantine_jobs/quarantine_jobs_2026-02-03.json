@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "date": "2026-02-03",
+  "title": "Quarantäne-Aufträge – 2026-02-03",
+  "created_at": "2026-02-03T02:32:50Z",
+  "list_status": "offen",
+  "closed_at": null,
+  "summary": {
+    "total": 1,
+    "done": 0,
+    "postponed": 0,
+    "hard_cases": 0,
+    "open": 1
+  },
+  "items": [
+    {
+      "job_id": "q_20260203_023250_0001",
+      "source_run_id": "20260203_023250",
+      "status": "bereit",
+      "label": "quarantaene",
+      "summary": "audio_check_fail",
+      "recommended_action": "neu_machen_ton_safe",
+      "tries": 0,
+      "max_tries": 3,
+      "preset": "youtube_hd_ton_safe",
+      "output_file": "tone_5s_in_work_20260203_023250_youtube_hd_ton_safe_2026-02-03_001_quarantaene.mp4",
+      "paths": {
+        "quarantine_dir": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/mustpass_auto/data/quarantine/2026-02-03",
+        "staging_audio": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/mustpass_auto/data/staging/2026-02-03/audio/tone_5s_in_work_20260203_023250.wav",
+        "staging_image": "/mnt/data/modultool_portable_100/modultool_portable/portable_data/user_data/mustpass_auto/data/staging/2026-02-03/images/img_in_work_20260203_023250.jpg"
+      },
+      "validation": {
+        "audio_bitrate_kbps": 96,
+        "audio_samplerate_hz": 48000,
+        "ok": false
+      }
+    }
+  ]
+}

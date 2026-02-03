@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "ui": {
+    "theme": "hochkontrast_dunkel",
+    "zoom_percent": 110,
+    "show_checkboxes_always": true,
+    "selection_basket_auto_show": true,
+    "button_height": 38,
+    "padding_px": 10
+  },
+  "paths": {
+    "watch_folder": "/home/oai/Downloads",
+    "base_data_dir": "/mnt/data/modultool_portable/portable_data/user_data",
+    "exports_dir": "exports",
+    "library_audio_dir": "library/audio",
+    "library_images_dir": "library/images",
+    "quarantine_dir": "quarantine",
+    "quarantine_jobs_dir": "quarantine_jobs",
+    "reports_dir": "reports",
+    "trash_dir": "trash",
+    "staging_dir": "staging"
+  },
+  "naming": {
+    "template_single": "{audio}_{vorlage}_{datum}_{uhrzeit}{sw}",
+    "template_batch": "{audio}_{vorlage}_{datum}_{nummer}{sw}",
+    "append_label_to_output": false,
+    "append_label_mode": "only_quarantine",
+    "append_label_shortform": true,
+    "label_suffix": {
+      "quarantaene": {
+        "long": "quarantaene",
+        "short": "q"
+      },
+      "ton_warnung": {
+        "long": "ton_warnung",
+        "short": "tw"
+      }
+    }
+  },
+  "audio": {
+    "fade_in_sec": 0.5,
+    "fade_out_sec": 1.0,
+    "min_bitrate_kbps": 192,
+    "target_bitrate_kbps": 320,
+    "target_samplerate_hz": 48000
+  },
+  "performance": {
+    "eco_mode_default": false,
+    "eco_mode_threads": 2,
+    "normal_threads": 0,
+    "watchdog_timeout_sec": 900,
+    "eco_mode": true,
+    "eco_threads": 2
+  },
+  "maintenance": {
+    "logs_max_mb": 5,
+    "logs_keep": 5,
+    "cache_max_mb": 200,
+    "thumbs_max_mb": 150,
+    "temp_max_age_days": 3,
+    "reports_keep_days": 30,
+    "min_free_mb": 1024
+  },
+  "video": {
+    "grayscale_default": false
+  }
+}
