@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.26
+- Release: ZIP-Build-Skript ergänzt (lokaler Build mit Version aus Manifest).
+- Release: .deb-Build-Skript ergänzt (Template + Launcher, Desktop-Entry).
+- Release: Template-Installer kopiert portable Vorlage nach ~/.local/share.
+
 ## 1.0.25
 - Automatik: Watchfolder wird auch auf Ordner-Status geprüft (klarer Abbruch bei Datei-Pfad).
 - Validierung: Ausgabe-Pfad meldet Zielordner sauber, wenn ein Datei-Pfad als Ordner missbraucht wird.
