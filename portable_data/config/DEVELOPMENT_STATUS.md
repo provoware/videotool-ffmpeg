@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.28
-- Fortschritt: 41/42 = **98%**
-- Nächster Schritt: **Release-Pakete mit den neuen Skripten erstellen und testen (ZIP, .deb, Must-Pass)**
+- Version: 1.0.29
+- Fortschritt: 44/45 = **98%**
+- Nächster Schritt: **main.py modularisieren (UI-Logik trennen, Wartbarkeit erhöhen)**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -46,6 +46,9 @@
 39. Validierung: Ausgabe-Pfade prüfen Schreibrechte und verhindern Ordner-Zielpfade
 40. Fehlerberichte: base_data_dir validieren und Fehler im Debug-Log erfassen
 41. Preflight: Settings-JSON nur bei gültiger Dict-Struktur übernehmen
+42. Release-Pakete automatisieren (ZIP, .deb, Must-Pass)
+43. Zentrales Logging-Modul mit getrenntem User-Feedback
+44. Konfigurationsvalidierung mit Schema- und Pfad-Checks
 
 ## 🔧 Offen
-1. Release-Pakete erstellen und testen (ZIP, .deb, Must-Pass)
+1. main.py modularisieren (UI-Logik in eigene Klassen auslagern)
