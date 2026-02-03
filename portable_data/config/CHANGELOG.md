@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.11
+- Pfadlogik zentralisiert (paths = Speicherorte), weniger Duplikate.
+- Qualitäts-Checks: Format-Check (Formatprüfung) mit ruff, Dev-Tools werden automatisch installiert.
+- Start-Routine: klarer Hinweis, wenn Abhängigkeiten (Dependencies = Zusatzpakete) nicht installierbar sind.
+
 ## 1.0.10
 - System-/Automations-Skripte prüfen jetzt Existenz, laufen per QProcess und melden Exit-Code/Fehler mit klaren nächsten Schritten.
 - Automatik: Pflicht-Pfade in settings prüfen, klare Aktion im Log bei Fehlern.

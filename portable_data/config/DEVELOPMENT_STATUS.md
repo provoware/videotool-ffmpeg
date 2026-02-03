@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.10
-- Fortschritt: 29/29 = **100%**
-- Nächster Schritt: **Deb-Paket vorbereiten und testen**
+- Version: 1.0.11
+- Fortschritt: 31/34 = **91%**
+- Nächster Schritt: **Release-Checks (ZIP, .deb, Must-Pass) auf frischem System**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -34,6 +34,10 @@
 27. Debug-Modus (Log-Level) + gezielte Fehlerberichte
 28. Preflight: Watchfolder-Schreibrecht prüfen und melden
 29. Maintenance: Settings-Ints sicher parsen und Warnungen im Summary loggen
+30. Pfadlogik zentralisiert (paths = Speicherorte) für weniger Duplikate
+31. Qualitäts-Checks: Formatprüfung mit ruff integriert
 
 ## 🔧 Offen
-1. Deb-Paket (später)
+1. Release: ZIP bauen und starten
+2. Release: .deb bauen und Installation testen
+3. Release: Must-Pass Suite auf Zielsystem ausführen

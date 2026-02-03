@@ -34,6 +34,9 @@ Es prüft u. a.:
 - Shell-Skripte (Bash-Check)
 - Marker-Scan (keine Platzhalter wie TODO/FIXME in .py/.sh)
 - Must-Pass Suite (wenn FFmpeg vorhanden ist)
+- Format-Check (Formatprüfung) mit **ruff** (Code-Format und Stilprüfung)
+
+*Hinweis:* Das Skript richtet eine venv (virtuelle Umgebung) ein und installiert notwendige Prüf-Tools automatisch.
 
 ## Tests & Checks
 - **Must-Pass Suite (Pflicht)**
@@ -47,6 +50,7 @@ Es prüft u. a.:
 
 ## Struktur & Wartbarkeit (einheitliche Standards)
 - `app/` → Programmlogik (Code)
+- `app/paths.py` → zentrale Pfade (Paths = Speicherorte) für **Portable-Daten**
 - `tools/` → Start- und Prüfskripte (Werkzeuge)
 - `portable_data/` → **Variable Daten** (Logs, Cache, Reports)
 - `portable_data/config/` → **Konfiguration** (Settings, Manifest, Status)
@@ -61,6 +65,7 @@ Es prüft u. a.:
 - Logs (Protokolle) liegen unter `portable_data/logs/`.
 - Wichtige Dateien: `activity_log.jsonl`, `debug.log`.
 - Die Wartung rotiert Logs automatisch (schützt vor übervollen Dateien).
+- Debug-Modus (Fehlersuche): starte mit `MODULTOOL_DEBUG=1 tools/start.sh` (Debug = mehr Details im Log).
 
 ## Linux-Konformität & Berechtigungen
 - Alle Skripte in `tools/` sind ausführbar (Linux-Standard).
@@ -73,6 +78,16 @@ Es prüft u. a.:
 - **Wenn FFmpeg fehlt:** Installiere es über den Paketmanager deiner Linux-Distribution.
 - **Wenn zu wenig Speicher frei ist:** Alte Export-Dateien oder Cache löschen.
 - **Wenn die Vorschau langsam ist:** Schonmodus (Eco-Modus) aktivieren.
+- **Wenn die Schrift zu klein wirkt:** System-Schriftgröße erhöhen oder High-Contrast (Hochkontrast) Theme wählen.
+- **Wenn Format-Checks fehlschlagen:** `tools/run_quality_checks.sh` starten, dann Hinweise im Terminal lesen.
+
+## Release-Checkliste (Release = Veröffentlichung)
+Für den Release fehlen typischerweise:
+- ZIP bauen und Start auf einem frischen System testen.
+- .deb bauen und Installation testen.
+- Must-Pass Suite auf Zielsystem ausführen.
+
+*Details:* `portable_data/config/DEVELOPMENT_STATUS.md` zeigt den aktuellen Stand.
 
 ## Support & nächste Schritte
 - Prüfe `todo.txt` für geplante Verbesserungen.

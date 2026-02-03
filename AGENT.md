@@ -19,6 +19,7 @@ Jede Iteration besteht aus exakt diesen Schritten:
 
 3) **Prüfen + Dokumentieren (Pflicht vor Ausgabe)**
    - Python Compile: `python3 -m py_compile app/*.py`
+   - Format-Check (Formatprüfung): `tools/run_quality_checks.sh` (enthält ruff check + ruff format --check)
    - Marker-Scan: kein `TODO`, `FIXME`, `placeholder`, `Platzhalter` in `.py`/`.sh`
    - Must-Pass Suite: `tools/run_must_pass.sh` (wenn ffmpeg vorhanden)
    - Ergebnis dokumentieren (kurz)
@@ -47,6 +48,7 @@ Jede Iteration besteht aus exakt diesen Schritten:
 - `python3 -m py_compile app/*.py`
 - `bash -n tools/*.sh`
 - Marker-Scan (siehe test.yml)
+- Format-Check (Formatprüfung) via `tools/run_quality_checks.sh`
 
 ### 2.2 Funktion
 - `tools/run_must_pass.sh` liefert pass (oder skip, wenn ffmpeg nicht vorhanden)
