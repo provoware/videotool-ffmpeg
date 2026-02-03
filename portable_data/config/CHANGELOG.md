@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.13
+- Start-Routine: Debug-Modus zeigt Pip- und Preflight-Details ohne Log-Unterdrückung.
+
 ## 1.0.12
 - Preflight: Debug-Log wird stabil geschrieben (Kontextmanager = sicheres Öffnen/Schließen).
 
