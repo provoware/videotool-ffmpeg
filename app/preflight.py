@@ -6,19 +6,10 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 from uuid import uuid4
+from io_utils import load_json
 from logging_utils import log_message
 from paths import config_dir, data_dir, cache_dir
 from validation_utils import validate_settings_paths, validate_settings_schema
-
-
-def load_json(p: Path, default=None):
-    try:
-        data = json.loads(p.read_text(encoding="utf-8"))
-    except Exception:
-        return default if default is not None else {}
-    if not isinstance(data, dict):
-        return default if default is not None else {}
-    return data
 
 
 def debug_enabled() -> bool:
@@ -94,7 +85,8 @@ def load_theme_names() -> set[str]:
 def run(settings_path: Path | None = None) -> dict:
     if settings_path is None:
         settings_path = config_dir() / "settings.json"
-    if debug_enabled():
+    debug = debug_enabled()
+    if debug:
         log_debug(f"Preflight start (settings={settings_path})")
     settings = load_json(settings_path, {})
     paths = settings.get("paths", {})
@@ -132,10 +124,10 @@ def run(settings_path: Path | None = None) -> dict:
         try:
             watch.mkdir(parents=True, exist_ok=True)
             watch_created = True
-            if debug_enabled():
+            if debug:
                 log_debug(f"Watchfolder created: {watch}")
         except Exception as exc:
-            if debug_enabled():
+            if debug:
                 log_debug(f"Watchfolder create failed: {watch} ({exc})", level="WARN")
     exports = data_dir() / paths.get("exports_dir", "exports")
     reports = data_dir() / paths.get("reports_dir", "reports")
@@ -236,7 +228,7 @@ def run(settings_path: Path | None = None) -> dict:
         "settings_schema_errors": schema_errors,
         "settings_path_errors": path_errors,
     }
-    if debug_enabled():
+    if debug:
         log_debug(f"Preflight result overall_ok={overall_ok} rec={rec}")
     return result
 

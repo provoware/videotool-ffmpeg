@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.39
+- Preflight: JSON-Laden über zentralen IO-Helper vereinheitlicht.
+- Preflight: Debug-Flag nur einmal ermittelt, weniger Streuung im Ablauf.
+- IO: Default-Fallback im JSON-Loader zentralisiert.
+
 ## 1.0.37
 - Quarantäne-Tabelle: Inline-Bearbeitung für Status, Grund und Empfehlung mit Validierung.
 - UI-Logik: Quarantäne-Tab in einen eigenen Controller modularisiert.

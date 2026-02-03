@@ -1,7 +1,7 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.38
-- Fortschritt: 64/64 = **100%**
+- Version: 1.0.39
+- Fortschritt: 65/65 = **100%**
 - Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
 ## ✅ Fertig
@@ -69,6 +69,7 @@
 62. CI: GitHub Actions korrekt unter .github/workflows, automatisierte Qualitäts-Checks
 63. IO: Atomic JSON Writes über einen zentralen IO-Helper
 64. Locking: Single-Writer für Settings und Quarantäne-Listen
+65. Preflight: JSON-IO vereinheitlicht und Debug-Flag einmalig ermittelt
 
 ## 🔧 Offen
 - (keine)
