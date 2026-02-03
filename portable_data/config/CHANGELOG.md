@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.41
+- Bereinigung: .deb- und ZIP-Release-Artefakte aus dem Repo entfernt.
+- README: Entwicklungsfortschritt in Prozent ergänzt und offene Punkte nummeriert gelistet.
+- Entwicklungsstatus: Fortschritt und offene Punkte aktualisiert.
+
 ## 1.0.40
 - Release-Doku: AGENT.md um Release-Finalisierung, Autostart, Qualität und Barrierefreiheit ergänzt.
 - Struktur-Regeln: klare Trennung von Logik, Tools und Config dokumentiert.

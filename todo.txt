@@ -1,4 +1,6 @@
 # todo.txt
+- [x] Bereinigung: .deb- und ZIP-Release-Artefakte aus dem Repo entfernt.
+- [x] README: Entwicklungsfortschritt (%) ergänzt und offene Punkte nummeriert gelistet.
 - [x] AGENT.md: Release-Finalisierung ergänzt (Autostart, Checks, Barrierefreiheit, Struktur-Regeln).
 - [x] Preflight: Mindest-Speichergrenze robust parsen (Fallback bei ungültigen Werten).
 - [x] Autotest: Thumbnail-Erzeugung im Must-Pass integrieren.
