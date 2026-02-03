@@ -1,6 +1,6 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.39
+- Version: 1.0.40
 - Fortschritt: 65/65 = **100%**
 - Nächster Schritt: **Selftest-Szenarien erweitern (Bitraten, fehlerhafte Dateien, große Dateien)**
 
