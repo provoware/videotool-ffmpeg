@@ -33,7 +33,7 @@
 26. Qualitäts-Checks: Compile, Bash-Check, Marker-Scan, Must-Pass
 27. Debug-Modus (Log-Level) + gezielte Fehlerberichte
 28. Preflight: Watchfolder-Schreibrecht prüfen und melden
-29. System-/Automations-Skripte prüfen Existenz und liefern UI-Feedback mit Exit-Code
+29. Maintenance: Settings-Ints sicher parsen und Warnungen im Summary loggen
 
 ## 🔧 Offen
 1. Deb-Paket (später)
