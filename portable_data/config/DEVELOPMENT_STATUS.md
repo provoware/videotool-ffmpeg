@@ -1,8 +1,8 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.36
-- Fortschritt: 60/60 = **100%**
-- Nächster Schritt: **Release-Checks auf Zielsystemen durchführen (inkl. Theme-Fallback prüfen)**
+- Version: 1.0.37
+- Fortschritt: 61/61 = **100%**
+- Nächster Schritt: **CI-Workflow (Continuous Integration = automatischer Build-Server) für die Must-Pass-Suite einrichten**
 
 ## ✅ Fertig
 1. Portable Struktur
@@ -65,6 +65,7 @@
 58. Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap validiert
 59. Preflight: Theme-Auswahl wird geprüft und meldet unbekannte Themes
 60. UI/Start: Theme-Fallback & Preflight-Empfehlungen erweitert
+61. Quarantäne-Tabelle: Inline-Bearbeitung mit Validierung und modularer Controller-Logik
 
 ## 🔧 Offen
 - (keine)

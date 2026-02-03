@@ -30,7 +30,7 @@
 - [x] Download-Stabilität überwachen: stable_file() durch echte Dateisystem-Watcher oder Hash-Vergleiche ersetzen, um den Abschluss von Downloads sicher zu erkennen.
 - [x] Zentrales Logging-Konzept einführen: alle Logs über ein einheitliches Modul mit Log-Level-Steuerung führen und Benutzer-Feedback von Entwickler-Logs trennen.
 - [x] Konfigurationsvalidierung erweitern: Pfade auf tatsächliche Erreichbarkeit und Schreibrechte prüfen; JSON-Schema-Validierung einführen.
-- [ ] Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste als Tabelle editierbar machen, Plugin-Schnittstelle für Presets umsetzen und Kontrast-Checks automatisieren.
+- [ ] Barrierefreiheit & UI-Integration vervollständigen: Quarantäne-Tagesliste als Tabelle editierbar machen (Teil erledigt: Inline-Bearbeitung + Validierung), Plugin-Schnittstelle für Presets umsetzen und Kontrast-Checks automatisieren.
 - [ ] Testabdeckung erhöhen: Selftest um Szenarien mit verschiedenen Bitraten, fehlerhaften Dateien und großen Dateien erweitern; CI-Workflow für Must-Pass-Suite einrichten.
 - [x] Plattform-Unabhängigkeit verbessern: Skripte portabel gestalten und Installationshinweise für nicht-Linux-Plattformen ergänzen.
 - [x] Datenstrukturen versionieren: Migrationslogik für Reports und Quarantäne-Listen entwickeln, um Schema-Änderungen zu unterstützen.

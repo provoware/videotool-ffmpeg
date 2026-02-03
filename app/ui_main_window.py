@@ -20,10 +20,10 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QFileDialog,
     QInputDialog,
-    QTableWidgetItem,
     QDialog,
 )
 from ui_main_layout import build_main_layout
+from quarantine_table_controller import QuarantineTableController
 
 from app_services import (
     activity,
@@ -101,6 +101,13 @@ class Main(QMainWindow):
         self.done_search = ""
 
         self._init_ui()
+        self._quar_controller = QuarantineTableController(
+            self.quar_table,
+            self.statusBar(),
+            load_today_quarantine_jobs,
+            save_today_quarantine_jobs,
+            update_quarantine_list_status,
+        )
 
         # --- Signals ---
         self.material.itemChanged.connect(self.refresh_sel)
@@ -172,6 +179,7 @@ class Main(QMainWindow):
         )
         # Initial load
         self._load_quarantine_table()
+        self.quar_table.itemChanged.connect(self._quar_controller.on_item_changed)
         self.chk_auto.stateChanged.connect(self.toggle_automation_enabled)
         self.dev_search.textChanged.connect(self.dev_find)
 
@@ -1134,57 +1142,16 @@ class Main(QMainWindow):
         self.lbl_preview_name.setText(example + ".mp4")
 
     # --- Quarantäne Tabelle (0.9.9) ---
-    def _get_today_quar_doc(self):
-        # reuse existing helper: load_today_quarantine_jobs
-        try:
-            return load_today_quarantine_jobs()
-        except Exception:
-            return {"items": [], "list_status": "offen"}
-
     def _load_quarantine_table(self):
-        doc = self._get_today_quar_doc()
-        doc = update_quarantine_list_status(doc)
-        save_today_quarantine_jobs(doc)
-
-        items = doc.get("items", [])
-        self.quar_table.setRowCount(len(items))
-        for r, it in enumerate(items):
-            status = it.get("status", "")
-            out_file = it.get("output_file", "")
-            reason = it.get("summary", "")
-            tries = f"{it.get('tries', 0)}/{it.get('max_tries', 3)}"
-            job_id = it.get("job_id", "")
-
-            self.quar_table.setItem(r, 0, QTableWidgetItem(status))
-            self.quar_table.setItem(r, 1, QTableWidgetItem(out_file))
-            self.quar_table.setItem(r, 2, QTableWidgetItem(reason))
-            self.quar_table.setItem(r, 3, QTableWidgetItem(tries))
-            self.quar_table.setItem(
-                r, 4, QTableWidgetItem(it.get("recommended_action", ""))
-            )
-            self.quar_table.setItem(r, 5, QTableWidgetItem(job_id))
+        self._quar_controller.load_table()
 
         # Visual hint: mark abgehakt in tab title (derzeit deaktiviert, Parent-Pfad ist nicht stabil).
 
     def _selected_quar_job_id(self):
-        sel = self.quar_table.selectionModel().selectedRows()
-        if not sel:
-            return None
-        row = sel[0].row()
-        item = self.quar_table.item(row, 5)
-        return item.text() if item else None
+        return self._quar_controller.selected_job_id()
 
     def _update_quar_status(self, job_id: str, new_status: str):
-        doc = self._get_today_quar_doc()
-        changed = False
-        for it in doc.get("items", []):
-            if it.get("job_id") == job_id:
-                it["status"] = new_status
-                changed = True
-        if changed:
-            doc = update_quarantine_list_status(doc)
-            save_today_quarantine_jobs(doc)
-        return changed
+        return self._quar_controller.update_job_status(job_id, new_status)
 
     def _quar_open_folder(self):
         # open today's quarantine folder, if exists
