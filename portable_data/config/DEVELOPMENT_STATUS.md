@@ -1,6 +1,6 @@
 # Entwicklungsstand – Modultool Video-Werkstatt
 
-- Version: 1.0.6
+- Version: 1.0.7
 - Fortschritt: 25/25 = **100%**
 - Nächster Schritt: **Preflight weiter härten (Watchfolder-Validierung, klare Hinweise)**
 

@@ -1885,6 +1885,8 @@ class Main(QMainWindow):
             msg_lines.append(self.texts["strings"].get("preflight.watch_missing","Watchfolder fehlt."))
         if not t.get("space_ok", True):
             msg_lines.append(self.texts["strings"].get("preflight.space_low","Wenig Speicher frei.") + f" ({t.get('free_mb')} MB)")
+        if not t.get("min_free_mb_ok", True):
+            msg_lines.append(self.texts["strings"].get("preflight.min_free_invalid","Mindest-Speicher (min_free_mb) ist ungültig. Standard 1024 MB wird genutzt.") + f" (Eingabe: {t.get('min_free_mb_input')})")
         for k,v in (t.get("writable") or {}).items():
             if not v.get("ok", True):
                 msg_lines.append(f"Ordner nicht schreibbar: {k} ({v.get('path')})")
@@ -1965,6 +1967,8 @@ class Main(QMainWindow):
             lines.append(self.texts["strings"].get("preflight.details_space_ok","✅ Genug Speicher frei.") + f" {space_info}")
         else:
             lines.append(self.texts["strings"].get("preflight.details_space_bad","⚠️ Speicher knapp. Export kann scheitern.") + f" {space_info}")
+        if not t.get("min_free_mb_ok", True):
+            lines.append(self.texts["strings"].get("preflight.details_min_free_invalid","⚠️ Mindest-Speicher (min_free_mb) ist ungültig. Standard 1024 MB wird genutzt.") + f" (Eingabe: {t.get('min_free_mb_input')})")
 
         if t.get("font_ok", True):
             lines.append(self.texts["strings"].get("preflight.details_font_ok","✅ Schrift (Font) verfügbar. Lauftext möglich."))
@@ -1993,7 +1997,8 @@ class Main(QMainWindow):
                 "ffmpeg_install": self.texts["strings"].get("preflight.details_rec_ffmpeg","• FFmpeg (Video-Werkzeug) installieren."),
                 "set_watchfolder": self.texts["strings"].get("preflight.details_rec_watch","• Watchfolder (Eingangsordner) wählen."),
                 "free_space": self.texts["strings"].get("preflight.details_rec_space","• Speicher frei machen (nicht benötigte Dateien löschen)."),
-                "install_font": self.texts["strings"].get("preflight.details_rec_font","• Schrift (Font) installieren, z.B. DejaVuSans.")
+                "install_font": self.texts["strings"].get("preflight.details_rec_font","• Schrift (Font) installieren, z.B. DejaVuSans."),
+                "min_free_mb_invalid": self.texts["strings"].get("preflight.details_rec_min_free","• Mindest-Speicher (min_free_mb) als Zahl eintragen (z.B. 2048).")
             }
             for rec in recs:
                 lines.append(rec_map.get(rec, f"• {rec}"))

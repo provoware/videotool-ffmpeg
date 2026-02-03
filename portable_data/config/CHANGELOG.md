@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.7
+- Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen.
+
+
 ## 1.0.6
 - Preflight: robustes Parsen der Mindest-Speichergrenze, inkl. Fallback bei ungültigen Werten.
 
