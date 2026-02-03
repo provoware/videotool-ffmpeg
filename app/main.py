@@ -51,18 +51,6 @@ def open_path(p: Path):
     except Exception:
         pass
 
-def run_setup():
-    script = portable_root()/"tools"/"setup_system.sh"
-    subprocess.Popen(["bash", str(script)], cwd=str(portable_root()))
-
-def run_timer_install():
-    script = portable_root()/"tools"/"install_timer.sh"
-    subprocess.Popen(["bash", str(script)], cwd=str(portable_root()))
-
-def run_automation_now():
-    script = portable_root()/"tools"/"run_automation.sh"
-    subprocess.Popen(["bash", str(script)], cwd=str(portable_root()))
-
 def run_quarantine_worker(job_id: str|None = None):
     venv = portable_root()/"portable_data"/".venv"
     py = venv/"bin"/"python"
@@ -142,6 +130,83 @@ from PySide6.QtGui import QPixmap, QIcon, QImageReader
 
 SUPPORTED_AUDIO = {".mp3",".wav",".flac",".m4a",".aac",".ogg"}
 SUPPORTED_IMG = {".jpg",".jpeg",".png",".webp",".bmp"}
+
+def _show_process_message(parent: QWidget|None, title: str, text: str, details: str|None = None, icon=QMessageBox.Information):
+    msg = QMessageBox(parent)
+    msg.setWindowTitle(title)
+    msg.setIcon(icon)
+    msg.setText(text)
+    if details:
+        msg.setDetailedText(details)
+    msg.exec()
+
+def _run_tool_script(parent: QWidget|None, script: Path, title: str, success_next: str, failure_next: str) -> QProcess|None:
+    if not script.exists() or not script.is_file():
+        text = f"{script.name} fehlt.\nNächster Schritt: Script wiederherstellen oder Neuinstallation starten."
+        _show_process_message(parent, title, text, icon=QMessageBox.Critical)
+        activity(f"{title} fehlgeschlagen: Script fehlt ({script.name}).")
+        return None
+    proc = QProcess(parent)
+    proc.setProgram("bash")
+    proc.setArguments([str(script)])
+    proc.setWorkingDirectory(str(portable_root()))
+    proc.setProcessChannelMode(QProcess.MergedChannels)
+    activity(f"{title} gestartet ({script.name}).")
+
+    def on_error(error):
+        output = bytes(proc.readAllStandardOutput()).decode("utf-8", "ignore").strip()
+        text = f"{title} konnte nicht gestartet werden.\nNächster Schritt: {failure_next}"
+        _show_process_message(parent, title, text, details=output or str(error), icon=QMessageBox.Critical)
+        activity(f"{title} Startfehler: {error}.")
+
+    def on_finished(exit_code, exit_status):
+        output = bytes(proc.readAllStandardOutput()).decode("utf-8", "ignore").strip()
+        if exit_status == QProcess.NormalExit and exit_code == 0:
+            text = f"{title} abgeschlossen.\nNächster Schritt: {success_next}"
+            _show_process_message(parent, title, text, details=output or None, icon=QMessageBox.Information)
+            activity(f"{title} abgeschlossen: exit=0.")
+        else:
+            text = (
+                f"{title} fehlgeschlagen (Exit-Code/Beendigungszahl: {exit_code}).\n"
+                f"Nächster Schritt: {failure_next}"
+            )
+            _show_process_message(parent, title, text, details=output or None, icon=QMessageBox.Critical)
+            activity(f"{title} fehlgeschlagen: exit={exit_code}, status={int(exit_status)}.")
+
+    proc.errorOccurred.connect(on_error)
+    proc.finished.connect(on_finished)
+    proc.start()
+    return proc
+
+def run_setup(parent: QWidget|None = None) -> QProcess|None:
+    script = portable_root()/"tools"/"setup_system.sh"
+    return _run_tool_script(
+        parent,
+        script,
+        "Einrichtung",
+        "Tool neu starten und Werkstatt-Check laufen lassen.",
+        "Setup manuell starten oder Hilfe-Center öffnen."
+    )
+
+def run_timer_install(parent: QWidget|None = None) -> QProcess|None:
+    script = portable_root()/"tools"/"install_timer.sh"
+    return _run_tool_script(
+        parent,
+        script,
+        "Zeitplan",
+        "Automatik ist eingerichtet. Optional: Automatik aktivieren.",
+        "Automatik-Status prüfen und Script erneut ausführen."
+    )
+
+def run_automation_now(parent: QWidget|None = None) -> QProcess|None:
+    script = portable_root()/"tools"/"run_automation.sh"
+    return _run_tool_script(
+        parent,
+        script,
+        "Automatik-Test",
+        "Reports und Quarantäne prüfen.",
+        "Logdatei öffnen und Fehler beheben."
+    )
 
 def is_image_path(p: Path) -> bool:
     return p.suffix.lower() in SUPPORTED_IMG
@@ -301,6 +366,7 @@ class Main(QMainWindow):
         self.settings = load_json(config_dir()/"settings.json", {})
         self.rules_path = config_dir()/"automation_rules.json"
         self.rules = load_json(self.rules_path, {})
+        self._tool_procs = []
 
         self.setWindowTitle(self.texts.get("strings", {}).get("app.titel", "Modultool"))
         self.setMinimumSize(1360, 820)
@@ -1151,12 +1217,9 @@ class Main(QMainWindow):
 
     # --- System & folders ---
     def setup_clicked(self):
-        try:
-            run_setup()
-            QMessageBox.information(self, "Einrichtung", "Setup gestartet. Wenn fertig: Tool neu starten.")
-            activity("Systemeinrichtung gestartet (sudo).")
-        except Exception as e:
-            QMessageBox.critical(self, "Fehler", f"Einrichtung konnte nicht gestartet werden:\n{e}")
+        proc = run_setup(self)
+        if proc:
+            self._tool_procs.append(proc)
 
     def open_exports(self):
         exports = data_dir()/self.settings.get("paths",{}).get("exports_dir","exports")
@@ -1177,12 +1240,14 @@ class Main(QMainWindow):
 
     # --- Automation controls ---
     def install_timer(self):
-        run_timer_install()
-        activity("Zeitplan einrichten/aktualisieren gestartet.")
+        proc = run_timer_install(self)
+        if proc:
+            self._tool_procs.append(proc)
 
     def run_auto(self):
-        run_automation_now()
-        activity("Automatik manuell gestartet (Test).")
+        proc = run_automation_now(self)
+        if proc:
+            self._tool_procs.append(proc)
 
     def toggle_automation_enabled(self, state: int):
         self.rules["enabled"] = (state == Qt.Checked)
