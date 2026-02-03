@@ -1,8 +1,8 @@
 {
   "name": "modultool_video_werkstatt_portable",
   "display_name": "Modultool – Video-Werkstatt",
-  "version": "1.0.20",
-  "build_date": "2026-02-03T07:43:21Z",
+  "version": "1.0.21",
+  "build_date": "2026-02-03T07:53:34Z",
   "schema_versions": {
     "settings": 1,
     "automation_rules": 1,
@@ -67,6 +67,6 @@
   },
   "release": {
     "channel": "release",
-    "notes": "Automatik: Lock-Datei mit Timeout und PID-Erkennung gegen parallele Läufe gehärtet."
+    "notes": "Automatik: Abbrüche laufen jetzt über klare Fehlercodes statt SystemExit im Ablauf."
   }
 }
