@@ -131,6 +131,17 @@ class Main(QMainWindow):
         self.done_search = ""
 
         self._init_ui()
+        self.preset_options = getattr(self, "preset_options", [])
+        self._preset_ids = {
+            p.get("id")
+            for p in self.preset_options
+            if isinstance(p, dict) and isinstance(p.get("id"), str)
+        }
+        self._default_preset_id = (
+            self.preset_options[0].get("id")
+            if self.preset_options
+            else "youtube_hd_ton_safe"
+        )
         self.help_controller = HelpCenterController(
             self.help_view,
             self.help_topics,
@@ -279,6 +290,13 @@ class Main(QMainWindow):
         self.btn_wb_assign_open.clicked.connect(self._wb_open_assign)
         self.wb_pairing.currentIndexChanged.connect(lambda *_: None)
         self.btn_selftest.clicked.connect(self.selftest_full)
+
+        for btn, preset_id, preset_name in getattr(self, "preset_buttons", []):
+            btn.clicked.connect(
+                lambda *_, pid=preset_id, pname=preset_name: self._apply_preset_button(
+                    pid, pname
+                ),
+            )
 
         self.btn_mustpass.clicked.connect(self.run_mustpass)
         self.btn_open_qjobs.clicked.connect(self.open_qjobs_today)
@@ -710,6 +728,27 @@ class Main(QMainWindow):
                         images.append(p)
         return audios, images
 
+    def _apply_preset_button(self, preset_id: str, preset_name: str) -> None:
+        if not isinstance(preset_id, str) or preset_id not in self._preset_ids:
+            QMessageBox.information(
+                self,
+                "Vorlagen",
+                "Vorlage ungültig. Aktion: Presets prüfen.",
+            )
+            self.statusBar().showMessage("Vorlage ungültig. Presets prüfen.")
+            return
+        idx = self.wb_preset.findData(preset_id)
+        if idx >= 0:
+            self.wb_preset.setCurrentIndex(idx)
+            self.statusBar().showMessage(f"Vorlage gesetzt: {preset_name}")
+        else:
+            QMessageBox.information(
+                self,
+                "Vorlagen",
+                "Vorlage nicht gefunden. Aktion: Preset-Liste prüfen.",
+            )
+            self.statusBar().showMessage("Vorlage nicht gefunden. Preset-Liste prüfen.")
+
     def _wb_export(self):
         # Choose audio/image; batch if multiple audios.
         audios, images = self._wb_collect_selection()
@@ -724,7 +763,21 @@ class Main(QMainWindow):
             )
             return
 
-        preset = self.wb_preset.currentText().strip()
+        preset = self.wb_preset.currentData() or self.wb_preset.currentText().strip()
+        if not isinstance(preset, str) or preset not in self._preset_ids:
+            fallback = self._default_preset_id
+            QMessageBox.information(
+                self,
+                "Werkbank",
+                "Vorlage ungültig. Standard-Vorlage wird genutzt.",
+            )
+            self.statusBar().showMessage(
+                "Vorlage ungültig, Standard-Vorlage wurde gesetzt."
+            )
+            preset = fallback
+            idx = self.wb_preset.findData(fallback)
+            if idx >= 0:
+                self.wb_preset.setCurrentIndex(idx)
         # text options
         text = self.wb_text.text().strip() if self.wb_text_on.isChecked() else ""
         pos = self.wb_text_pos.currentText().strip()

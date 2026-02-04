@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 from io_utils import atomic_write_json, load_json
-from logging_utils import log_exception
+from logging_utils import log_exception, log_message
 from paths import (
     app_dir,
     repo_root,
@@ -61,6 +61,92 @@ def ensure_dirs():
         (base / rel).mkdir(parents=True, exist_ok=True)
     logs_dir().mkdir(parents=True, exist_ok=True)
     (cache_dir() / "thumbs").mkdir(parents=True, exist_ok=True)
+
+
+DEFAULT_PRESETS = [
+    {"id": "youtube_hd_ton_safe", "name": "YouTube HD (Ton Safe)"},
+    {"id": "shorts_9_16_ton_safe", "name": "Shorts 9:16 (Ton Safe)"},
+]
+
+
+def load_presets() -> list[dict]:
+    presets: list[dict] = []
+    seen: set[str] = set()
+
+    def add_preset(entry: dict, context: str) -> None:
+        if not isinstance(entry, dict):
+            log_message(
+                "Preset-Eintrag ignoriert: falscher Typ.",
+                level="WARNING",
+                context="presets",
+                user_message=("Ein Preset ist ungültig. Aktion: Preset-Datei prüfen."),
+                extra={"source": context, "type": type(entry).__name__},
+            )
+            return
+        preset_id = entry.get("id")
+        preset_name = entry.get("name")
+        if not isinstance(preset_id, str) or not preset_id.strip():
+            log_message(
+                "Preset ignoriert: ID fehlt.",
+                level="WARNING",
+                context="presets",
+                user_message=("Ein Preset hat keine ID. Aktion: Preset-Datei prüfen."),
+                extra={"source": context, "id": preset_id},
+            )
+            return
+        if preset_id in seen:
+            return
+        name = (
+            preset_name
+            if isinstance(preset_name, str) and preset_name.strip()
+            else preset_id
+        )
+        presets.append({"id": preset_id.strip(), "name": name.strip()})
+        seen.add(preset_id)
+
+    manifest = load_json(config_dir() / "manifest.json", {})
+    manifest_presets = manifest.get("presets", [])
+    if isinstance(manifest_presets, list):
+        for preset in manifest_presets:
+            add_preset(preset, "manifest.json")
+    else:
+        log_message(
+            "Presets in manifest.json sind ungültig.",
+            level="WARNING",
+            context="presets",
+            user_message=("Preset-Liste ist ungültig. Aktion: manifest.json prüfen."),
+        )
+
+    extra_path = config_dir() / "presets.json"
+    if extra_path.exists():
+        extra_doc = load_json(extra_path, {})
+        extra_list = (
+            extra_doc.get("presets") if isinstance(extra_doc, dict) else extra_doc
+        )
+        if isinstance(extra_list, list):
+            for preset in extra_list:
+                add_preset(preset, "presets.json")
+        else:
+            log_message(
+                "Presets in presets.json sind ungültig.",
+                level="WARNING",
+                context="presets",
+                user_message=(
+                    "Preset-Liste ist ungültig. Aktion: presets.json prüfen."
+                ),
+            )
+
+    if not presets:
+        presets = [p.copy() for p in DEFAULT_PRESETS]
+        log_message(
+            "Preset-Liste leer, Standard wird genutzt.",
+            level="WARNING",
+            context="presets",
+            user_message=(
+                "Es sind keine Presets verfügbar. Aktion: Standard wird genutzt."
+            ),
+        )
+    return presets
 
 
 def activity(msg: str) -> bool:
