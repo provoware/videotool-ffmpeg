@@ -15,6 +15,9 @@
 - [x] Autotest: Thumbnail-Erzeugung im Must-Pass integrieren.
 - [x] Werkstatt-Check Details: Klartext-Anzeige mit einfachen Empfehlungen.
 - [x] Start-Routine: Abhängigkeiten prüfen und Nutzer-Feedback bündeln.
+- [x] Logging: ungültige Log-Meldungen bereinigen und Logging-Fehler sichtbar melden.
+- [x] Preflight: ungültige Themes auf Standard zurücksetzen und Debug-Hinweis geben.
+- [x] Start-Routine: RUN_CHECKS führt vollständige Release-Checks aus.
 - [x] Barrierefreiheit: Kontrast-Checks für alle Themes automatisieren.
 - [x] Qualitäts-Checks: eigenes Skript für Compile, Bash-Check, Marker-Scan und Must-Pass.
 - [x] Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen.

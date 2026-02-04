@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.53 - 2026-02-04
+Verbessert: Logging bereinigt ungültige Meldungen und meldet Log-Fehler sichtbar, der Preflight setzt ungültige Themes sicher auf den Standard zurück (mit Debug-Hinweis), und die Start-Routine führt bei RUN_CHECKS vollständige Release-Checks aus.
+
 ## 1.0.52 - 2026-02-06
 Verbessert: Favoriten-Logik in eigenen Controller ausgelagert (inkl. Fix, damit alle Einträge angezeigt werden), Einstellungen sind in einen Controller mit klarer Validierung umgezogen, und Quarantäne-Aktionen laufen nun in einem separaten Modul für bessere Wartbarkeit.
 

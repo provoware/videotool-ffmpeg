@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 import traceback
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +16,20 @@ def _write_jsonl(path: Path, payload: dict[str, Any]) -> None:
         handle.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
 
+def _normalize_level(level: str) -> str:
+    if not isinstance(level, str):
+        return "INFO"
+    normalized = level.strip().upper()
+    return normalized or "INFO"
+
+
+def _sanitize_message(message: str) -> str:
+    if not isinstance(message, str):
+        return "Unbekannte Meldung"
+    cleaned = message.strip()
+    return cleaned or "Unbekannte Meldung"
+
+
 def log_message(
     message: str,
     *,
@@ -24,12 +39,14 @@ def log_message(
     user_message: str | None = None,
     extra: dict[str, Any] | None = None,
 ) -> None:
+    safe_message = _sanitize_message(message)
+    safe_level = _normalize_level(level)
     try:
         target_dir = logs_path or logs_dir()
         payload = {
             "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-            "level": level,
-            "message": message,
+            "level": safe_level,
+            "message": safe_message,
         }
         if context:
             payload["context"] = context
@@ -45,7 +62,11 @@ def log_message(
             if context:
                 user_payload["context"] = context
             _write_jsonl(target_dir / "user_feedback.log", user_payload)
-    except Exception:
+    except Exception as exc:
+        print(
+            f"[Modultool] Logging-Fehler (Logging = Protokoll): {exc}",
+            file=sys.stderr,
+        )
         return
 
 
