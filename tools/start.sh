@@ -55,7 +55,7 @@ fi
 
 if [ "$RUN_CHECKS" = "1" ]; then
   echo "[Modultool] Release-Checks (automatische Prüfung) …"
-  if "$ROOT/tools/run_quality_checks.sh"; then
+  if "$ROOT/tools/run_release_checks.sh"; then
     echo "[Modultool] Release-Checks: ok."
   else
     echo "[Modultool] Release-Checks: Fehler."

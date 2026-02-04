@@ -94,16 +94,29 @@ def run(settings_path: Path | None = None) -> dict:
     schema_errors = validate_settings_schema(settings)
     path_errors = validate_settings_paths(settings)
     min_free_mb, min_free_ok, min_free_raw = parse_min_free_mb(settings)
-    theme_input = ui.get("theme", "hochkontrast_dunkel")
+    default_theme = "hochkontrast_dunkel"
+    theme_input = ui.get("theme", default_theme)
     theme_names = load_theme_names()
     theme_ok = True
-    theme = "hochkontrast_dunkel"
+    theme = default_theme
     if isinstance(theme_input, str) and theme_input.strip():
-        theme = theme_input.strip()
-        if theme_names and theme not in theme_names:
+        candidate = theme_input.strip()
+        if theme_names and candidate not in theme_names:
             theme_ok = False
-    elif theme_names:
-        theme_ok = False
+            theme = default_theme
+            if debug:
+                log_debug(
+                    f"Theme ungültig: {candidate} -> {default_theme}",
+                    level="WARN",
+                )
+        else:
+            theme = candidate
+    else:
+        if theme_names:
+            theme_ok = False
+            if debug:
+                log_debug("Theme fehlt oder leer, Standard wird genutzt.", level="WARN")
+        theme = default_theme
 
     raw_watch = paths.get("watch_folder")
     watch_invalid = False
