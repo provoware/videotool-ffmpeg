@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.63
-- Fokus dieser Iteration: Basis-Ordner (base_data_dir) in Preflight prüfen und Pfad-Validierung für zusätzliche Ordner erweitern.
+- Version: 1.0.64
+- Fokus dieser Iteration: Info-Dateien aktualisiert (Start-Routine, automatische Prüfungen, Input/Output-Validierung in einfacher Sprache).
 
 ## Nächster Schritt
 - Main-UI weiter modularisieren (Materialliste, Auswahlkorb und Quarantäne-Listen als eigene Komponenten).

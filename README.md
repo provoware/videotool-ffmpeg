@@ -44,6 +44,7 @@ Dieses Projekt verarbeitet Videos mit FFmpeg (Video-Werkzeug). Der Fokus liegt a
 - **Werkstatt-Check (Preflight = Startprüfung)** prüft u. a. FFmpeg, Speicherplatz und notwendige Einstellungen.
 - **Start-Routine löst Abhängigkeiten automatisch** (auto-fix = selbstständig reparieren) und meldet **klar verständlich**, was funktioniert hat oder wo Hilfe nötig ist.
 - **Self-Repair (Selbstreparatur)** setzt eine defekte Python-Umgebung neu auf, prüft FFmpeg und zeigt die nächsten Schritte in einfacher Sprache.
+- **Autonome Start-Routine**: prüft alles Nötige, löst fehlende Abhängigkeiten automatisch und gibt Schritt-für-Schritt-Feedback (Feedback = klare Rückmeldung).
 
 ## Qualitäts- und Formatprüfungen (Codequalität)
 Für eine automatische Qualitätsprüfung gibt es ein eigenes Skript:
@@ -64,6 +65,10 @@ tools/run_release_checks.sh
 *Der Release-Check führt Compile, Bash-Check, Qualitäts-Checks, Must-Pass und Release-Builds aus.*
 
 *Hinweis:* Die Skripte richten eine venv (virtuelle Umgebung) ein und installieren notwendige Prüf-Tools automatisch.
+
+**Empfohlene automatische Prüfungen (vollautomatisch, ohne Handarbeit):**
+- **Kurz-Check**: `tools/run_quality_checks.sh` (prüft Codequalität + Format).
+- **Voll-Check**: `tools/run_release_checks.sh` (prüft zusätzlich Builds).
 
 ## CI (GitHub Actions = automatischer Build-Server)
 - **Pfad korrekt:** Workflows liegen unter `.github/workflows/`.
@@ -88,6 +93,7 @@ tools/run_release_checks.sh
 - `app/io_utils.py` → **Einheitliche JSON-IO** (atomic writes = atomar/sicher speichern, inkl. Lock)
 
 *Ziel:* Systemdateien (Code) sind getrennt von variablen Daten (Logs/Cache). Das erleichtert Backups, Updates und Wartung.
+*Zusatz:* Tool-Logik (Werkzeuge) bleibt in `tools/`, Konfiguration (Config = feste Einstellungen) in `portable_data/config/`.
 
 **Projektverzeichnis & Dateien (finaler Überblick):**
 - Siehe `portable_data/config/PROJECT_STRUCTURE.md` (klare Liste der Ordner und Dateien).
@@ -121,6 +127,9 @@ tools/run_release_checks.sh
   ```bash
   cat portable_data/logs/self_repair_last.log
   ```
+**Validierung (Eingabe/Output):**
+- Jede Aktion prüft Eingaben (Input = Nutzereingabe) und meldet Ergebnisse klar.
+- Bei Fehlern gibt es immer eine **nächste Empfehlung** (z. B. „Jetzt reparieren“, „Sicherer Standard“, „Details“).
 
 ### Wenn der Start auf neuen Systemen hakt (Checkliste für Laien)
 1) **Fehlertext notieren** (genau so wie angezeigt).
