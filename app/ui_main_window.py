@@ -62,6 +62,39 @@ from app_services import (
 
 
 class Main(QMainWindow):
+    def _apply_status_role(
+        self,
+        widget: QWidget | None,
+        role: str,
+        context: str,
+    ) -> None:
+        if widget is None:
+            log_message(
+                "Status-Rolle nicht gesetzt: Widget fehlt.",
+                level="WARNING",
+                context=context,
+                extra={"role": role},
+            )
+            return
+        if not isinstance(role, str) or not role.strip():
+            log_message(
+                "Status-Rolle nicht gesetzt: Rolle fehlt.",
+                level="WARNING",
+                context=context,
+                extra={"role": role},
+            )
+            return
+        widget.setProperty("role", role.strip())
+        try:
+            widget.style().unpolish(widget)
+            widget.style().polish(widget)
+        except Exception as exc:
+            log_exception(
+                "apply_status_role",
+                exc,
+                extra={"role": role, "widget": widget.objectName(), "context": context},
+            )
+
     def apply_theme(self):
         theme = self.settings.get("ui", {}).get("theme", "hochkontrast_dunkel")
         qss = _load_theme_qss(theme)
@@ -1324,8 +1357,20 @@ class Main(QMainWindow):
         else:
             msg = "- " + "\n- ".join(msg_lines)
 
+        overall_ok = bool(t.get("overall_ok"))
         self.preflight_banner.setTitle(
-            "Werkstatt-Check ✅" if t.get("overall_ok") else "Werkstatt-Check ⚠️"
+            "Werkstatt-Check ✅" if overall_ok else "Werkstatt-Check ⚠️"
+        )
+        status_role = "status_ok" if overall_ok else "status_warn"
+        self._apply_status_role(
+            self.preflight_banner,
+            status_role,
+            "ui.preflight.banner_role",
+        )
+        self._apply_status_role(
+            self.lbl_preflight,
+            status_role,
+            "ui.preflight.label_role",
         )
         self.lbl_preflight.setText(msg)
 
