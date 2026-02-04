@@ -1,4 +1,7 @@
 # todo.txt
+- [x] Start-Routine: Release-Checks brechen bei Fehlern ab und geben klare Optionen aus.
+- [x] Maintenance: ohne --auto keine Änderungen, stattdessen klare Hinweise und Beispiel.
+- [x] Maintenance: negative Werte und falsche maintenance-Struktur werden validiert und sicher abgefangen.
 - [x] Start-Routine: FFmpeg/ffprobe konsistent prüfen und bei Fehler sauber abbrechen.
 - [x] Start-Routine: Werkstatt-Check verarbeitet Preflight-JSON robust, selbst wenn Fremdausgaben enthalten sind.
 - [x] Start-Routine: GUI-Start meldet Exit-Code und klare Optionen bei Fehlern.

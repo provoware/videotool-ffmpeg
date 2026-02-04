@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.59 - 2026-02-11
+Verbessert: Release-Checks in der Start-Routine brechen bei Fehlern klar ab, Maintenance verlangt --auto mit verständlicher Erklärung, und Wartungswerte werden bei negativen oder falschen Einstellungen sicher validiert.
+
 ## 1.0.58 - 2026-02-10
 Verbessert: Release-Checks vermeiden doppelte Must-Pass-Läufe, der Build kann diese Prüfung effizient überspringen, und die Release-Regeln dokumentieren die Effizienz-Option klar.
 

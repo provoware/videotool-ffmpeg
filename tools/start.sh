@@ -79,6 +79,7 @@ if [ "$RUN_CHECKS" = "1" ]; then
   else
     echo "[Modultool] Release-Checks: Fehler."
     echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    exit 1
   fi
 fi
 
