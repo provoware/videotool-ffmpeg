@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.64 - 2026-02-15
+Verbessert: Dokumentation präzisiert die autonome Start-Routine mit Nutzerfeedback, ergänzt klare Voll- und Kurzprüfungen, und beschreibt Input/Output-Validierung in einfacher Sprache.
+
 ## 1.0.63 - 2026-02-14
 Verbessert: Preflight prüft jetzt den Basis-Ordner (base_data_dir) inklusive Schreibrechten, die Pfad-Validierung deckt zusätzliche Einstellungs-Ordner ab, und die Start-Routine meldet Basis-Ordner-Probleme klar mit Empfehlungen.
 
