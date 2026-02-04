@@ -84,7 +84,7 @@
 - [x] Start-Routine: Abhängigkeiten über zentrale Bootstrap-Logik prüfen und installieren, mit klaren Nutzerhinweisen.
 - [x] Qualitäts-Checks: Dev-Abhängigkeiten und Pflichtpakete über Bootstrap-Skript validieren.
 - [x] Start-Routine: optionaler Auto-Install von FFmpeg per MODULTOOL_AUTO_INSTALL mit laienfreundlichem Hinweis.
-- [ ] Performance optimieren: parallele Audio-Verarbeitung einführen.
+- [x] Performance optimieren: parallele Audio-Verarbeitung einführen.
 - [x] Hilfe-Center integrieren: interaktive Hilfe mit Suchfunktion und Schritt-für-Schritt-Anleitungen ins Tool einbauen.
 - [x] Internationalisierung hinzufügen: Übersetzungsdateien bereitstellen und Benutzeroberfläche für weitere Sprachen vorbereiten.
 - [x] Eingabe-/Ausgabe-Validierung weiter vereinheitlichen: klare Checks mit Erfolgsmeldung für Ordner/Report-Aktionen.

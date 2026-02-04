@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.69 - 2026-02-19
+Verbessert: Automatik verarbeitet Audio-Jobs parallel mit validierter Worker-Konfiguration, Reports dokumentieren die Performance-Einstellungen, und Fehlerfälle erzeugen konsistente Quarantäne-Marker.
+
 ## 1.0.68 - 2026-02-18
 Verbessert: Preflight protokolliert eine detaillierte Debug-Zusammenfassung, der Werkstatt-Check markiert Status optisch mit Rollenfarben, und Themes liefern klare Statusfarben für Hinweise, Warnungen und Fehler.
 

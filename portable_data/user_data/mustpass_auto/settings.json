@@ -50,7 +50,8 @@
     "normal_threads": 0,
     "watchdog_timeout_sec": 900,
     "eco_mode": true,
-    "eco_threads": 2
+    "eco_threads": 2,
+    "parallel_audio_workers": 2
   },
   "maintenance": {
     "logs_max_mb": 5,
