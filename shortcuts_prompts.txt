@@ -1,0 +1,227 @@
+# Provoware CheatSheet PRO (GitHub, Konsole, Editor, Begriffe)
+
+> Format: **Befehl / Begriff** | **Kurz-Erklärung** | **2–3 Tipps / Stolperfallen**
+
+---
+
+## 1) Git & GitHub (Repository, prüfen, reparieren, auslesen, löschen)
+
+### 1.1 Repo anlegen, klonen, verbinden
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `git init` | Neues Repo im aktuellen Ordner initialisieren | Nur im Projekt-Root ausführen, sonst verschachtelte Repos. |
+| `git clone <URL>` | Repo lokal klonen | Für SSH: `git@github.com:user/repo.git`, für HTTPS: `https://...` |
+| `git remote -v` | Zeigt verbundene Remotes | Prüfen, ob `origin` wirklich stimmt, bevor du pushst. |
+| `git remote add origin <URL>` | Remote „origin“ hinzufügen | Wenn origin schon existiert: erst `git remote remove origin`. |
+| `git remote set-url origin <URL>` | Remote-URL ändern | Perfekt, wenn du von HTTPS auf SSH wechselst. |
+| `git branch -M main` | Aktuellen Branch auf `main` umbenennen | Hilft bei „master/main“-Chaos. |
+| `git config --global user.name "NAME"` | Git-Name setzen | Einmal global, dann Ruhe. |
+| `git config --global user.email "MAIL"` | Git-Mail setzen | Muss zur GitHub-Identität passen (für hübsche Commits). |
+
+### 1.2 Status, Differenzen, Historie (auslesen & prüfen)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `git status` | Was ist geändert, staged, untracked? | Dein „Radar“. Vor jedem Commit einmal. |
+| `git diff` | Unterschiede (unstaged) anzeigen | Für staged: `git diff --staged` |
+| `git log --oneline --decorate --graph --all -n 30` | Kompakte Verlaufskarte | Beste Schnell-Übersicht, auch für Branch-Chaos. |
+| `git show <HASH>` | Einzelnen Commit ansehen | Hash aus `git log --oneline`. |
+| `git blame <DATEI>` | Wer hat welche Zeile geändert | Super bei „wer hat das kaputt gemacht“. |
+| `git ls-files` | Alle getrackten Dateien | Hilft bei „liegt das überhaupt im Repo?“. |
+
+### 1.3 Add/Commit/Push/Pull (Standard-Flow)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `git add .` | Alle Änderungen stagen | Vorsicht bei großen Ordnern: lieber gezielt `git add file`. |
+| `git add -p` | Interaktiv stagen (Patch) | Perfekt, um Müll nicht mitzucommitten. |
+| `git commit -m "Nachricht"` | Commit erstellen | Nachricht kurz+konkret, z.B. `Fix: import crash`. |
+| `git push -u origin main` | Erster Push + Upstream setzen | Danach reicht `git push`. |
+| `git pull --rebase` | Pull ohne Merge-Commit | Hält Verlauf sauber, vermeidet „Merge-Matsch“. |
+| `git fetch --all --prune` | Remotes aktualisieren + tote Branches weg | Sehr gut als „Repo putzen“-Befehl. |
+
+### 1.4 Branching (minimal-chaos)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `git branch` | Lokale Branches anzeigen | Aktueller Branch hat `*`. |
+| `git branch -a` | Lokale + Remote Branches | Gut um zu sehen, was GitHub kennt. |
+| `git switch -c dev` | Neuen Branch erstellen + wechseln | Alternativ alt: `git checkout -b dev`. |
+| `git switch main` | Branch wechseln | Schneller als `checkout`. |
+| `git merge dev` | dev in aktuellen Branch mergen | Vorher `git status` (working tree sauber!). |
+| `git branch -d dev` | Branch löschen (nur wenn gemerged) | Zwingend löschen: `git branch -D dev` (gefährlich). |
+
+### 1.5 Reparieren, Reset, „ich hab’s versemmelt“
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `git restore <DATEI>` | Datei auf letzten Stand zurücksetzen | Für staged nutzen: `git restore --staged <DATEI>`. |
+| `git restore .` | Alle lokalen Änderungen verwerfen | Macht gnadenlos sauber. Vorher ggf. Backup. |
+| `git reset --soft HEAD~1` | Letzten Commit rückgängig, Änderungen bleiben | Ideal bei falscher Commit-Nachricht. |
+| `git reset --mixed HEAD~1` | Commit weg, Änderungen unstaged | Standard „undo commit“. |
+| `git reset --hard HEAD~1` | Alles weg bis vorheriger Commit | **Achtung:** Datenverlust. Nur wenn sicher. |
+| `git reflog` | Rettungsleiter: zeigt auch „verlorene“ Zustände | Danach: `git reset --hard <HASH>` zum Wiederherstellen. |
+| `git fsck --full` | Prüft Repo-Objekte auf Schäden | Bei kaputten Repos hilfreich, kombiniert mit `reflog`. |
+| `git gc` | Garbage Collection / Repo aufräumen | Kann Repo schneller machen, nicht dauernd nötig. |
+
+### 1.6 „Repo löschen“ (lokal) und „GitHub Repo löschen“ (Hinweis)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `rm -rf .git` | Git aus Ordner entfernen (kein Repo mehr) | Das ist **nur** lokal, löscht Historie. |
+| `rm -rf <PROJEKTORDNER>` | Projektordner komplett löschen | Vorher prüfen: `pwd` und `ls` (sonst falscher Ordner). |
+
+> GitHub-Repo löschen geht offiziell über Web-UI (Settings → Danger Zone → Delete).  
+> Wenn du unbedingt CLI willst: GitHub CLI `gh` kann das, aber nur wenn installiert + eingeloggt.
+
+---
+
+## 2) „Codecs / Vibe-Coding / Standardbegriffe beim Programmieren“
+
+### 2.1 Codecs & Medien (YouTube-tauglich)
+| Begriff / Befehl | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| **Codec** | „Übersetzer“ für Video/Audio-Daten | Container ≠ Codec (MP4 ist Container). |
+| **Container (MP4/MKV/WebM)** | Verpackung für Streams | MP4 ist Standard für YouTube. |
+| **H.264 (AVC)** | Sehr kompatibler Video-Codec | Für maximale Kompatibilität: H.264 + AAC. |
+| **H.265 (HEVC)** | Besser komprimiert, teils zickig | Nicht überall gut editierbar. |
+| **VP9 / AV1** | Moderne Codecs, effizient | AV1 top, aber Encoding langsam. |
+| **AAC / Opus** | Audio-Codecs | AAC in MP4, Opus meist in WebM. |
+| **Bitrate** | Datenrate, beeinflusst Qualität | Zu niedrig = Matsch; zu hoch = große Dateien. |
+| **CRF** | Qualitätsmodus bei x264/x265 | Niedriger = besser (und größer). |
+
+### 2.2 Vibe-Coding (praktisch)
+| Begriff | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| **Vibe-Coding** | Schnell iterieren: Idee → Code → testen → fixen | Immer mit Mini-Zielen arbeiten: „nur eine Funktion“. |
+| **MVP** | Kleinste lauffähige Version | Erst „läuft“, dann „schön“. |
+| **Refactor** | Code umbauen ohne Verhalten zu ändern | Nach Feature-Block, nicht mitten im Stress. |
+| **Tech Debt** | „Schulden“ durch schnelle Lösungen | Notieren in TODO, sonst frisst es dich später. |
+| **Edge Case** | Sonderfall, der Fehler triggert | Beim Input/Dateinamen zuerst abfangen. |
+| **Regression** | Alter Bug kommt zurück | Selftest/Checkliste nach jeder Änderung. |
+
+---
+
+## 3) ChatGPT Prompt-Bausteine (für deine Tool- & Content-Arbeit)
+
+| Prompt (copy/paste) | Zweck | Tipps |
+|---|---|---|
+| `Analysiere meinen Code auf Fehler, Inkonsistenzen und fehlende Imports. Gib mir nur konkrete Fixes als Patch-Schritte.` | Debug/Qualität | Immer mit Datei-Inhalt + Fehlermeldung füttern. |
+| `Schreibe eine EndCheckListe für dieses Projekt: Dateien, Startpunkt, Abhängigkeiten, Selftest, Export.` | Release-Sicherheit | Perfekt vor ZIP/Release. |
+| `Erstelle mir 20 YouTube-Titel (Shorts) im Stil: provokant, systemkritisch, kurz. Thema: <THEMA>.` | SEO/Titles | Danach: 10 Varianten „noch kürzer“. |
+| `Mach aus diesem Text eine Hörspiel-Fassung: nur Szenenname + Dialoge + 1 Satz Stimmung. 140 BPM, Reimdruck.` | Hörspiel/Suno | Du lieferst Rohtext, ich mache Performance-Flow. |
+| `Gib mir eine robuste Linux-Konsole-Anleitung für: <ZIEL>. Mit Validierung, Fehlerfällen, und sicheren Befehlen.` | Terminal-Workflow | Fordere „dry-run“ Varianten an. |
+| `Baue mir eine Projektstruktur für <PROJEKT>, mit Ordnern, Dateinamenregeln, und minimaler Doku.` | Ordnung | Danach: „nenn mir 10 typische Bedienfehler + Gegenmaßnahmen“. |
+
+---
+
+## 4) Linux Konsole: Suchen, Aufräumen, System-Checks (DEIN Survival-Kit)
+
+### 4.1 Dateien finden (Name, Größe, Datum)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `find . -type f -name "*.json"` | Findet JSON-Dateien im Projekt | `.` = aktueller Ordner, rekursiv. |
+| `find . -type d -name "logs"` | Findet Ordner namens logs | Gut bei großen Projekten. |
+| `find . -type f -iname "*readme*"` | Findet unabhängig von Groß/Klein | `-iname` ist praktischer als `-name`. |
+| `find . -type f -size +200M` | Dateien größer als 200 MB | Ideal zum Aufräumen. |
+| `find . -type f -mtime -7` | Dateien geändert in den letzten 7 Tagen | `-mtime +30` = älter als 30 Tage. |
+| `find . -type f -empty` | Leere Dateien | Oft Reste von Crashes. |
+| `find . -type f -print0 \| xargs -0 ls -lh` | Liste mit Größenanzeige | Sicherer bei Leerzeichen in Dateinamen. |
+
+### 4.2 In Dateien nach Text suchen (rekursiv)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `grep -RIn "TODO" .` | Sucht „TODO“ rekursiv, mit Zeilennummer | `-I` ignoriert Binärdateien. |
+| `grep -RIn --exclude-dir=node_modules "import" .` | Sucht ohne node_modules | Große Beschleunigung in JS-Projekten. |
+| `grep -RIn --include="*.py" "Qt" .` | Sucht nur in .py | Sehr gezielt, weniger Müll. |
+
+### 4.3 Ordnergrößen & Speicherfresser
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `du -h --max-depth=1` | Größen je Unterordner | Im Projekt-Root laufen lassen. |
+| `du -sh *` | Größe jeder Datei/jedes Verzeichnis | Schnellster „wer frisst Platz“-Scan. |
+| `df -h` | Freier Speicher auf Partitionen | Wenn `/` voll ist, knallt alles. |
+
+### 4.4 Löschen (sicherer Modus vs. hart)
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `ls -la` | Erst gucken, dann handeln | Vor `rm` immer Pflicht. |
+| `rm -i <DATEI>` | Löschen mit Nachfrage | Gut gegen „Oops“. |
+| `rm -rf <ORDNER>` | Ordner brutal löschen | Vorher: `pwd` prüfen, dann `ls`. |
+| `mkdir -p ~/papierkorb && mv <DATEI> ~/papierkorb/` | „Armer-Mann-Papierkorb“ | Besser als sofort löschen. |
+
+### 4.5 Prozesse & „warum ist alles langsam“
+| Befehl (exakt) | Kurz-Erklärung | Tipps / Stolperfallen |
+|---|---|---|
+| `top` | Live Prozessliste | `q` zum Beenden. |
+| `htop` | Komfortabler als top (wenn installiert) | Falls fehlt: `sudo apt install htop`. |
+| `ps aux \| grep -i chrome` | Prozesse filtern | Alternative: `pgrep -af chrome`. |
+
+---
+
+## 5) Tastenkombinationen (Terminal, Linux, micro)
+
+### 5.1 Terminal (Bash)
+| Shortcut | Wirkung | Tipps |
+|---|---|---|
+| `Ctrl + C` | Stoppt laufenden Prozess | „Not-Aus“. |
+| `Ctrl + D` | Logout / EOF | Schließt oft Shell/SSH. |
+| `Ctrl + R` | Reverse Search in History | Tippe Teilstring, Enter bestätigt. |
+| `Ctrl + L` | Bildschirm leeren | Wie „clear“, nur schneller. |
+| `Tab` | Autovervollständigen | Doppelt Tab = Vorschläge. |
+| `↑ / ↓` | History durchgehen | Klassiker. |
+| `Alt + .` | Letztes Argument wiederholen | Gold bei Pfaden. |
+
+### 5.2 Linux Desktop (typisch, kann je DE variieren)
+| Shortcut | Wirkung | Tipps |
+|---|---|---|
+| `Alt + Tab` | Fenster wechseln | Gedrückt halten für Auswahl. |
+| `Alt + F4` | Fenster schließen | Funktioniert fast überall. |
+| `Ctrl + Alt + T` | Terminal öffnen | Standard auf vielen Distros. |
+| `PrtSc` | Screenshot | Mit `Shift` oft Bereich. |
+
+### 5.3 micro Editor (dein Setup)
+| Shortcut | Wirkung | Tipps |
+|---|---|---|
+| `Ctrl + S` | Speichern | micro speichert direkt. |
+| `Ctrl + Q` | Beenden | Bei Änderungen fragt micro. |
+| `Ctrl + F` | Suchen | `Enter` = nächster Treffer. |
+| `Ctrl + Z` | Undo | Rettet bei Schnell-Edits. |
+| `Ctrl + Y` | Redo | Gegenstück zu Undo. |
+| `Ctrl + C / Ctrl + V` | Kopieren/Einfügen | Funktioniert „normal“. |
+
+---
+
+## 6) IT-/Programmier-Fremdwörter (einfach erklärt)
+
+| Begriff | Erklärung (leicht) |
+|---|---|
+| **Dependency / Abhängigkeit** | Zusatzpaket, das dein Programm braucht, sonst startet es nicht. |
+| **Runtime** | Umgebung, in der Code ausgeführt wird, z.B. Python oder Node. |
+| **Build** | Aus Quellcode wird ein lauffähiges Programm oder Paket. |
+| **Compile** | Übersetzen in Maschinencode oder optimierte Zwischenform. |
+| **Interpreter** | Führt Code direkt aus, ohne klassisches Compile vorher. |
+| **Framework** | Gerüst mit Regeln und Tools, damit du schneller bauen kannst. |
+| **Library** | Sammlung fertiger Funktionen, die du einbindest. |
+| **API** | Vereinbarte Schnittstelle: so sprichst du mit einem Dienst/Modul. |
+| **CLI** | Bedienung per Konsole statt mit GUI. |
+| **GUI** | Oberfläche mit Buttons und Fenstern statt Textbefehlen. |
+| **Repo** | Projektordner mit Versionsgeschichte (Git). |
+| **Commit** | Gespeicherter Zwischenstand der Historie. |
+| **Merge** | Zwei Entwicklungsstände zusammenführen. |
+| **Rebase** | Commits „umhängen“, Verlauf glätten. |
+| **Upstream** | „Gegenstelle“, zu der dein Branch standardmäßig pusht/pullt. |
+| **Fork** | Kopie eines Repos unter deinem Account. |
+| **Issue** | Ticket für Bug/Feature, damit nichts vergessen wird. |
+| **Pull Request** | Vorschlag, Änderungen ins Hauptprojekt zu übernehmen. |
+| **Patch** | Kleine Änderung, oft als Diff/Update gedacht. |
+| **Hotfix** | Schneller Fix für akuten Fehler, sofort wichtig. |
+| **Refactoring** | Aufräumen/umbauen ohne neue Features. |
+| **Validation** | Eingaben prüfen, bevor sie Schaden anrichten. |
+| **Sanitizing** | Eingaben „sauber machen“, z.B. gefährliche Zeichen entfernen. |
+| **Crash** | Programm stürzt ab und bricht hart ab. |
+| **Stacktrace** | Fehler-Spur: wo im Code es geknallt hat. |
+| **Logging** | Protokoll, was das Programm tut, für Debug/Beweise. |
+| **Telemetry** | Nach-Hause-Funken von Daten (oft unerwünscht). |
+
+---
+
+## Nächster Schritt (empfohlen)
+Wenn du willst, mache ich daraus **eine druckfertige `CHEATSHEET_PRO.md`** mit Inhaltsverzeichnis, Sprungmarken und einem extra Abschnitt „Top-20 typische Git-Fehler + Sofortlösung“.
+
+**Welche 2 Bereiche sollen ganz oben stehen: Git/GitHub oder Konsole?**
