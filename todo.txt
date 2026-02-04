@@ -1,4 +1,7 @@
 # todo.txt
+- [x] Start-Routine: Start-Info mit laienfreundlichen Optionen und Vollautomatik-Hinweis ausgeben.
+- [x] Start-Routine: Config- und Daten-Ordner auf Schreibrechte prüfen und klare Fehleroptionen bieten.
+- [x] Start-Routine: Wiederkehrende Fehler-Optionen und Debug-Tipps zentral bündeln.
 - [x] Preflight-Status nutzt Farbrollen (status_ok/status_warn) für klare visuelle Rückmeldung, Debug-Log enthält eine detaillierte Preflight-Zusammenfassung.
 - [x] Klick-Start: Root-Skript hinzugefügt, das die GUI mit Fortschrittsanzeige und Autoreparatur startet.
 - [x] Start-Routine: Fortschrittsschritte ergänzt, damit Autostart klare Etappen meldet.

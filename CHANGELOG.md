@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 1.0.69 - 2026-02-19
+Verbessert: Start-Info erklärt Konfiguration, Daten und Optionen in einfacher Sprache, die Start-Routine prüft Config- und Daten-Ordner auf Schreibrechte mit klaren Fehlerwegen, und Debug-/Fehlerhinweise sind gebündelt für konsistente Hilfe.
 Verbessert: Automatik verarbeitet Audio-Jobs parallel mit validierter Worker-Konfiguration, Reports dokumentieren die Performance-Einstellungen, und Fehlerfälle erzeugen konsistente Quarantäne-Marker.
 
 ## 1.0.68 - 2026-02-18

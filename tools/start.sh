@@ -16,6 +16,32 @@ if [ "$RUN_CHECKS" = "1" ]; then
   TOTAL_STEPS=8
 fi
 
+print_options() {
+  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+}
+
+print_debug_tips() {
+  echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+  echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
+}
+
+ensure_writable_dir() {
+  local dir="$1"
+  local label="$2"
+  if ! mkdir -p "$dir" 2>/dev/null; then
+    echo "[Modultool] Fehler: $label kann nicht erstellt werden."
+    echo "[Modultool] Tipp: Prüfe Schreibrechte für $dir."
+    print_options
+    exit 1
+  fi
+  if [ ! -w "$dir" ]; then
+    echo "[Modultool] Fehler: $label ist nicht beschreibbar."
+    echo "[Modultool] Tipp: Prüfe Schreibrechte für $dir."
+    print_options
+    exit 1
+  fi
+}
+
 progress_step() {
   local message="$1"
   STEP=$((STEP + 1))
@@ -48,16 +74,22 @@ progress_step "Start – Video-Werkstatt (Portable)"
 if [ "$DEBUG_MODE" = "1" ]; then
   echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
 fi
+echo "[Modultool] Start-Info: Config in portable_data/config (Konfiguration), Daten in portable_data/user_data (veränderliche Daten)."
+echo "[Modultool] Start-Optionen: Debug=$DEBUG_MODE (Fehlersuche), Self-Repair=$SELF_REPAIR (Selbstreparatur), Auto-Install=$AUTO_INSTALL (Abhängigkeiten), Checks=$RUN_CHECKS (Prüfungen)."
+echo "[Modultool] Tipp: Vollautomatik mit Feedback: MODULTOOL_SELF_REPAIR=1 MODULTOOL_AUTO_INSTALL=1 tools/start.sh"
 if [ -n "$LOG_FILE" ]; then
   echo "[Modultool] Start-Log: $LOG_FILE"
 fi
+
+ensure_writable_dir "$ROOT/portable_data/config" "Config-Ordner (Konfiguration)"
+ensure_writable_dir "$ROOT/portable_data/user_data" "Daten-Ordner (veränderliche Daten)"
 
 progress_step "Abhängigkeiten prüfen …"
 if [ "$SELF_REPAIR" = "1" ]; then
   echo "[Modultool] Self-Repair aktiviert (Selbstreparatur)."
   if ! "$ROOT/tools/self_repair.sh"; then
     echo "[Modultool] Fehler: Self-Repair fehlgeschlagen."
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    print_options
     exit 1
   fi
 fi
@@ -65,24 +97,22 @@ fi
 if ! "$ROOT/tools/bootstrap_python_env.sh"; then
   if [ "$SELF_REPAIR" = "1" ]; then
     echo "[Modultool] Fehler: Abhängigkeiten konnten nicht eingerichtet werden."
-    echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    print_debug_tips
+    print_options
     exit 1
   fi
   echo "[Modultool] Hinweis: Abhängigkeiten fehlgeschlagen. Starte einmalige Self-Repair-Runde …"
   if "$ROOT/tools/self_repair.sh"; then
     if ! "$ROOT/tools/bootstrap_python_env.sh"; then
       echo "[Modultool] Fehler: Abhängigkeiten konnten nicht eingerichtet werden."
-      echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
-      echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
-      echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+      print_debug_tips
+      print_options
       exit 1
     fi
   else
     echo "[Modultool] Fehler: Self-Repair fehlgeschlagen."
-    echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
-    echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    print_debug_tips
+    print_options
     exit 1
   fi
 fi
@@ -90,7 +120,7 @@ VENV_DIR="$ROOT/portable_data/.venv"
 if [ ! -x "$VENV_DIR/bin/python" ]; then
   echo "[Modultool] Fehler: Python-Umgebung fehlt oder ist defekt."
   echo "[Modultool] Tipp: Lösche $VENV_DIR und starte erneut."
-  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+  print_options
   exit 1
 fi
 
@@ -101,7 +131,7 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
     echo "[Modultool] Starte Systemeinrichtung (kann Admin-Rechte brauchen) …"
     if ! "$ROOT/tools/setup_system.sh"; then
       echo "[Modultool] Fehler: FFmpeg-Installation fehlgeschlagen."
-      echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+      print_options
       exit 1
     fi
   else
@@ -109,7 +139,7 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
   fi
   if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
     echo "[Modultool] Fehler: FFmpeg/ffprobe fehlt weiterhin."
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    print_options
     exit 1
   fi
 fi
@@ -120,7 +150,7 @@ if [ "$RUN_CHECKS" = "1" ]; then
     echo "[Modultool] Release-Checks: ok."
   else
     echo "[Modultool] Release-Checks: Fehler."
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    print_options
     exit 1
   fi
 fi
@@ -208,6 +238,6 @@ if "$VENV_DIR/bin/python" "$APP_DIR/main.py"; then
 else
   exit_code=$?
   echo "[Modultool] Fehler: GUI-Start fehlgeschlagen (Exit-Code: $exit_code)."
-  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+  print_options
   exit "$exit_code"
 fi
