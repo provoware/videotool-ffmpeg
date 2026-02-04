@@ -287,7 +287,15 @@ def run(settings_path: Path | None = None) -> dict:
         "settings_path_errors": path_errors,
     }
     if debug:
-        log_debug(f"Preflight result overall_ok={overall_ok} rec={rec}")
+        log_debug(
+            "Preflight summary "
+            f"overall_ok={overall_ok} ffmpeg_ok={ok_ffmpeg} "
+            f"watchfolder_ok={ok_watch} watchfolder='{watch}' "
+            f"watch_writable_ok={watch_writable_ok} base_ok={base_ok} "
+            f"base_writable_ok={base_writable_ok} config_writable_ok={config_writable_ok} "
+            f"theme='{theme}' theme_ok={theme_ok} free_mb={free_mb} "
+            f"min_free_mb={min_free_mb} settings_ok={settings_ok} rec={rec}"
+        )
     return result
 
 

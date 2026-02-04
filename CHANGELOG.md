@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.68 - 2026-02-18
+Verbessert: Preflight protokolliert eine detaillierte Debug-Zusammenfassung, der Werkstatt-Check markiert Status optisch mit Rollenfarben, und Themes liefern klare Statusfarben für Hinweise, Warnungen und Fehler.
+
 ## 1.0.67 - 2026-02-17
 Verbessert: Klick-Start nutzt zentrale Textbausteine aus der Textdatei, Autostart-Optionen werden robust validiert und mit klaren Standardwerten bestätigt, und Fortschrittsmeldungen folgen einem einheitlichen Format.
 
