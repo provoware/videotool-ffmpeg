@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.70
-- Fokus dieser Iteration: Material- und Auswahl-Logik in einen eigenen Controller ausgelagert, UI-Signale zentral angebunden, und Validierung/Logging konsistent verbessert.
+- Version: 1.0.71
+- Fokus dieser Iteration: AutoFix-Startoption ergänzt, Preflight kann JSON ins Log schreiben, und der Werkstatt-Check liest diese Datei robust mit klaren Hinweisen.
 
 ## Nächster Schritt
 - Barrierefreiheit & UI-Integration weiter abschließen (Quarantäne-Tagesliste als Tabelle editierbar, Preset-Plugin-Schnittstelle planen, Theme-Auswahl im UI klarer führen).

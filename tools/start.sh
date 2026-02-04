@@ -6,6 +6,7 @@ DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
 RUN_CHECKS="${MODULTOOL_RUN_CHECKS:-0}"
 SELF_REPAIR="${MODULTOOL_SELF_REPAIR:-0}"
+AUTO_FIX="${MODULTOOL_AUTOFIX:-0}"
 PROGRESS_MODE="${MODULTOOL_PROGRESS:-0}"
 LOG_DIR="$ROOT/portable_data/logs"
 LOG_FILE=""
@@ -14,6 +15,11 @@ STEP=0
 TOTAL_STEPS=7
 if [ "$RUN_CHECKS" = "1" ]; then
   TOTAL_STEPS=8
+fi
+
+if [ "$AUTO_FIX" = "1" ]; then
+  AUTO_INSTALL=1
+  SELF_REPAIR=1
 fi
 
 print_options() {
@@ -75,8 +81,8 @@ if [ "$DEBUG_MODE" = "1" ]; then
   echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
 fi
 echo "[Modultool] Start-Info: Config in portable_data/config (Konfiguration), Daten in portable_data/user_data (veränderliche Daten)."
-echo "[Modultool] Start-Optionen: Debug=$DEBUG_MODE (Fehlersuche), Self-Repair=$SELF_REPAIR (Selbstreparatur), Auto-Install=$AUTO_INSTALL (Abhängigkeiten), Checks=$RUN_CHECKS (Prüfungen)."
-echo "[Modultool] Tipp: Vollautomatik mit Feedback: MODULTOOL_SELF_REPAIR=1 MODULTOOL_AUTO_INSTALL=1 tools/start.sh"
+echo "[Modultool] Start-Optionen: Debug=$DEBUG_MODE (Fehlersuche), Self-Repair=$SELF_REPAIR (Selbstreparatur), Auto-Install=$AUTO_INSTALL (Abhängigkeiten), AutoFix=$AUTO_FIX (Vollautomatik), Checks=$RUN_CHECKS (Prüfungen)."
+echo "[Modultool] Tipp: Vollautomatik mit Feedback: MODULTOOL_AUTOFIX=1 tools/start.sh"
 if [ -n "$LOG_FILE" ]; then
   echo "[Modultool] Start-Log: $LOG_FILE"
 fi
@@ -156,25 +162,48 @@ if [ "$RUN_CHECKS" = "1" ]; then
 fi
 
 progress_step "Werkstatt-Check (Startprüfung) …"
+PREFLIGHT_JSON_PATH=""
+if [ -d "$LOG_DIR" ] && [ -w "$LOG_DIR" ]; then
+  PREFLIGHT_JSON_PATH="$LOG_DIR/preflight_last.json"
+fi
 if [ "$DEBUG_MODE" = "1" ]; then
-  if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json); then
-    :
+  if [ -n "$PREFLIGHT_JSON_PATH" ]; then
+    if ! "$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json-path "$PREFLIGHT_JSON_PATH"; then
+      rm -f "$PREFLIGHT_JSON_PATH"
+      PREFLIGHT_JSON_PATH=""
+    fi
   else
-    PREFLIGHT_JSON=""
+    if ! PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json); then
+      PREFLIGHT_JSON=""
+    fi
   fi
 else
-  if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json 2>/dev/null); then
-    :
+  if [ -n "$PREFLIGHT_JSON_PATH" ]; then
+    if ! "$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json-path "$PREFLIGHT_JSON_PATH" >/dev/null 2>&1; then
+      rm -f "$PREFLIGHT_JSON_PATH"
+      PREFLIGHT_JSON_PATH=""
+    fi
   else
-    PREFLIGHT_JSON=""
+    if ! PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json 2>/dev/null); then
+      PREFLIGHT_JSON=""
+    fi
   fi
 fi
-if [ -n "${PREFLIGHT_JSON:-}" ] && [ -n "${PREFLIGHT_JSON//[[:space:]]/}" ]; then
-  printf '%s' "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
+if { [ -n "${PREFLIGHT_JSON_PATH:-}" ] && [ -s "$PREFLIGHT_JSON_PATH" ]; } || [ -n "${PREFLIGHT_JSON:-}" ]; then
+  PREFLIGHT_JSON_PATH="${PREFLIGHT_JSON_PATH:-}" "$VENV_DIR/bin/python" - <<'PY'
 import json
+import os
 import sys
+from pathlib import Path
 
-raw = sys.stdin.read()
+json_path = os.environ.get("PREFLIGHT_JSON_PATH") or ""
+if json_path:
+    try:
+        raw = Path(json_path).read_text(encoding="utf-8")
+    except Exception:
+        raw = ""
+else:
+    raw = sys.stdin.read()
 candidate = raw.strip()
 
 def parse_payload(text: str) -> dict | None:
@@ -194,6 +223,8 @@ if not isinstance(data, dict):
     print("[Modultool] Werkstatt-Check: Ergebnis unlesbar (JSON = strukturierte Textdaten).")
     print("[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh")
     print("[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json")
+    if json_path:
+        print(f"[Modultool] Hinweis: Preflight-JSON liegt in {json_path}")
     sys.exit(0)
 
 overall_ok = bool(data.get("overall_ok", False))
