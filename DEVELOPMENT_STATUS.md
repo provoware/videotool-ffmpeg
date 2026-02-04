@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.66
-- Fokus dieser Iteration: Start-Routine repariert Bootstrap-Fehler automatisch einmalig, Self-Repair validiert die Python-Umgebung, und Bootstrap prüft Dependencies mit pip-Check.
+- Version: 1.0.67
+- Fokus dieser Iteration: Klick-Start nutzt zentrale Textbausteine, Autostart-Optionen werden validiert, und Fortschrittsmeldungen sind einheitlich formatiert.
 
 ## Nächster Schritt
-- Klick-Start-Texte in zentrale JSON-Texte auslagern und gemeinsam für UI/CLI nutzen.
+- Barrierefreiheit & UI-Integration weiter abschließen (Quarantäne-Tagesliste als Tabelle editierbar, Preset-Plugin-Schnittstelle planen).
