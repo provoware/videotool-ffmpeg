@@ -49,6 +49,23 @@ def parse_int(value, default: int, field: str, warnings: list[dict]) -> int:
         return default
 
 
+def parse_non_negative_int(
+    value, default: int, field: str, warnings: list[dict]
+) -> int:
+    parsed = parse_int(value, default, field, warnings)
+    if parsed < 0:
+        warnings.append(
+            {
+                "field": field,
+                "value": value,
+                "default": default,
+                "message": f"Value for {field} must be >= 0; using default {default}.",
+            }
+        )
+        return default
+    return parsed
+
+
 def bytes_from_mb(mb: int | float) -> int:
     return max(0, int(float(mb) * 1024 * 1024))
 
@@ -181,20 +198,46 @@ def main():
     ap.add_argument(
         "--auto", action="store_true", help="Run maintenance with settings.json rules"
     )
-    ap.parse_args()
+    args = ap.parse_args()
+    if not args.auto:
+        print(
+            json.dumps(
+                {
+                    "status": "skipped",
+                    "reason": "Bitte mit --auto starten (Auto = automatische Regeln).",
+                    "next_step": "Beispiel: app/maintenance.py --auto",
+                },
+                ensure_ascii=False,
+            )
+        )
+        return 0
     settings = load_json(settings_path(), {})
     m = settings.get("maintenance", {})
     warnings: list[dict] = []
-    logs_max_mb = parse_int(m.get("logs_max_mb", 5), 5, "logs_max_mb", warnings)
-    logs_keep = parse_int(m.get("logs_keep", 5), 5, "logs_keep", warnings)
-    cache_max_mb = parse_int(m.get("cache_max_mb", 200), 200, "cache_max_mb", warnings)
-    thumbs_max_mb = parse_int(
+    if not isinstance(m, dict):
+        warnings.append(
+            {
+                "field": "maintenance",
+                "value": type(m).__name__,
+                "default": "dict",
+                "message": "maintenance muss ein Objekt sein; Standardwerte aktiv.",
+            }
+        )
+        m = {}
+    logs_max_mb = parse_non_negative_int(
+        m.get("logs_max_mb", 5), 5, "logs_max_mb", warnings
+    )
+    logs_keep = parse_non_negative_int(m.get("logs_keep", 5), 5, "logs_keep", warnings)
+    cache_max_mb = parse_non_negative_int(
+        m.get("cache_max_mb", 200), 200, "cache_max_mb", warnings
+    )
+    thumbs_max_mb = parse_non_negative_int(
         m.get("thumbs_max_mb", 150), 150, "thumbs_max_mb", warnings
     )
-    temp_age = parse_int(
+    temp_age = parse_non_negative_int(
         m.get("temp_max_age_days", 3), 3, "temp_max_age_days", warnings
     )
-    reports_keep_days = parse_int(
+    reports_keep_days = parse_non_negative_int(
         m.get("reports_keep_days", 30), 30, "reports_keep_days", warnings
     )
     logs_max = bytes_from_mb(logs_max_mb)
