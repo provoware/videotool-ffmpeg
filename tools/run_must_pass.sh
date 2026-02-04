@@ -3,6 +3,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV="$ROOT/portable_data/.venv"
 SYSTEM_PY="$(command -v python3 || true)"
+PORTABLE_FFMPEG_DIR="$ROOT/portable_data/bin"
+if [ -d "$PORTABLE_FFMPEG_DIR" ]; then
+  export PATH="$PORTABLE_FFMPEG_DIR:$PATH"
+fi
 if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
   echo "[Modultool] Must-Pass Suite: übersprungen (ffmpeg/ffprobe fehlt)."
   exit 0

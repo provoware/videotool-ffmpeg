@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.61 - 2026-02-13
+Verbessert: Start-Routine, Self-Repair und Must-Pass Suite finden portables FFmpeg aus portable_data/bin für Offline-Betrieb.
+
 ## 1.0.60 - 2026-02-12
 Verbessert: Main-UI verdrahtet Signale zentral, das Hilfe-Center ist in einen Controller ausgelagert, und die manuelle Werkbank-Zuweisung wird validiert, bevor sie übernommen wird.
 

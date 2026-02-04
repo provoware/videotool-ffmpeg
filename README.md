@@ -155,6 +155,14 @@ tools/run_release_checks.sh
   portable_data/.venv/bin/python app/main.py
   ```
 - **FFmpeg installieren** (Pflicht): z. B. via Homebrew (`brew install ffmpeg`) oder Chocolatey (`choco install ffmpeg`).
+- **Offline-FFmpeg (portable)**: Lege `ffmpeg` und `ffprobe` in `portable_data/bin/` (Portable = lokal mitgeliefert).
+  - **Beispiel**:
+    ```bash
+    mkdir -p portable_data/bin
+    cp /pfad/zu/ffmpeg portable_data/bin/ffmpeg
+    cp /pfad/zu/ffprobe portable_data/bin/ffprobe
+    ```
+  - Start-Routine, Self-Repair und Must-Pass nutzen diese Dateien automatisch, wenn sie dort liegen.
 
 ## Weiterführende Laien-Tipps (einfach erklärt)
 - **Wenn FFmpeg fehlt:** Installiere es über den Paketmanager deiner Linux-Distribution.

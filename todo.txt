@@ -1,4 +1,5 @@
 # todo.txt
+- [x] Offline-FFmpeg: portables ffmpeg/ffprobe aus portable_data/bin in Start, Self-Repair und Must-Pass nutzen.
 - [x] Start-Routine: Release-Checks brechen bei Fehlern ab und geben klare Optionen aus.
 - [x] Maintenance: ohne --auto keine Änderungen, stattdessen klare Hinweise und Beispiel.
 - [x] Maintenance: negative Werte und falsche maintenance-Struktur werden validiert und sicher abgefangen.

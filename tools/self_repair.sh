@@ -6,6 +6,7 @@ DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
 LOG_DIR="$ROOT/portable_data/logs"
 LOG_FILE=""
+PORTABLE_FFMPEG_DIR="$ROOT/portable_data/bin"
 
 if mkdir -p "$LOG_DIR" 2>/dev/null; then
   LOG_FILE="$LOG_DIR/self_repair_last.log"
@@ -16,6 +17,13 @@ fi
 
 if [ -n "$LOG_FILE" ]; then
   exec > >(tee -a "$LOG_FILE") 2>&1
+fi
+
+if [ -d "$PORTABLE_FFMPEG_DIR" ]; then
+  export PATH="$PORTABLE_FFMPEG_DIR:$PATH"
+  if [ -x "$PORTABLE_FFMPEG_DIR/ffmpeg" ] || [ -x "$PORTABLE_FFMPEG_DIR/ffprobe" ]; then
+    echo "[Modultool] Hinweis: Portables FFmpeg gefunden (offline nutzbar)."
+  fi
 fi
 
 echo "[Modultool] Self-Repair startet (Selbstreparatur)."
