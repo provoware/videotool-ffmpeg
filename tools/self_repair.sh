@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_DIR="$ROOT/app"
+VENV_DIR="$ROOT/portable_data/.venv"
 DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
-RUN_CHECKS="${MODULTOOL_RUN_CHECKS:-0}"
-SELF_REPAIR="${MODULTOOL_SELF_REPAIR:-0}"
 LOG_DIR="$ROOT/portable_data/logs"
 LOG_FILE=""
 
 if mkdir -p "$LOG_DIR" 2>/dev/null; then
-  LOG_FILE="$LOG_DIR/start_last.log"
+  LOG_FILE="$LOG_DIR/self_repair_last.log"
 else
-  echo "[Modultool] Hinweis: Start-Log nicht möglich (Log = Protokoll)."
+  echo "[Modultool] Hinweis: Self-Repair-Log nicht möglich (Log = Protokoll)."
   echo "[Modultool] Tipp: Prüfe Schreibrechte für $LOG_DIR."
 fi
 
@@ -20,35 +18,28 @@ if [ -n "$LOG_FILE" ]; then
   exec > >(tee -a "$LOG_FILE") 2>&1
 fi
 
-echo "[Modultool] Start – Video-Werkstatt (Portable)"
+echo "[Modultool] Self-Repair startet (Selbstreparatur)."
 if [ "$DEBUG_MODE" = "1" ]; then
   echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
 fi
 if [ -n "$LOG_FILE" ]; then
-  echo "[Modultool] Start-Log: $LOG_FILE"
+  echo "[Modultool] Self-Repair-Log: $LOG_FILE"
 fi
 
-echo "[Modultool] Abhängigkeiten prüfen …"
-if [ "$SELF_REPAIR" = "1" ]; then
-  echo "[Modultool] Self-Repair aktiviert (Selbstreparatur)."
-  if ! "$ROOT/tools/self_repair.sh"; then
-    echo "[Modultool] Fehler: Self-Repair fehlgeschlagen."
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
-    exit 1
-  fi
-fi
-
-if ! "$ROOT/tools/bootstrap_python_env.sh"; then
-  echo "[Modultool] Fehler: Abhängigkeiten konnten nicht eingerichtet werden."
-  echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
-  echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "[Modultool] Fehler: python3 fehlt. Bitte installieren."
   echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
   exit 1
 fi
-VENV_DIR="$ROOT/portable_data/.venv"
-if [ ! -x "$VENV_DIR/bin/python" ]; then
-  echo "[Modultool] Fehler: Python-Umgebung fehlt oder ist defekt."
-  echo "[Modultool] Tipp: Lösche $VENV_DIR und starte erneut."
+
+if [ -d "$VENV_DIR" ] && [ ! -x "$VENV_DIR/bin/python" ]; then
+  echo "[Modultool] Hinweis: Python-Umgebung defekt. Setze sie neu auf …"
+  rm -rf "$VENV_DIR"
+fi
+
+echo "[Modultool] Abhängigkeiten prüfen und reparieren …"
+if ! "$ROOT/tools/bootstrap_python_env.sh"; then
+  echo "[Modultool] Fehler: Python-Umgebung konnte nicht repariert werden."
   echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
   exit 1
 fi
@@ -72,16 +63,6 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
   fi
 fi
 
-if [ "$RUN_CHECKS" = "1" ]; then
-  echo "[Modultool] Release-Checks (automatische Prüfung) …"
-  if "$ROOT/tools/run_release_checks.sh"; then
-    echo "[Modultool] Release-Checks: ok."
-  else
-    echo "[Modultool] Release-Checks: Fehler."
-    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
-  fi
-fi
-
 echo "[Modultool] Werkstatt-Check (Startprüfung) …"
 if [ "$DEBUG_MODE" = "1" ]; then
   if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json); then
@@ -96,6 +77,7 @@ else
     PREFLIGHT_JSON=""
   fi
 fi
+
 if [ -n "${PREFLIGHT_JSON:-}" ] && [ -n "${PREFLIGHT_JSON//[[:space:]]/}" ]; then
   printf '%s' "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
 import json
@@ -119,7 +101,7 @@ if data is None:
 
 if not isinstance(data, dict):
     print("[Modultool] Werkstatt-Check: Ergebnis unlesbar (JSON = strukturierte Textdaten).")
-    print("[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh")
+    print("[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/self_repair.sh")
     print("[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json")
     sys.exit(0)
 
@@ -148,21 +130,9 @@ else:
             print(f" - {rec_map.get(rec, rec)}")
 PY
 else
-  echo "[Modultool] Werkstatt-Check: fehlgeschlagen (weiter mit Standardstart)."
-  echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+  echo "[Modultool] Werkstatt-Check: fehlgeschlagen (Details im Log)."
+  echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/self_repair.sh"
   echo "[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json"
 fi
 
-echo "[Modultool] Werkstatt-Aufräumen …"
-# Maintenance (Logs/Cache/Temp) – best effort
-"$VENV_DIR/bin/python" "$ROOT/app/maintenance.py" --auto >/dev/null 2>&1 || true
-
-echo "[Modultool] GUI startet …"
-if "$VENV_DIR/bin/python" "$APP_DIR/main.py"; then
-  echo "[Modultool] GUI beendet."
-else
-  exit_code=$?
-  echo "[Modultool] Fehler: GUI-Start fehlgeschlagen (Exit-Code: $exit_code)."
-  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
-  exit "$exit_code"
-fi
+echo "[Modultool] Self-Repair abgeschlossen."
