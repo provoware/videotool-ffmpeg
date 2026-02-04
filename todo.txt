@@ -69,7 +69,7 @@
 - [x] Entwicklerdoku: Start-Routine, Release-Checks, Validierung und Versionierung ergänzt.
 - [x] Projektstruktur: finale Ordner-/Dateiübersicht als eigene Info-Datei erstellt.
 - [x] Prüfautomatik: Vollständigen Release-Check als Skript bereitgestellt.
-- [ ] main.py modularisieren: UI-Logik in getrennte Klassen (Materialliste, Favoriten, Einstellungen, Quarantäne-UI) auslagern, um Wartbarkeit zu erhöhen.
+- [x] main.py modularisieren: UI-Logik in getrennte Klassen (Materialliste, Favoriten, Einstellungen, Quarantäne-UI) auslagern, um Wartbarkeit zu erhöhen.
 - [x] Teil 1: Favoriten-, Einstellungen- und Quarantäne-Aktionen in eigene Controller ausgelagert.
 - [x] main.py: UI-Start in eigenständige Klassen (App/Window/Runner) modularisiert und mit Logging/Validierung ergänzt.
 - [x] Parallele Läufe robuster sperren: zuverlässige Datei-Locks mit Zeitüberschreitung und PID-Erkennung implementieren, um gleichzeitige GUI- und CLI-Läufe zu verhindern.

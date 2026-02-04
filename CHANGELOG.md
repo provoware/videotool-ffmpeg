@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.70 - 2026-02-04
+Verbessert: Material- und Auswahl-Logik ist in einen eigenen Controller ausgelagert, die UI bindet Suche/Sortierung/Import zentral daran, und Eingaben/Fehler werden dort konsistent validiert sowie protokolliert.
+
 ## 1.0.69 - 2026-02-19
 Verbessert: Start-Info erklärt Konfiguration, Daten und Optionen in einfacher Sprache, die Start-Routine prüft Config- und Daten-Ordner auf Schreibrechte mit klaren Fehlerwegen, und Debug-/Fehlerhinweise sind gebündelt für konsistente Hilfe.
 Verbessert: Automatik verarbeitet Audio-Jobs parallel mit validierter Worker-Konfiguration, Reports dokumentieren die Performance-Einstellungen, und Fehlerfälle erzeugen konsistente Quarantäne-Marker.
