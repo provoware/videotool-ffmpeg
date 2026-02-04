@@ -25,6 +25,9 @@
 - [x] Qualitäts-Checks: eigenes Skript für Compile, Bash-Check, Marker-Scan und Must-Pass.
 - [x] Preflight: ungültigen min_free_mb-Wert melden und Standard klar anzeigen.
 - [x] Debug-Modus (erweiterte Fehlersuche) mit klaren Log-Leveln ergänzen.
+- [x] Bootstrap: defekte Python-Umgebung automatisch neu erstellen und Installationen mit Self-Repair wiederholen.
+- [x] Start-Routine: Self-Repair-Option und klare Hinweise bei fehlgeschlagenem Bootstrap ergänzen.
+- [x] Self-Repair: eigenes Skript mit Log, FFmpeg-Check und Werkstatt-Check ergänzt.
 - [x] Preflight: Watchfolder-Schreibrecht prüfen und klar melden.
 - [x] Preflight: fehlenden Watchfolder automatisch anlegen (Self-Repair).
 - [x] Maintenance: ungültige Settings-Ints sicher parsen und im Summary warnen.

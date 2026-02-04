@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.56
-- Fokus dieser Iteration: Preflight prüft den Config-Ordner auf Schreibrechte, die Start-Routine warnt bei fehlendem Start-Log, und der Release-Build validiert ZIP/.deb-Artefakte nach dem Build.
+- Version: 1.0.57
+- Fokus dieser Iteration: Self-Repair repariert die Python-Umgebung mit Log und Werkstatt-Check, die Start-Routine bietet einen klaren Self-Repair-Fehlerpfad, und Bootstrap setzt defekte Umgebungen automatisch neu auf.
 
 ## Nächster Schritt
 - Main-UI weiter modularisieren (Materialliste und übrige UI-Sektionen in eigenständige Klassen trennen).

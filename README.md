@@ -18,12 +18,23 @@ Dieses Projekt verarbeitet Videos mit FFmpeg (Video-Werkzeug). Der Fokus liegt a
    ```
    *Die Start-Routine richtet Python (Programmiersprache) und Abhängigkeiten ein und führt den Werkstatt-Check (Startprüfung) aus.*
 
-2) **Automatik (CLI) nutzen**
+2) **Self-Repair (Selbstreparatur) – vollautomatisch**
+   ```bash
+   MODULTOOL_SELF_REPAIR=1 tools/start.sh
+   ```
+   *Self-Repair prüft und repariert die Python-Umgebung, prüft FFmpeg und wiederholt den Werkstatt-Check mit klaren Rückmeldungen.*
+
+   Alternativ (direkt):
+   ```bash
+   tools/self_repair.sh
+   ```
+
+3) **Automatik (CLI) nutzen**
    ```bash
    tools/run_automation.sh
    ```
 
-3) **Selftest (Automatische Prüfung)**
+4) **Selftest (Automatische Prüfung)**
    ```bash
    tools/run_selftest.sh
    ```
@@ -32,6 +43,7 @@ Dieses Projekt verarbeitet Videos mit FFmpeg (Video-Werkzeug). Der Fokus liegt a
 - **Abhängigkeiten werden automatisch installiert** (Python-Umgebung + Pakete), inkl. Nutzerfeedback bei Problemen.
 - **Werkstatt-Check (Preflight = Startprüfung)** prüft u. a. FFmpeg, Speicherplatz und notwendige Einstellungen.
 - **Start-Routine löst Abhängigkeiten automatisch** (auto-fix = selbstständig reparieren) und meldet **klar verständlich**, was funktioniert hat oder wo Hilfe nötig ist.
+- **Self-Repair (Selbstreparatur)** setzt eine defekte Python-Umgebung neu auf, prüft FFmpeg und zeigt die nächsten Schritte in einfacher Sprache.
 
 ## Qualitäts- und Formatprüfungen (Codequalität)
 Für eine automatische Qualitätsprüfung gibt es ein eigenes Skript:
@@ -105,6 +117,10 @@ tools/run_release_checks.sh
   MODULTOOL_DEBUG=1 tools/start.sh | tee start.log
   ```
   *`tee` speichert den Log (Protokoll) in `start.log` und zeigt ihn gleichzeitig im Terminal.*
+- Self-Repair-Log (Selbstreparatur-Protokoll):
+  ```bash
+  cat portable_data/logs/self_repair_last.log
+  ```
 
 ### Wenn der Start auf neuen Systemen hakt (Checkliste für Laien)
 1) **Fehlertext notieren** (genau so wie angezeigt).
@@ -146,6 +162,7 @@ tools/run_release_checks.sh
 - **Wenn die Vorschau langsam ist:** Schonmodus (Eco-Modus) aktivieren.
 - **Wenn die Schrift zu klein wirkt:** System-Schriftgröße erhöhen oder High-Contrast (Hochkontrast) Theme wählen.
 - **Wenn Format-Checks fehlschlagen:** `tools/run_quality_checks.sh` starten, dann Hinweise im Terminal lesen.
+- **Wenn der Start hakt:** `MODULTOOL_SELF_REPAIR=1 tools/start.sh` nutzen und das Log `portable_data/logs/self_repair_last.log` prüfen.
 
 ## Release-Checkliste (Release = Veröffentlichung)
 Für den Release fehlen typischerweise:
