@@ -6,9 +6,25 @@ DEBUG_MODE="${MODULTOOL_DEBUG:-0}"
 AUTO_INSTALL="${MODULTOOL_AUTO_INSTALL:-0}"
 RUN_CHECKS="${MODULTOOL_RUN_CHECKS:-0}"
 SELF_REPAIR="${MODULTOOL_SELF_REPAIR:-0}"
+PROGRESS_MODE="${MODULTOOL_PROGRESS:-0}"
 LOG_DIR="$ROOT/portable_data/logs"
 LOG_FILE=""
 PORTABLE_FFMPEG_DIR="$ROOT/portable_data/bin"
+STEP=0
+TOTAL_STEPS=7
+if [ "$RUN_CHECKS" = "1" ]; then
+  TOTAL_STEPS=8
+fi
+
+progress_step() {
+  local message="$1"
+  STEP=$((STEP + 1))
+  if [ "$PROGRESS_MODE" = "1" ]; then
+    echo "[Modultool] Schritt $STEP/$TOTAL_STEPS: $message"
+  else
+    echo "[Modultool] $message"
+  fi
+}
 
 if mkdir -p "$LOG_DIR" 2>/dev/null; then
   LOG_FILE="$LOG_DIR/start_last.log"
@@ -28,7 +44,7 @@ if [ -d "$PORTABLE_FFMPEG_DIR" ]; then
   fi
 fi
 
-echo "[Modultool] Start – Video-Werkstatt (Portable)"
+progress_step "Start – Video-Werkstatt (Portable)"
 if [ "$DEBUG_MODE" = "1" ]; then
   echo "[Modultool] Debug-Modus aktiv (mehr Details im Log)."
 fi
@@ -36,7 +52,7 @@ if [ -n "$LOG_FILE" ]; then
   echo "[Modultool] Start-Log: $LOG_FILE"
 fi
 
-echo "[Modultool] Abhängigkeiten prüfen …"
+progress_step "Abhängigkeiten prüfen …"
 if [ "$SELF_REPAIR" = "1" ]; then
   echo "[Modultool] Self-Repair aktiviert (Selbstreparatur)."
   if ! "$ROOT/tools/self_repair.sh"; then
@@ -61,6 +77,7 @@ if [ ! -x "$VENV_DIR/bin/python" ]; then
   exit 1
 fi
 
+progress_step "FFmpeg prüfen (Video-Werkzeug) …"
 if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
   echo "[Modultool] Hinweis: FFmpeg/ffprobe fehlt (Video-Werkzeug)."
   if [ "$AUTO_INSTALL" = "1" ]; then
@@ -81,7 +98,7 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
 fi
 
 if [ "$RUN_CHECKS" = "1" ]; then
-  echo "[Modultool] Release-Checks (automatische Prüfung) …"
+  progress_step "Release-Checks (automatische Prüfung) …"
   if "$ROOT/tools/run_release_checks.sh"; then
     echo "[Modultool] Release-Checks: ok."
   else
@@ -91,7 +108,7 @@ if [ "$RUN_CHECKS" = "1" ]; then
   fi
 fi
 
-echo "[Modultool] Werkstatt-Check (Startprüfung) …"
+progress_step "Werkstatt-Check (Startprüfung) …"
 if [ "$DEBUG_MODE" = "1" ]; then
   if PREFLIGHT_JSON=$("$VENV_DIR/bin/python" "$ROOT/app/preflight.py" --json); then
     :
@@ -164,11 +181,11 @@ else
   echo "[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json"
 fi
 
-echo "[Modultool] Werkstatt-Aufräumen …"
+progress_step "Werkstatt-Aufräumen …"
 # Maintenance (Logs/Cache/Temp) – best effort
 "$VENV_DIR/bin/python" "$ROOT/app/maintenance.py" --auto >/dev/null 2>&1 || true
 
-echo "[Modultool] GUI startet …"
+progress_step "GUI startet …"
 if "$VENV_DIR/bin/python" "$APP_DIR/main.py"; then
   echo "[Modultool] GUI beendet."
 else
