@@ -13,7 +13,6 @@ from validation_utils import (
     PathValidationError,
 )
 from PySide6.QtCore import Qt, QSize, QProcess
-from PySide6.QtGui import QPixmap, QIcon, QImageReader
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -26,7 +25,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QTextEdit,
     QFileDialog,
-    QInputDialog,
     QDialog,
 )
 from ui_main_layout import build_main_layout
@@ -35,12 +33,12 @@ from quarantine_table_controller import QuarantineTableController
 from favorites_controller import FavoritesController
 from quarantine_actions_controller import QuarantineActionsController
 from settings_controller import SettingsController
+from material_controller import MaterialController
 
 from app_services import (
     activity,
     ensure_dirs,
     favorites_dir,
-    get_thumb_pixmap,
     have,
     is_audio_path,
     is_image_path,
@@ -49,7 +47,6 @@ from app_services import (
     load_today_quarantine_jobs,
     normalize_report_doc,
     open_path,
-    rename_file_safe,
     run_automation_now,
     run_quarantine_worker,
     run_setup,
@@ -130,11 +127,6 @@ class Main(QMainWindow):
         self.statusBar().showMessage("Bereit. Gib mir Material.")
         activity("GUI gestartet.")
 
-        # filters state
-        self.material_search = ""
-        self.material_type_filter = "alle"
-        self.selection_search = ""
-        self.selection_type_filter = "alle"
         self.q_search = ""
         self.done_search = ""
 
@@ -185,6 +177,16 @@ class Main(QMainWindow):
             self.fav_tag_combo,
             self.texts,
         )
+        self.material_controller = MaterialController(
+            self,
+            self.material,
+            self.preview_img,
+            self.preview_info,
+            self.sort_combo,
+            self.sel_list,
+            self.grp_sel,
+            self.statusBar(),
+        )
         self.quarantine_actions = QuarantineActionsController(
             self,
             self._quar_controller,
@@ -197,7 +199,7 @@ class Main(QMainWindow):
 
         self._connect_signals()
 
-        self.refresh_sel()
+        self.material_controller.refresh_selection()
         self.refresh_last_night()
 
         # Barriere-Labels (Screenreader / Tastatur)
@@ -241,7 +243,7 @@ class Main(QMainWindow):
         )
         # Barriere-Labels gesetzt
         self.favorites_controller.refresh_favorites()
-        self.apply_material_filter()
+        self.material_controller.apply_material_filter()
 
         if not have("ffmpeg") or not have("ffprobe"):
             self.statusBar().showMessage(
@@ -254,9 +256,11 @@ class Main(QMainWindow):
 
     def _connect_signals(self):
         # --- Signals ---
-        self.material.itemChanged.connect(self.refresh_sel)
-        self.material.currentItemChanged.connect(self.update_preview_from_current)
-        self.btn_clear.clicked.connect(self.clear_sel)
+        self.material.itemChanged.connect(self.material_controller.refresh_selection)
+        self.material.currentItemChanged.connect(
+            self.material_controller.update_preview_from_current
+        )
+        self.btn_clear.clicked.connect(self.material_controller.clear_selection)
         self.btn_setup.clicked.connect(self.setup_clicked)
         self.btn_preflight_setup.clicked.connect(self.setup_clicked)
         self.btn_preflight_details.clicked.connect(self._show_preflight_details)
@@ -337,32 +341,23 @@ class Main(QMainWindow):
         self.settings_controller.update_name_preview()
         self.fav_list.itemDoubleClicked.connect(self.favorites_controller.open_selected)
 
-        self.btn_add_files.clicked.connect(self.pick_files)
-        self.btn_add_folder.clicked.connect(self.pick_folder)
-        self.sort_combo.currentIndexChanged.connect(self.apply_sort)
-        self.material_search_box.textChanged.connect(self.on_material_search)
-        self.material_type_combo.currentIndexChanged.connect(self.on_material_type)
-        self.selection_search_box.textChanged.connect(self.on_selection_search)
-        self.selection_type_combo.currentIndexChanged.connect(self.on_selection_type)
+        self.btn_add_files.clicked.connect(self.material_controller.pick_files)
+        self.btn_add_folder.clicked.connect(self.material_controller.pick_folder)
+        self.sort_combo.currentIndexChanged.connect(self.material_controller.apply_sort)
+        self.material_search_box.textChanged.connect(
+            self.material_controller.on_material_search
+        )
+        self.material_type_combo.currentIndexChanged.connect(
+            self.material_controller.on_material_type
+        )
+        self.selection_search_box.textChanged.connect(
+            self.material_controller.on_selection_search
+        )
+        self.selection_type_combo.currentIndexChanged.connect(
+            self.material_controller.on_selection_type
+        )
         self.q_search_box.textChanged.connect(self.on_q_search)
         self.done_search_box.textChanged.connect(self.on_done_search)
-
-    # --- Search/filter handlers ---
-    def on_material_search(self, t: str):
-        self.material_search = t.strip().lower()
-        self.apply_material_filter()
-
-    def on_material_type(self, idx: int):
-        self.material_type_filter = ["alle", "audio", "bilder"][idx]
-        self.apply_material_filter()
-
-    def on_selection_search(self, t: str):
-        self.selection_search = t.strip().lower()
-        self.refresh_sel()
-
-    def on_selection_type(self, idx: int):
-        self.selection_type_filter = ["alle", "audio", "bilder"][idx]
-        self.refresh_sel()
 
     def on_q_search(self, t: str):
         self.q_search = t.strip().lower()
@@ -371,27 +366,6 @@ class Main(QMainWindow):
     def on_done_search(self, t: str):
         self.done_search = t.strip().lower()
         self.refresh_last_night()
-
-    def apply_material_filter(self):
-        # hide/unhide items based on search and type
-        for i in range(self.material.count()):
-            it = self.material.item(i)
-            path = it.data(Qt.UserRole)
-            name = (it.text() or "").lower()
-            show = True
-            if self.material_search and self.material_search not in name:
-                show = False
-            if path:
-                p = Path(path)
-                if self.material_type_filter == "audio" and not is_audio_path(p):
-                    show = False
-                if self.material_type_filter == "bilder" and not is_image_path(p):
-                    show = False
-            else:
-                # items without path: show only if no type filter
-                if self.material_type_filter != "alle":
-                    show = False
-            it.setHidden(not show)
 
     # --- Developer docs search ---
     def dev_find(self, q: str):
@@ -426,245 +400,6 @@ class Main(QMainWindow):
             self.statusBar().showMessage(
                 f"{label}: Kein Treffer gefunden. Nächster Schritt: Begriff prüfen."
             )
-
-    # --- Import ---
-    def pick_files(self):
-        files, _ = QFileDialog.getOpenFileNames(
-            self,
-            "Dateien holen",
-            str(Path.home() / "Downloads"),
-            "Audio/Bilder (*.mp3 *.wav *.flac *.m4a *.aac *.ogg *.jpg *.jpeg *.png *.webp *.bmp)",
-        )
-        if files:
-            self.add_paths_to_material([Path(f) for f in files])
-
-    def pick_folder(self):
-        folder = QFileDialog.getExistingDirectory(
-            self, "Ordner holen", str(Path.home() / "Downloads")
-        )
-        if folder:
-            p = Path(folder)
-            paths = [x for x in p.iterdir() if x.is_file()]
-            self.add_paths_to_material(paths)
-
-    def add_paths_to_material(self, paths):
-        added = 0
-        for p in paths:
-            if p.is_dir():
-                for x in p.iterdir():
-                    if x.is_file():
-                        added += self._add_single_path(x)
-            else:
-                added += self._add_single_path(p)
-        self.apply_sort()
-        self.apply_material_filter()
-        if added:
-            self.statusBar().showMessage(
-                f"{added} Datei(en) geholt. Jetzt: Checkboxen anklicken."
-            )
-            activity(f"Import: {added} Datei(en) hinzugefügt.")
-        self.refresh_sel()
-
-    def _add_single_path(self, p: Path) -> int:
-        if not is_audio_path(p) and not is_image_path(p):
-            return 0
-        # avoid duplicates
-        for i in range(self.material.count()):
-            it = self.material.item(i)
-            if it.data(Qt.UserRole) == str(p):
-                return 0
-
-        it = QListWidgetItem(p.name)
-        it.setToolTip(str(p))
-        it.setData(Qt.UserRole, str(p))
-        it.setCheckState(Qt.Unchecked)
-
-        if is_image_path(p):
-            pm = get_thumb_pixmap(p, 96)
-            if pm:
-                it.setIcon(QIcon(pm))
-        self.material.addItem(it)
-        return 1
-
-    def apply_sort(self):
-        items = []
-        for i in range(self.material.count()):
-            it = self.material.item(i)
-            path = it.data(Qt.UserRole)
-            items.append((it.checkState(), it.text(), path, it.icon(), it.isHidden()))
-        self.material.blockSignals(True)
-        self.material.clear()
-        mode = self.sort_combo.currentIndex()
-
-        def key_fn(t):
-            chk, name, path, _icon, _hidden = t
-            if not path:
-                return 0
-            try:
-                mt = Path(path).stat().st_mtime
-            except Exception:
-                mt = 0
-            return -mt if mode == 0 else name.lower()
-
-        for chk, name, path, icon, hidden in sorted(items, key=key_fn):
-            it = QListWidgetItem(name)
-            it.setToolTip(path or "")
-            it.setData(Qt.UserRole, path)
-            it.setCheckState(chk)
-            it.setIcon(icon)
-            it.setHidden(hidden)
-            self.material.addItem(it)
-        self.material.blockSignals(False)
-
-    def update_preview_from_current(self, current, prev):
-        if not current:
-            self.preview_img.setText("Kein Bild ausgewählt.")
-            self.preview_img.setPixmap(QPixmap())
-            self.preview_info.setText("")
-            return
-        path = current.data(Qt.UserRole)
-        if not path:
-            self.preview_img.setText("Kein Bild ausgewählt.")
-            self.preview_img.setPixmap(QPixmap())
-            self.preview_info.setText("")
-            return
-        p = Path(path)
-        if is_image_path(p) and p.exists():
-            reader = QImageReader(str(p))
-            reader.setAutoTransform(True)
-            img = reader.read()
-            pm = QPixmap.fromImage(img) if not img.isNull() else None
-            if pm and not pm.isNull():
-                pm2 = pm.scaled(
-                    self.preview_img.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation
-                )
-                self.preview_img.setPixmap(pm2)
-                self.preview_img.setText("")
-                try:
-                    st = p.stat()
-                    self.preview_info.setText(
-                        f"{p.name}\n{p.parent}\nGröße: {st.st_size // 1024} KB"
-                    )
-                except Exception:
-                    self.preview_info.setText(f"{p.name}\n{p.parent}")
-                return
-        self.preview_img.setPixmap(QPixmap())
-        self.preview_img.setText("Keine Bildvorschau.")
-        self.preview_info.setText(p.name)
-
-    # --- Selection basket ---
-    def refresh_sel(self):
-        checked = []
-        self.sel_list.clear()
-
-        for i in range(self.material.count()):
-            it = self.material.item(i)
-            if it.checkState() == Qt.Checked:
-                path = it.data(Qt.UserRole) or ""
-                name = (it.text() or "").lower()
-                # apply selection filters
-                if self.selection_search and self.selection_search not in name:
-                    continue
-                if path:
-                    p = Path(path)
-                    if self.selection_type_filter == "audio" and not is_audio_path(p):
-                        continue
-                    if self.selection_type_filter == "bilder" and not is_image_path(p):
-                        continue
-                else:
-                    if self.selection_type_filter != "alle":
-                        continue
-                checked.append((it, path))
-
-        self.grp_sel.setTitle(f"Deine Auswahl ({len(checked)})")
-        for it, path in checked:
-            self._add_selection_row(it, path)
-
-        self.statusBar().showMessage(
-            "Auswahl aktualisiert. Nächster Schritt: Vorschau klicken."
-        )
-
-    def _add_selection_row(self, material_item: QListWidgetItem, path_str: str):
-        w = QWidget()
-        layout = QHBoxLayout(w)
-        layout.setContentsMargins(6, 2, 6, 2)
-
-        icon_lbl = QLabel()
-        icon_lbl.setFixedSize(52, 52)
-        icon_lbl.setAlignment(Qt.AlignCenter)
-
-        if path_str:
-            p = Path(path_str)
-            if is_image_path(p):
-                pm = get_thumb_pixmap(p, 48)
-                if pm:
-                    icon_lbl.setPixmap(pm)
-
-        label = QLabel(material_item.text())
-        label.setToolTip(path_str)
-
-        btn_rename = QPushButton("Umbenennen")
-        btn_rename.setMaximumWidth(120)
-        btn_remove = QPushButton("Entfernen")
-        btn_remove.setMaximumWidth(100)
-
-        def do_remove():
-            material_item.setCheckState(Qt.Unchecked)
-            self.refresh_sel()
-            activity(f"Auswahl entfernt: {material_item.text()}")
-
-        def do_rename():
-            if not path_str:
-                QMessageBox.information(
-                    self, "Umbenennen", "Diese Auswahl hat keinen echten Pfad."
-                )
-                return
-            p = Path(path_str)
-            if not p.exists():
-                QMessageBox.information(
-                    self, "Umbenennen", "Datei nicht gefunden. Pfad ist veraltet."
-                )
-                return
-            new_name, ok = QInputDialog.getText(
-                self, "Umbenennen", "Neuer Name (ohne Endung):", text=p.stem
-            )
-            if not ok or not new_name.strip():
-                return
-            try:
-                new_path = rename_file_safe(p, new_name)
-            except Exception as e:
-                QMessageBox.critical(
-                    self, "Umbenennen", f"Konnte nicht umbenennen:\n{e}"
-                )
-                return
-            material_item.setText(new_path.name)
-            material_item.setData(Qt.UserRole, str(new_path))
-            material_item.setToolTip(str(new_path))
-            if is_image_path(new_path):
-                pm = get_thumb_pixmap(new_path, 96)
-                if pm:
-                    material_item.setIcon(QIcon(pm))
-            activity(f"Umbenannt: {p.name} -> {new_path.name}")
-            self.refresh_sel()
-            self.apply_material_filter()
-
-        btn_remove.clicked.connect(do_remove)
-        btn_rename.clicked.connect(do_rename)
-
-        layout.addWidget(icon_lbl)
-        layout.addWidget(label, 1)
-        layout.addWidget(btn_rename)
-        layout.addWidget(btn_remove)
-
-        item = QListWidgetItem()
-        item.setSizeHint(QSize(10, 58))
-        self.sel_list.addItem(item)
-        self.sel_list.setItemWidget(item, w)
-
-    def clear_sel(self):
-        for i in range(self.material.count()):
-            self.material.item(i).setCheckState(Qt.Unchecked)
-        self.refresh_sel()
 
     # --- System & folders ---
     def setup_clicked(self):
