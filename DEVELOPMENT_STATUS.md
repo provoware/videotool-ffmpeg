@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.64
-- Fokus dieser Iteration: Info-Dateien aktualisiert (Start-Routine, automatische Prüfungen, Input/Output-Validierung in einfacher Sprache).
+- Version: 1.0.65
+- Fokus dieser Iteration: Klick-Start im Root ergänzt, Start-Routine meldet Fortschrittsschritte und führt bei Bedarf eine Autoreparatur-Runde durch.
 
 ## Nächster Schritt
-- Main-UI weiter modularisieren (Materialliste, Auswahlkorb und Quarantäne-Listen als eigene Komponenten).
+- Klick-Start-Texte in zentrale JSON-Texte auslagern und gemeinsam für UI/CLI nutzen.

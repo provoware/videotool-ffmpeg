@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.65 - 2026-02-15
+Verbessert: Klick-Start-Skript im Projekt-Root startet die GUI vollautomatisch mit Fortschrittsanzeige, die Start-Routine meldet jetzt klare Fortschrittsschritte, und ein Autoreparatur-Lauf wird im Klick-Start als zweiter Versuch angeboten.
+
 ## 1.0.64 - 2026-02-15
 Verbessert: Dokumentation präzisiert die autonome Start-Routine mit Nutzerfeedback, ergänzt klare Voll- und Kurzprüfungen, und beschreibt Input/Output-Validierung in einfacher Sprache.
 
