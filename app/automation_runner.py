@@ -47,12 +47,34 @@ def save_json(p: Path, obj, context: str = "automation_runner.save_json") -> boo
     return ok
 
 
-def log_line(logs_dir: Path, msg: str):
-    logs_dir.mkdir(parents=True, exist_ok=True)
-    p = logs_dir / "activity_log.jsonl"
-    entry = {"at": datetime.utcnow().isoformat(timespec="seconds") + "Z", "msg": msg}
-    with p.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+def log_line(logs_dir: Path, msg: str) -> bool:
+    if not isinstance(logs_dir, Path):
+        log_exception(
+            "automation_runner.log_line",
+            TypeError("logs_dir ist kein Path."),
+            extra={"logs_dir_type": type(logs_dir).__name__},
+        )
+        return False
+    safe_msg = (
+        msg.strip() if isinstance(msg, str) and msg.strip() else "Unbekannte Meldung"
+    )
+    try:
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        p = logs_dir / "activity_log.jsonl"
+        entry = {
+            "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "msg": safe_msg,
+        }
+        with p.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception as exc:
+        log_exception(
+            "automation_runner.log_line",
+            exc,
+            extra={"path": str(logs_dir), "msg": safe_msg},
+        )
+        return False
+    return True
 
 
 def record_report_error(report: dict, message: str, details: str | None = None):

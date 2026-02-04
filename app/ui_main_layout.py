@@ -22,14 +22,27 @@ from PySide6.QtWidgets import (
     QTableWidget,
 )
 
-from logging_utils import log_exception
+from logging_utils import log_exception, log_message
 from paths import config_dir
 
 
 class FileDropListWidget(QListWidget):
     def __init__(self, on_paths, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.on_paths = on_paths
+        if callable(on_paths):
+            self.on_paths = on_paths
+        else:
+            self.on_paths = None
+            log_message(
+                "Drag & Drop wurde ohne Handler gestartet.",
+                level="ERROR",
+                context="ui.file_drop_list.init",
+                user_message=(
+                    "Drag & Drop ist deaktiviert. Aktion: Bitte Dateien über die "
+                    "Schaltfläche auswählen."
+                ),
+                extra={"on_paths_type": type(on_paths).__name__},
+            )
         self.setAcceptDrops(True)
         self.setDragDropMode(QListWidget.DropOnly)
 
@@ -47,14 +60,47 @@ class FileDropListWidget(QListWidget):
 
     def dropEvent(self, event):
         urls = event.mimeData().urls()
+        if not callable(self.on_paths):
+            log_message(
+                "Drop ignoriert, weil kein Handler verfügbar ist.",
+                level="WARNING",
+                context="ui.file_drop_list.drop",
+                user_message=(
+                    "Drag & Drop ist gerade nicht bereit. Aktion: Bitte die "
+                    "Schaltflächen für Dateien oder Ordner nutzen."
+                ),
+            )
+            event.ignore()
+            return
         paths = []
         for u in urls:
             if u.isLocalFile():
                 paths.append(Path(u.toLocalFile()))
         if paths:
-            self.on_paths(paths)
-            event.acceptProposedAction()
+            try:
+                self.on_paths(paths)
+                event.acceptProposedAction()
+            except Exception as exc:
+                log_exception(
+                    "ui.file_drop_list.drop",
+                    exc,
+                    extra={"paths": [str(p) for p in paths]},
+                    user_message=(
+                        "Dateien konnten nicht übernommen werden. Aktion: Bitte erneut "
+                        "versuchen oder die Dateien über die Schaltfläche hinzufügen."
+                    ),
+                )
+                event.ignore()
         else:
+            log_message(
+                "Drop enthält keine lokalen Dateien.",
+                level="INFO",
+                context="ui.file_drop_list.drop",
+                user_message=(
+                    "Es wurden keine lokalen Dateien erkannt. Aktion: Bitte lokale "
+                    "Dateien oder Ordner auswählen."
+                ),
+            )
             super().dropEvent(event)
 
 
@@ -73,6 +119,21 @@ def _apply_label_role(label: QLabel, role: str):
         )
 
 
+def _apply_accessibility(widget: QWidget, name: str, description: str | None = None):
+    if not isinstance(name, str) or not name.strip():
+        return
+    try:
+        widget.setAccessibleName(name.strip())
+        if isinstance(description, str) and description.strip():
+            widget.setAccessibleDescription(description.strip())
+    except Exception as exc:
+        log_exception(
+            "apply_accessibility",
+            exc,
+            extra={"name": name, "widget": widget.objectName()},
+        )
+
+
 def build_main_layout(main) -> None:
     splitter = QSplitter(Qt.Horizontal)
     main.left = QTabWidget()
@@ -88,6 +149,16 @@ def build_main_layout(main) -> None:
     row0 = QHBoxLayout()
     main.btn_add_files = QPushButton("Dateien holen")
     main.btn_add_folder = QPushButton("Ordner holen")
+    _apply_accessibility(
+        main.btn_add_files,
+        "Dateien hinzufügen",
+        "Öffnet einen Dialog zum Auswählen von Dateien.",
+    )
+    _apply_accessibility(
+        main.btn_add_folder,
+        "Ordner hinzufügen",
+        "Öffnet einen Dialog zum Auswählen eines Ordners.",
+    )
     row0.addWidget(main.btn_add_files)
     row0.addWidget(main.btn_add_folder)
     lm.addLayout(row0)
@@ -95,6 +166,11 @@ def build_main_layout(main) -> None:
     row1 = QHBoxLayout()
     main.material_search_box = QLineEdit()
     main.material_search_box.setPlaceholderText("Suchen im Material …")
+    _apply_accessibility(
+        main.material_search_box,
+        "Material durchsuchen",
+        "Suche im Material mit Text oder Dateiname.",
+    )
     main.material_type_combo = QComboBox()
     main.material_type_combo.addItems(["Typ: alle", "Typ: audio", "Typ: bilder"])
     main.sort_combo = QComboBox()
@@ -154,6 +230,11 @@ def build_main_layout(main) -> None:
     main.fav_search_box = QLineEdit()
     main.fav_search_box.setPlaceholderText(
         main.texts["strings"].get("favoriten.suchen", "Suchen in Favoriten …")
+    )
+    _apply_accessibility(
+        main.fav_search_box,
+        "Favoriten durchsuchen",
+        "Suche in Favoriten mit Text oder Tag.",
     )
     main.fav_tag_combo = QComboBox()
     main.fav_tag_combo.addItems(["Tag: alle"])
