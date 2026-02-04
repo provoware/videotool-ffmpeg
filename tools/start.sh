@@ -78,17 +78,32 @@ else
   fi
 fi
 if [ -n "${PREFLIGHT_JSON:-}" ] && [ -n "${PREFLIGHT_JSON//[[:space:]]/}" ]; then
-  echo "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
+  printf '%s' "$PREFLIGHT_JSON" | "$VENV_DIR/bin/python" - <<'PY'
 import json
 import sys
 
-try:
-    data = json.load(sys.stdin)
-except json.JSONDecodeError:
+raw = sys.stdin.read()
+candidate = raw.strip()
+
+def parse_payload(text: str) -> dict | None:
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return None
+
+data = parse_payload(candidate)
+if data is None:
+    start = candidate.find("{")
+    end = candidate.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        data = parse_payload(candidate[start : end + 1])
+
+if not isinstance(data, dict):
     print("[Modultool] Werkstatt-Check: Ergebnis unlesbar (JSON = strukturierte Textdaten).")
     print("[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh")
     print("[Modultool] Tipp: Befehl: ./portable_data/.venv/bin/python app/preflight.py --json")
     sys.exit(0)
+
 overall_ok = bool(data.get("overall_ok", False))
 if overall_ok:
     print("[Modultool] Werkstatt-Check: Alles bereit.")
@@ -123,4 +138,11 @@ echo "[Modultool] Werkstatt-Aufräumen …"
 "$VENV_DIR/bin/python" "$ROOT/app/maintenance.py" --auto >/dev/null 2>&1 || true
 
 echo "[Modultool] GUI startet …"
-exec "$VENV_DIR/bin/python" "$APP_DIR/main.py"
+if "$VENV_DIR/bin/python" "$APP_DIR/main.py"; then
+  echo "[Modultool] GUI beendet."
+else
+  exit_code=$?
+  echo "[Modultool] Fehler: GUI-Start fehlgeschlagen (Exit-Code: $exit_code)."
+  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+  exit "$exit_code"
+fi
