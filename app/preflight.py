@@ -159,8 +159,12 @@ def run(settings_path: Path | None = None) -> dict:
         watch_writable_ok = False
         watch_writable_error = "watchfolder_missing_or_invalid"
 
+    config_root = config_dir()
+    config_writable_ok, config_writable_error = writable_dir(config_root)
+
     writable = {}
     for key, p in [
+        ("config", config_root),
         ("exports", exports),
         ("reports", reports),
         ("staging", staging),
@@ -171,7 +175,10 @@ def run(settings_path: Path | None = None) -> dict:
         ok, err = writable_dir(p)
         writable[key] = {"ok": ok, "path": str(p), "error": err}
         if not ok:
-            path_errors.append(f"paths.{key}:not_writable")
+            if key == "config":
+                path_errors.append("config_dir:not_writable")
+            else:
+                path_errors.append(f"paths.{key}:not_writable")
 
     free_mb = free_space_mb(data_dir())
     ok_space = (free_mb >= min_free_mb) if free_mb >= 0 else True
@@ -198,6 +205,8 @@ def run(settings_path: Path | None = None) -> dict:
         rec.append("free_space")
     if not ok_font:
         rec.append("install_font")
+    if not config_writable_ok:
+        rec.append("config_not_writable")
     if not min_free_ok:
         rec.append("min_free_mb_invalid")
     if not theme_ok:

@@ -10,6 +10,9 @@ LOG_FILE=""
 
 if mkdir -p "$LOG_DIR" 2>/dev/null; then
   LOG_FILE="$LOG_DIR/start_last.log"
+else
+  echo "[Modultool] Hinweis: Start-Log nicht möglich (Log = Protokoll)."
+  echo "[Modultool] Tipp: Prüfe Schreibrechte für $LOG_DIR."
 fi
 
 if [ -n "$LOG_FILE" ]; then
@@ -115,6 +118,7 @@ else:
         "set_watchfolder": "Watchfolder (Eingangsordner) wählen.",
         "free_space": "Speicher frei machen (nicht benötigte Dateien löschen).",
         "install_font": "Schrift (Font) installieren, z.B. DejaVuSans.",
+        "config_not_writable": "Config-Ordner (Konfiguration) braucht Schreibrechte.",
         "watchfolder_not_writable": "Watchfolder (Eingangsordner) braucht Schreibrechte (Rechte prüfen).",
         "watchfolder_invalid": "Watchfolder-Eingabe prüfen und gültigen Ordner wählen.",
         "min_free_mb_invalid": "Mindest-Speicher (min_free_mb) als Zahl setzen (z.B. 2048).",
