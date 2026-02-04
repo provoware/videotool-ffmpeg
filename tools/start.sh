@@ -34,15 +34,22 @@ if [ ! -x "$VENV_DIR/bin/python" ]; then
   exit 1
 fi
 
-if ! command -v ffmpeg >/dev/null 2>&1; then
-  echo "[Modultool] Hinweis: FFmpeg fehlt (Video-Werkzeug)."
+if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+  echo "[Modultool] Hinweis: FFmpeg/ffprobe fehlt (Video-Werkzeug)."
   if [ "$AUTO_INSTALL" = "1" ]; then
     echo "[Modultool] Starte Systemeinrichtung (kann Admin-Rechte brauchen) …"
     if ! "$ROOT/tools/setup_system.sh"; then
       echo "[Modultool] Fehler: FFmpeg-Installation fehlgeschlagen."
+      echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+      exit 1
     fi
   else
     echo "[Modultool] Tipp: Starte \"tools/setup_system.sh\" oder setze MODULTOOL_AUTO_INSTALL=1."
+  fi
+  if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+    echo "[Modultool] Fehler: FFmpeg/ffprobe fehlt weiterhin."
+    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    exit 1
   fi
 fi
 
