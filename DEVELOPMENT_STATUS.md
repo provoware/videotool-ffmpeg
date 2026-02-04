@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.68
-- Fokus dieser Iteration: Preflight-Debugging ist detailreicher, der Werkstatt-Check nutzt Rollenfarben, und die Themes liefern klare Statusfarben.
+- Version: 1.0.69
+- Fokus dieser Iteration: Automatik exportiert Audio-Jobs parallel, die Worker-Anzahl wird validiert, und Reports zeigen Performance-Details.
 
 ## Nächster Schritt
 - Barrierefreiheit & UI-Integration weiter abschließen (Quarantäne-Tagesliste als Tabelle editierbar, Preset-Plugin-Schnittstelle planen).

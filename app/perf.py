@@ -36,3 +36,18 @@ def get_threads(settings_path: Path) -> int | None:
     if normal_threads > 0:
         return normal_threads
     return cpu_threads
+
+
+def get_parallel_audio_workers(settings: dict) -> int:
+    if not isinstance(settings, dict):
+        return 1
+    performance = settings.get("performance", {})
+    if not isinstance(performance, dict):
+        return 1
+    cpu_threads = _cpu_threads()
+    eco_mode = bool(performance.get("eco_mode", False))
+    default_workers = 1 if eco_mode else max(1, min(4, cpu_threads))
+    raw = _safe_int(performance.get("parallel_audio_workers", default_workers), 1)
+    if raw < 1:
+        return 1
+    return min(raw, cpu_threads)

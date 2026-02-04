@@ -6,10 +6,11 @@ import os
 import re
 import shutil
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 from pathlib import Path
 from datetime import datetime
-from perf import get_threads
+from perf import get_parallel_audio_workers, get_threads
 from io_utils import atomic_write_json, load_json
 from paths import config_dir, logs_dir, cache_dir, repo_root
 from logging_utils import log_exception
@@ -444,6 +445,273 @@ def append_quarantine_job(
     save_json(qfile, update_list_status(doc))
 
 
+def _resolve_parallel_audio_workers(settings: dict, logs_dir_path: Path) -> int:
+    workers = get_parallel_audio_workers(settings)
+    raw = None
+    if isinstance(settings, dict):
+        performance = settings.get("performance")
+        if isinstance(performance, dict):
+            raw = performance.get("parallel_audio_workers")
+    if raw is None:
+        return workers
+    try:
+        raw_int = int(raw)
+    except (TypeError, ValueError):
+        log_line(
+            logs_dir_path,
+            "Performance: parallel_audio_workers ist ungültig (Zahl nötig). "
+            f"Standard wird genutzt: {workers}",
+        )
+        return workers
+    if raw_int < 1:
+        log_line(
+            logs_dir_path,
+            "Performance: parallel_audio_workers muss >= 1 sein. "
+            f"Standard wird genutzt: {workers}",
+        )
+        return workers
+    max_cpu = max(1, os.cpu_count() or 1)
+    if raw_int > max_cpu:
+        log_line(
+            logs_dir_path,
+            "Performance: parallel_audio_workers ist höher als CPU-Threads. "
+            f"Limit aktiv: {workers}",
+        )
+    return workers
+
+
+def _process_audio_job(
+    job: dict,
+    aud_dst: Path,
+    img_use: Path,
+    out_tmp: Path,
+    out_final: Path,
+    settings: dict,
+    threads: int | None,
+    quarantine_day: Path,
+    fallback_img: Path | None,
+    lib_a: Path,
+    lib_i: Path,
+) -> tuple[dict, int, int, dict | None]:
+    if not isinstance(job, dict):
+        raise ValueError("job muss ein Dict sein.")
+    if not isinstance(settings, dict):
+        job.update({"status": "quarantaene", "reason": "settings_invalid"})
+        return job, 0, 1, None
+    try:
+        aud_dst = ensure_existing_file(aud_dst, "Audio")
+        img_use = ensure_existing_file(Path(img_use), "Bild")
+    except PathValidationError as exc:
+        job.update(
+            {
+                "status": "quarantaene",
+                "reason": "ungueltiger_pfad",
+                "error": str(exc),
+            }
+        )
+        return job, 0, 1, None
+
+    cmd = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+    ]
+    if threads:
+        cmd += ["-threads", str(threads)]
+    cmd += [
+        "-loop",
+        "1",
+        "-i",
+        str(img_use),
+        "-i",
+        str(aud_dst),
+        "-vf",
+        f"scale={job['video']['width']}:{job['video']['height']}:"
+        "force_original_aspect_ratio=increase,"
+        f"crop={job['video']['width']}:{job['video']['height']}",
+        "-c:v",
+        "libx264",
+        "-tune",
+        "stillimage",
+        "-preset",
+        "medium",
+        "-crf",
+        "19",
+        "-pix_fmt",
+        "yuv420p",
+        "-r",
+        str(job["video"]["fps"]),
+        "-c:a",
+        "aac",
+        "-b:a",
+        f"{settings['audio']['target_bitrate_kbps']}k",
+        "-ar",
+        str(settings["audio"]["target_samplerate_hz"]),
+        "-shortest",
+        "-movflags",
+        "+faststart",
+        str(out_tmp),
+    ]
+
+    job.update(
+        {
+            "audio": str(aud_dst),
+            "image": str(img_use),
+            "output_tmp": str(out_tmp),
+        }
+    )
+    try:
+        subprocess.check_call(cmd)
+    except Exception as exc:
+        job.update(
+            {"status": "quarantaene", "reason": "ffmpeg_fail", "error": str(exc)}
+        )
+        marker = quarantine_day / (Path(out_final).stem + "_quarantaene.txt")
+        marker.write_text(
+            "FFmpeg Fehler beim Export. Siehe Report.\n", encoding="utf-8"
+        )
+        return (
+            job,
+            0,
+            1,
+            {
+                "output_quarantine": marker,
+                "staging_audio": aud_dst,
+                "staging_image": img_use if img_use != fallback_img else None,
+                "reason": "ffmpeg_fail",
+                "validation": {},
+            },
+        )
+
+    if not out_tmp.exists():
+        job.update(
+            {"status": "quarantaene", "reason": "output_missing", "error": "no_output"}
+        )
+        marker = quarantine_day / (Path(out_final).stem + "_quarantaene.txt")
+        marker.write_text(
+            "Ausgabe fehlt nach FFmpeg-Lauf. Siehe Report.\n", encoding="utf-8"
+        )
+        return (
+            job,
+            0,
+            1,
+            {
+                "output_quarantine": marker,
+                "staging_audio": aud_dst,
+                "staging_image": img_use if img_use != fallback_img else None,
+                "reason": "output_missing",
+                "validation": {},
+            },
+        )
+
+    ok_audio = False
+    bitrate_kbps = None
+    samplerate = None
+    validation = {}
+    try:
+        info = ffprobe_json(out_tmp)
+        astreams = [
+            s for s in info.get("streams", []) if s.get("codec_type") == "audio"
+        ]
+        if astreams:
+            samplerate = int(astreams[0].get("sample_rate") or 0)
+            br = astreams[0].get("bit_rate") or info.get("format", {}).get("bit_rate")
+            if br:
+                bitrate_kbps = int(int(br) / 1000)
+        min_br = int(settings["audio"]["min_bitrate_kbps"])
+        ok_bitrate = (
+            (bitrate_kbps is not None and bitrate_kbps >= min_br)
+            if min_br > 0
+            else True
+        )
+        ok_sr = samplerate == int(settings["audio"]["target_samplerate_hz"])
+        ok_audio = ok_bitrate and ok_sr
+        validation = {
+            "audio_bitrate_kbps": bitrate_kbps,
+            "audio_samplerate_hz": samplerate,
+            "ok": bool(ok_audio),
+        }
+        job["validation"] = validation
+    except Exception as exc:
+        job["validation"] = {"ok": False, "error": str(exc)}
+        ok_audio = False
+
+    if not ok_audio:
+        q_out = quarantine_day / (out_tmp.stem + "_quarantaene.mp4")
+        shutil.move(str(out_tmp), str(q_out))
+        job.update(
+            {
+                "status": "quarantaene",
+                "reason": "audio_check_fail",
+                "output_quarantine": str(q_out),
+            }
+        )
+        return (
+            job,
+            0,
+            1,
+            {
+                "output_quarantine": q_out,
+                "staging_audio": aud_dst,
+                "staging_image": img_use if img_use != fallback_img else None,
+                "reason": "audio_check_fail",
+                "validation": validation,
+            },
+        )
+
+    shutil.move(str(out_tmp), str(out_final))
+    if not out_final.exists():
+        job.update(
+            {
+                "status": "quarantaene",
+                "reason": "output_missing",
+                "error": "output_move_failed",
+            }
+        )
+        marker = quarantine_day / (Path(out_final).stem + "_quarantaene.txt")
+        marker.write_text(
+            "Ausgabe fehlt nach dem Verschieben. Siehe Report.\n", encoding="utf-8"
+        )
+        return (
+            job,
+            0,
+            1,
+            {
+                "output_quarantine": marker,
+                "staging_audio": aud_dst,
+                "staging_image": img_use if img_use != fallback_img else None,
+                "reason": "output_missing",
+                "validation": {},
+            },
+        )
+
+    used_ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    aud_final = lib_a / (
+        safe_slug(aud_dst.stem) + f"_used_{used_ts}" + aud_dst.suffix.lower()
+    )
+    shutil.move(str(aud_dst), str(aud_final))
+
+    img_final = ""
+    if img_use != fallback_img and Path(img_use).exists():
+        img_p = Path(img_use)
+        img_final_path = lib_i / (
+            safe_slug(img_p.stem) + f"_used_{used_ts}" + img_p.suffix.lower()
+        )
+        shutil.move(str(img_p), str(img_final_path))
+        img_final = str(img_final_path)
+
+    job.update(
+        {
+            "status": "fertig",
+            "output_final": str(out_final),
+            "inputs_final": {"audio": str(aud_final), "image": img_final},
+        }
+    )
+    return job, 1, 0, None
+
+
 def run(settings_path: Path, rules_path: Path) -> Path:
     settings = load_json(settings_path, {})
     threads = get_threads(settings_path)
@@ -625,9 +893,20 @@ def run(settings_path: Path, rules_path: Path) -> Path:
 
         ok = 0
         qn = 0
+        parallel_workers = _resolve_parallel_audio_workers(settings, logs_dir_path)
+        report["performance"] = {
+            "parallel_audio_workers": parallel_workers,
+            "ffmpeg_threads": threads or 0,
+        }
 
+        job_queue = []
         for idx, aud in enumerate(audios, start=1):
-            job = {"nr": idx, "preset": preset_id, "status": "bereit"}
+            job = {
+                "nr": idx,
+                "preset": preset_id,
+                "status": "bereit",
+                "video": {"width": W, "height": H, "fps": FPS},
+            }
             try:
                 aud = ensure_existing_file(aud, "Audio")
             except PathValidationError as exc:
@@ -659,13 +938,13 @@ def run(settings_path: Path, rules_path: Path) -> Path:
             )
             try:
                 shutil.move(str(aud), str(aud_dst))
-            except Exception as e:
+            except Exception as exc:
                 job.update(
                     {
                         "status": "quarantaene",
                         "reason": "move_fail_audio",
                         "audio": str(aud),
-                        "error": str(e),
+                        "error": str(exc),
                     }
                 )
                 report["jobs"].append(job)
@@ -751,173 +1030,160 @@ def run(settings_path: Path, rules_path: Path) -> Path:
                 report["jobs"].append(job)
                 continue
             out_final = exports_day / out_name
-
-            cmd = [
-                "ffmpeg",
-                "-hide_banner",
-                "-loglevel",
-                "error",
-                "-y",
-            ]
-            if threads:
-                cmd += ["-threads", str(threads)]
-            cmd += [
-                "-loop",
-                "1",
-                "-i",
-                str(img_use),
-                "-i",
-                str(aud_dst),
-                "-vf",
-                f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}",
-                "-c:v",
-                "libx264",
-                "-tune",
-                "stillimage",
-                "-preset",
-                "medium",
-                "-crf",
-                "19",
-                "-pix_fmt",
-                "yuv420p",
-                "-r",
-                str(FPS),
-                "-c:a",
-                "aac",
-                "-b:a",
-                f"{settings['audio']['target_bitrate_kbps']}k",
-                "-ar",
-                str(settings["audio"]["target_samplerate_hz"]),
-                "-shortest",
-                "-movflags",
-                "+faststart",
-                str(out_tmp),
-            ]
-
-            job.update(
+            job_queue.append(
                 {
-                    "audio": str(aud_dst),
-                    "image": str(img_use),
-                    "output_tmp": str(out_tmp),
+                    "job": job,
+                    "aud_dst": aud_dst,
+                    "img_use": img_use,
+                    "out_tmp": out_tmp,
+                    "out_final": out_final,
+                    "idx": idx,
                 }
             )
-            try:
-                subprocess.check_call(cmd)
-            except Exception as e:
-                qn += 1
-                job.update(
-                    {"status": "quarantaene", "reason": "ffmpeg_fail", "error": str(e)}
-                )
-                # Create a small marker file so quarantine jobs always have an output_file
-                marker = quarantine_day / (Path(out_name).stem + "_quarantaene.txt")
-                marker.write_text(
-                    "FFmpeg Fehler beim Export. Siehe Report.\n", encoding="utf-8"
-                )
+
+        def handle_job_result(
+            item: dict,
+            job_result: dict,
+            ok_inc: int,
+            qn_inc: int,
+            q_payload: dict | None,
+        ) -> None:
+            nonlocal ok, qn
+            report["jobs"].append(job_result)
+            ok += ok_inc
+            qn += qn_inc
+            if q_payload:
                 append_quarantine_job(
                     qfile,
                     day,
                     run_id,
-                    idx,
+                    item["idx"],
                     preset_id,
-                    marker,
-                    aud_dst,
-                    img_use if img_use != fallback_img else None,
-                    "ffmpeg_fail",
-                    {},
+                    q_payload["output_quarantine"],
+                    q_payload["staging_audio"],
+                    q_payload["staging_image"],
+                    q_payload["reason"],
+                    q_payload["validation"],
                 )
-                report["jobs"].append(job)
-                continue
 
-            # Validate audio with deterministic rule:
-            # If bitrate cannot be determined, treat as FAIL when a minimum is configured.
-            ok_audio = False
-            bitrate_kbps = None
-            samplerate = None
-            validation = {}
-            try:
-                info = ffprobe_json(out_tmp)
-                astreams = [
-                    s for s in info.get("streams", []) if s.get("codec_type") == "audio"
-                ]
-                if astreams:
-                    samplerate = int(astreams[0].get("sample_rate") or 0)
-                    br = astreams[0].get("bit_rate") or info.get("format", {}).get(
-                        "bit_rate"
+        if parallel_workers > 1 and len(job_queue) > 1:
+            with ThreadPoolExecutor(max_workers=parallel_workers) as executor:
+                futures = {
+                    executor.submit(
+                        _process_audio_job,
+                        item["job"],
+                        item["aud_dst"],
+                        item["img_use"],
+                        item["out_tmp"],
+                        item["out_final"],
+                        settings,
+                        threads,
+                        quarantine_day,
+                        fallback_img if fallback_img_valid else None,
+                        lib_a,
+                        lib_i,
+                    ): item
+                    for item in job_queue
+                }
+                for future in as_completed(futures):
+                    item = futures[future]
+                    try:
+                        job_result, ok_inc, qn_inc, q_payload = future.result()
+                    except Exception as exc:
+                        log_exception(
+                            "automation_runner.job_failure",
+                            exc,
+                            logs_path=logs_dir_path,
+                            extra={"audio": str(item["aud_dst"])},
+                        )
+                        marker = quarantine_day / (
+                            Path(item["out_final"]).stem + "_quarantaene.txt"
+                        )
+                        marker.write_text(
+                            "Interner Fehler beim Export. Siehe Report.\n",
+                            encoding="utf-8",
+                        )
+                        job_result = item["job"]
+                        job_result.update(
+                            {
+                                "status": "quarantaene",
+                                "reason": "exception",
+                                "error": str(exc),
+                                "output_quarantine": str(marker),
+                            }
+                        )
+                        handle_job_result(
+                            item,
+                            job_result,
+                            0,
+                            1,
+                            {
+                                "output_quarantine": marker,
+                                "staging_audio": item["aud_dst"],
+                                "staging_image": item["img_use"]
+                                if item["img_use"] != fallback_img
+                                else None,
+                                "reason": "exception",
+                                "validation": {"error": str(exc)},
+                            },
+                        )
+                        continue
+                    handle_job_result(item, job_result, ok_inc, qn_inc, q_payload)
+        else:
+            for item in job_queue:
+                try:
+                    job_result, ok_inc, qn_inc, q_payload = _process_audio_job(
+                        item["job"],
+                        item["aud_dst"],
+                        item["img_use"],
+                        item["out_tmp"],
+                        item["out_final"],
+                        settings,
+                        threads,
+                        quarantine_day,
+                        fallback_img if fallback_img_valid else None,
+                        lib_a,
+                        lib_i,
                     )
-                    if br:
-                        bitrate_kbps = int(int(br) / 1000)
-                min_br = int(settings["audio"]["min_bitrate_kbps"])
-                ok_bitrate = (
-                    (bitrate_kbps is not None and bitrate_kbps >= min_br)
-                    if min_br > 0
-                    else True
-                )
-                ok_sr = samplerate == int(settings["audio"]["target_samplerate_hz"])
-                ok_audio = ok_bitrate and ok_sr
-                validation = {
-                    "audio_bitrate_kbps": bitrate_kbps,
-                    "audio_samplerate_hz": samplerate,
-                    "ok": bool(ok_audio),
-                }
-                job["validation"] = validation
-            except Exception as e:
-                job["validation"] = {"ok": False, "error": str(e)}
-                ok_audio = False
-
-            if not ok_audio:
-                qn += 1
-                q_out = quarantine_day / (out_tmp.stem + "_quarantaene.mp4")
-                shutil.move(str(out_tmp), str(q_out))
-                job.update(
-                    {
-                        "status": "quarantaene",
-                        "reason": "audio_check_fail",
-                        "output_quarantine": str(q_out),
-                    }
-                )
-                append_quarantine_job(
-                    qfile,
-                    day,
-                    run_id,
-                    idx,
-                    preset_id,
-                    q_out,
-                    aud_dst,
-                    img_use if img_use != fallback_img else None,
-                    "audio_check_fail",
-                    validation,
-                )
-                report["jobs"].append(job)
-                continue
-
-            # Commit output
-            shutil.move(str(out_tmp), str(out_final))
-
-            # Commit inputs
-            used_ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            aud_final = lib_a / (
-                safe_slug(aud_dst.stem) + f"_used_{used_ts}" + aud_dst.suffix.lower()
-            )
-            shutil.move(str(aud_dst), str(aud_final))
-
-            img_final = ""
-            if img_use != fallback_img and Path(img_use).exists():
-                img_p = Path(img_use)
-                img_final_path = lib_i / (
-                    safe_slug(img_p.stem) + f"_used_{used_ts}" + img_p.suffix.lower()
-                )
-                shutil.move(str(img_p), str(img_final_path))
-                img_final = str(img_final_path)
-
-            job.update(
-                {
-                    "status": "fertig",
-                    "output_final": str(out_final),
-                    "inputs_final": {"audio": str(aud_final), "image": img_final},
-                }
-            )
-            report["jobs"].append(job)
-            ok += 1
+                except Exception as exc:
+                    log_exception(
+                        "automation_runner.job_failure",
+                        exc,
+                        logs_path=logs_dir_path,
+                        extra={"audio": str(item["aud_dst"])},
+                    )
+                    marker = quarantine_day / (
+                        Path(item["out_final"]).stem + "_quarantaene.txt"
+                    )
+                    marker.write_text(
+                        "Interner Fehler beim Export. Siehe Report.\n", encoding="utf-8"
+                    )
+                    job_result = item["job"]
+                    job_result.update(
+                        {
+                            "status": "quarantaene",
+                            "reason": "exception",
+                            "error": str(exc),
+                            "output_quarantine": str(marker),
+                        }
+                    )
+                    handle_job_result(
+                        item,
+                        job_result,
+                        0,
+                        1,
+                        {
+                            "output_quarantine": marker,
+                            "staging_audio": item["aud_dst"],
+                            "staging_image": item["img_use"]
+                            if item["img_use"] != fallback_img
+                            else None,
+                            "reason": "exception",
+                            "validation": {"error": str(exc)},
+                        },
+                    )
+                    continue
+                handle_job_result(item, job_result, ok_inc, qn_inc, q_payload)
 
         report["finished_at"] = datetime.utcnow().isoformat(timespec="seconds") + "Z"
         report["summary"] = {"fertig": ok, "quarantaene": qn, "gesamt": len(audios)}
