@@ -1,2 +1,0 @@
-Entwicklerdoku: portable_data/config/DEVELOPER_MANUAL.md
-Projektverzeichnis: portable_data/config/PROJECT_STRUCTURE.md
