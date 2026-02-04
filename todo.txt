@@ -75,3 +75,6 @@
 - [x] JSON-IO vereinheitlichen: Atomic JSON Writes (atomar/sicher speichern) und IO-Helper einführen.
 - [x] Datei-Lock (Single-Writer) für Settings und Quarantäne-Listen ergänzen.
 - [x] Preflight-JSON-IO vereinheitlicht (IO-Helper) und Debug-Flag nur einmal ermittelt.
+- [x] UI: Drag & Drop validiert Handler, meldet Fehler klar und protokolliert Ausnahmen.
+- [x] Barrierefreiheit: Material- und Favoriten-Suche mit barrierefreien Labels ergänzt.
+- [x] Automatik-Logging: log_line validiert Eingaben und meldet Schreibfehler robust.

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.55 - 2026-02-04
+Verbessert: Drag-&-Drop validiert jetzt den Handler und gibt klare Nutzerhinweise, wichtige Suchfelder sind barrierefrei beschrieben, und das Automatik-Logging prüft Eingaben sowie Schreibfehler robuster.
+
 ## 1.0.54 - 2026-02-07
 Verbessert: Werkstatt-Check verarbeitet Preflight-JSON robuster, der GUI-Start meldet Exit-Codes mit klaren Optionen, und Logging schreibt Zeitstempel zeitzonen-sicher ohne Warnungen.
 
