@@ -23,6 +23,6 @@ echo "[Modultool] Schritt 4/5: Must-Pass Suite (Funktionsprüfung) …"
 "$ROOT"/tools/run_must_pass.sh
 
 echo "[Modultool] Schritt 5/5: Release-Builds (ZIP + .deb) …"
-"$ROOT"/tools/build_release.sh
+MODULTOOL_SKIP_MUST_PASS=1 "$ROOT"/tools/build_release.sh
 
 echo "[Modultool] Release-Checks abgeschlossen."

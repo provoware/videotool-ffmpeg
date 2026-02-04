@@ -67,8 +67,12 @@ if [ -x "$INSTALL_SCRIPT" ]; then
 fi
 
 if [ -x "$MUST_PASS_SCRIPT" ]; then
-  echo "[Modultool] Release-Test: Must-Pass Suite …"
-  "$MUST_PASS_SCRIPT"
+  if [ "${MODULTOOL_SKIP_MUST_PASS:-0}" = "1" ]; then
+    echo "[Modultool] Release-Test: Must-Pass Suite übersprungen (bereits geprüft)."
+  else
+    echo "[Modultool] Release-Test: Must-Pass Suite …"
+    "$MUST_PASS_SCRIPT"
+  fi
 fi
 
 echo "[Modultool] Release-Build abgeschlossen."
