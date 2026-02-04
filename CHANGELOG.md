@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.67 - 2026-02-17
+Verbessert: Klick-Start nutzt zentrale Textbausteine aus der Textdatei, Autostart-Optionen werden robust validiert und mit klaren Standardwerten bestätigt, und Fortschrittsmeldungen folgen einem einheitlichen Format.
+
 ## 1.0.66 - 2026-02-16
 Verbessert: Start-Routine startet bei Bootstrap-Fehlern eine einmalige Self-Repair-Runde mit klaren Hinweisen, Self-Repair validiert die Python-Umgebung nach der Reparatur, und Bootstrap prüft per pip-Check auf inkonsistente Abhängigkeiten.
 
