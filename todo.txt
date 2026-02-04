@@ -90,3 +90,4 @@
 - [x] Release-Build: ZIP- und .deb-Artefakte nach Build validieren.
 - [x] Release-Checks: Must-Pass-Läufe entdoppeln und Effizienz-Option in den Regeln dokumentieren.
 - [x] Main-UI modularisiert: Signal-Verdrahtung ausgelagert, Hilfe-Center-Logik in Controller getrennt und manuelle Zuweisung validiert.
+- [x] Einstellungen: Vorlagen beim Speichern validieren, Watchfolder-Schreibrechte testen und klare Rückmeldungen protokollieren.

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.62 - 2026-02-14
+Verbessert: Einstellungen prüfen Vorlagen vor dem Speichern, der Watchfolder wird auf Schreibrechte getestet, und Rückmeldungen sind klarer protokolliert.
+
 ## 1.0.61 - 2026-02-13
 Verbessert: Start-Routine, Self-Repair und Must-Pass Suite finden portables FFmpeg aus portable_data/bin für Offline-Betrieb.
 

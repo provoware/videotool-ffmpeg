@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.61
-- Fokus dieser Iteration: Portables FFmpeg aus portable_data/bin wird in Start-Routine, Self-Repair und Must-Pass erkannt (offline nutzbar).
+- Version: 1.0.62
+- Fokus dieser Iteration: Einstellungen validieren Vorlagen und testen Watchfolder-Schreibrechte mit klaren Rückmeldungen.
 
 ## Nächster Schritt
 - Main-UI weiter modularisieren (Materialliste, Auswahlkorb und Quarantäne-Listen als eigene Komponenten).
