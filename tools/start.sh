@@ -63,11 +63,28 @@ if [ "$SELF_REPAIR" = "1" ]; then
 fi
 
 if ! "$ROOT/tools/bootstrap_python_env.sh"; then
-  echo "[Modultool] Fehler: Abhängigkeiten konnten nicht eingerichtet werden."
-  echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
-  echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
-  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
-  exit 1
+  if [ "$SELF_REPAIR" = "1" ]; then
+    echo "[Modultool] Fehler: Abhängigkeiten konnten nicht eingerichtet werden."
+    echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    exit 1
+  fi
+  echo "[Modultool] Hinweis: Abhängigkeiten fehlgeschlagen. Starte einmalige Self-Repair-Runde …"
+  if "$ROOT/tools/self_repair.sh"; then
+    if ! "$ROOT/tools/bootstrap_python_env.sh"; then
+      echo "[Modultool] Fehler: Abhängigkeiten konnten nicht eingerichtet werden."
+      echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+      echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
+      echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+      exit 1
+    fi
+  else
+    echo "[Modultool] Fehler: Self-Repair fehlgeschlagen."
+    echo "[Modultool] Tipp: Befehl: MODULTOOL_DEBUG=1 tools/start.sh"
+    echo "[Modultool] Tipp: Befehl: MODULTOOL_SELF_REPAIR=1 tools/start.sh"
+    echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+    exit 1
+  fi
 fi
 VENV_DIR="$ROOT/portable_data/.venv"
 if [ ! -x "$VENV_DIR/bin/python" ]; then

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.66 - 2026-02-16
+Verbessert: Start-Routine startet bei Bootstrap-Fehlern eine einmalige Self-Repair-Runde mit klaren Hinweisen, Self-Repair validiert die Python-Umgebung nach der Reparatur, und Bootstrap prüft per pip-Check auf inkonsistente Abhängigkeiten.
+
 ## 1.0.65 - 2026-02-15
 Verbessert: Klick-Start-Skript im Projekt-Root startet die GUI vollautomatisch mit Fortschrittsanzeige, die Start-Routine meldet jetzt klare Fortschrittsschritte, und ein Autoreparatur-Lauf wird im Klick-Start als zweiter Versuch angeboten.
 
@@ -16,6 +19,7 @@ Verbessert: Einstellungen prüfen Vorlagen vor dem Speichern, der Watchfolder wi
 Verbessert: Start-Routine, Self-Repair und Must-Pass Suite finden portables FFmpeg aus portable_data/bin für Offline-Betrieb.
 
 ## 1.0.60 - 2026-02-12
+## 1.0.65 - 2026-02-15
 Verbessert: Main-UI verdrahtet Signale zentral, das Hilfe-Center ist in einen Controller ausgelagert, und die manuelle Werkbank-Zuweisung wird validiert, bevor sie übernommen wird.
 
 ## 1.0.59 - 2026-02-11

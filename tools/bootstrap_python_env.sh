@@ -75,6 +75,14 @@ install_dev_requirements() {
   fi
 }
 
+run_pip_check() {
+  if [ "$DEBUG_MODE" = "1" ]; then
+    "${PIP_CMD[@]}" check
+  else
+    "${PIP_CMD[@]}" check >/dev/null
+  fi
+}
+
 run_with_repair() {
   local label="$1"
   shift
@@ -106,6 +114,12 @@ fi
 
 if ! run_with_repair "Dev-Dependencies-Installation" install_dev_requirements; then
   echo "[Modultool] Fehler: Dev-Abhängigkeiten konnten nicht installiert werden." >&2
+  exit 1
+fi
+
+if ! run_with_repair "pip-Check" run_pip_check; then
+  echo "[Modultool] Fehler: Python-Abhängigkeiten sind inkonsistent." >&2
+  echo "[Modultool] Tipp: MODULTOOL_DEBUG=1 tools/start.sh zeigt Details." >&2
   exit 1
 fi
 
