@@ -30,6 +30,7 @@ from PySide6.QtWidgets import (
     QDialog,
 )
 from ui_main_layout import build_main_layout
+from ui_help_center import HelpCenterController
 from quarantine_table_controller import QuarantineTableController
 from favorites_controller import FavoritesController
 from quarantine_actions_controller import QuarantineActionsController
@@ -105,7 +106,12 @@ class Main(QMainWindow):
         self.done_search = ""
 
         self._init_ui()
-        self._load_help_center()
+        self.help_controller = HelpCenterController(
+            self.help_view,
+            self.help_topics,
+            self.statusBar(),
+        )
+        self.help_controller.load_help_center(config_dir() / "HELP_CENTER.md")
         self._quar_controller = QuarantineTableController(
             self.quar_table,
             self.statusBar(),
@@ -156,6 +162,64 @@ class Main(QMainWindow):
             self._load_quarantine_table,
         )
 
+        self._connect_signals()
+
+        self.refresh_sel()
+        self.refresh_last_night()
+
+        # Barriere-Labels (Screenreader / Tastatur)
+        self._acc(
+            self.material,
+            "Materialliste",
+            "Liste der importierten Dateien. Checkboxen wählen die Auswahl.",
+        )
+        self._acc(
+            self.preview_img,
+            "Bildvorschau",
+            "Große Vorschau des aktuell gewählten Bildes.",
+        )
+        self._acc(
+            self.sel_list, "Auswahlkorb", "Liste der ausgewählten Dateien, bearbeitbar."
+        )
+        self._acc(
+            self.fav_list,
+            "Favoritenliste",
+            "Liste der Favoriten. Doppelklick öffnet Datei.",
+        )
+        self._acc(
+            self.btn_wb_export,
+            "Ausgabe bauen",
+            "Startet den Werkbank-Export für die aktuelle Auswahl.",
+        )
+        self._acc(
+            self.btn_quar_refresh,
+            "Quarantäne aktualisieren",
+            "Lädt die Quarantäne-Tagesliste neu.",
+        )
+        self._acc(self.help_view, "Hilfeansicht", "Hilfe-Center Inhalt.")
+        self._acc(self.dev_view, "Entwicklerdoku", "Entwickler-Handbuch im Tool.")
+        self._acc(
+            self.btn_settings_save,
+            "Einstellungen speichern",
+            "Speichert die aktuellen Einstellungen.",
+        )
+        self._acc(
+            self.btn_settings_test, "Pfade testen", "Prüft Schreibrechte und Pfade."
+        )
+        # Barriere-Labels gesetzt
+        self.favorites_controller.refresh_favorites()
+        self.apply_material_filter()
+
+        if not have("ffmpeg") or not have("ffprobe"):
+            self.statusBar().showMessage(
+                "Hinweis: FFmpeg fehlt. Bitte tagsüber einrichten."
+            )
+            activity("Hinweis: ffmpeg/ffprobe fehlt (Setup empfohlen).")
+
+    def _init_ui(self):
+        build_main_layout(self)
+
+    def _connect_signals(self):
         # --- Signals ---
         self.material.itemChanged.connect(self.refresh_sel)
         self.material.currentItemChanged.connect(self.update_preview_from_current)
@@ -250,61 +314,6 @@ class Main(QMainWindow):
         self.q_search_box.textChanged.connect(self.on_q_search)
         self.done_search_box.textChanged.connect(self.on_done_search)
 
-        self.refresh_sel()
-        self.refresh_last_night()
-
-        # Barriere-Labels (Screenreader / Tastatur)
-        self._acc(
-            self.material,
-            "Materialliste",
-            "Liste der importierten Dateien. Checkboxen wählen die Auswahl.",
-        )
-        self._acc(
-            self.preview_img,
-            "Bildvorschau",
-            "Große Vorschau des aktuell gewählten Bildes.",
-        )
-        self._acc(
-            self.sel_list, "Auswahlkorb", "Liste der ausgewählten Dateien, bearbeitbar."
-        )
-        self._acc(
-            self.fav_list,
-            "Favoritenliste",
-            "Liste der Favoriten. Doppelklick öffnet Datei.",
-        )
-        self._acc(
-            self.btn_wb_export,
-            "Ausgabe bauen",
-            "Startet den Werkbank-Export für die aktuelle Auswahl.",
-        )
-        self._acc(
-            self.btn_quar_refresh,
-            "Quarantäne aktualisieren",
-            "Lädt die Quarantäne-Tagesliste neu.",
-        )
-        self._acc(self.help_view, "Hilfeansicht", "Hilfe-Center Inhalt.")
-        self._acc(self.dev_view, "Entwicklerdoku", "Entwickler-Handbuch im Tool.")
-        self._acc(
-            self.btn_settings_save,
-            "Einstellungen speichern",
-            "Speichert die aktuellen Einstellungen.",
-        )
-        self._acc(
-            self.btn_settings_test, "Pfade testen", "Prüft Schreibrechte und Pfade."
-        )
-        # Barriere-Labels gesetzt
-        self.favorites_controller.refresh_favorites()
-        self.apply_material_filter()
-
-        if not have("ffmpeg") or not have("ffprobe"):
-            self.statusBar().showMessage(
-                "Hinweis: FFmpeg fehlt. Bitte tagsüber einrichten."
-            )
-            activity("Hinweis: ffmpeg/ffprobe fehlt (Setup empfohlen).")
-
-    def _init_ui(self):
-        build_main_layout(self)
-
     # --- Search/filter handlers ---
     def on_material_search(self, t: str):
         self.material_search = t.strip().lower()
@@ -359,6 +368,31 @@ class Main(QMainWindow):
             "Entwicklerdoku-Suche",
             "Suche in Entwicklerdoku abgeschlossen.",
         )
+
+    def _find_in_text_view(
+        self,
+        view: QTextEdit,
+        query: str,
+        label: str,
+        success_msg: str,
+    ) -> None:
+        if not query.strip():
+            self.statusBar().showMessage(
+                f"{label}: Bitte Suchbegriff eingeben (Query = Suchtext)."
+            )
+            return
+        text = view.toPlainText()
+        idx = text.lower().find(query.lower())
+        if idx >= 0:
+            cursor = view.textCursor()
+            cursor.setPosition(idx)
+            cursor.setPosition(idx + len(query), cursor.KeepAnchor)
+            view.setTextCursor(cursor)
+            self.statusBar().showMessage(success_msg)
+        else:
+            self.statusBar().showMessage(
+                f"{label}: Kein Treffer gefunden. Nächster Schritt: Begriff prüfen."
+            )
 
     # --- Import ---
     def pick_files(self):
@@ -1103,6 +1137,15 @@ class Main(QMainWindow):
                 ip = Path(i_s)
                 if ap.exists() and ip.exists():
                     mapping.append((ap, ip))
+            if not mapping:
+                QMessageBox.information(
+                    self,
+                    "Zuweisung",
+                    "Keine gültige Zuordnung gefunden. "
+                    "Bitte Format 'audio | bild' prüfen.",
+                )
+                activity("Manuelle Zuweisung: keine gültige Zuordnung.")
+                return
             self._wb_manual_map = mapping
             dlg.accept()
 
@@ -1129,37 +1172,11 @@ class Main(QMainWindow):
         return [(a, img0) for a in audios]
 
     def help_find(self, q: str):
-        self._find_in_text_view(
-            self.help_view,
+        self.help_controller.find(
             q,
             "Hilfe-Suche",
             "Suche im Hilfe-Center abgeschlossen.",
         )
-
-    def _find_in_text_view(
-        self,
-        view: QTextEdit,
-        query: str,
-        label: str,
-        success_msg: str,
-    ) -> None:
-        if not query.strip():
-            self.statusBar().showMessage(
-                f"{label}: Bitte Suchbegriff eingeben (Query = Suchtext)."
-            )
-            return
-        text = view.toPlainText()
-        idx = text.lower().find(query.lower())
-        if idx >= 0:
-            cursor = view.textCursor()
-            cursor.setPosition(idx)
-            cursor.setPosition(idx + len(query), cursor.KeepAnchor)
-            view.setTextCursor(cursor)
-            self.statusBar().showMessage(success_msg)
-        else:
-            self.statusBar().showMessage(
-                f"{label}: Kein Treffer gefunden. Nächster Schritt: Begriff prüfen."
-            )
 
     def _open_dir_with_feedback(self, path: Path, label: str) -> None:
         try:
@@ -1199,42 +1216,8 @@ class Main(QMainWindow):
         self.statusBar().showMessage(f"{label} geöffnet.")
         activity(f"{label} geöffnet.")
 
-    def _load_help_center(self) -> None:
-        help_path = config_dir() / "HELP_CENTER.md"
-        if help_path.exists():
-            content = help_path.read_text(encoding="utf-8")
-        else:
-            content = "HELP_CENTER.md fehlt."
-        self.help_view.setPlainText(content)
-        self._help_index = self._build_help_index(content)
-        self.help_topics.clear()
-        for title in self._help_index:
-            self.help_topics.addItem(title)
-        self.statusBar().showMessage("Hilfe-Center geladen.")
-
-    def _build_help_index(self, content: str) -> dict[str, int]:
-        index: dict[str, int] = {}
-        offset = 0
-        for line in content.splitlines(keepends=True):
-            stripped = line.strip()
-            if stripped.startswith("## "):
-                title = stripped.replace("## ", "", 1).strip()
-                if title:
-                    index[title] = offset
-            offset += len(line)
-        return index
-
     def _jump_help_topic(self, item: QListWidgetItem) -> None:
-        if not item:
-            return
-        title = item.text()
-        pos = self._help_index.get(title)
-        if pos is None:
-            return
-        cursor = self.help_view.textCursor()
-        cursor.setPosition(pos)
-        self.help_view.setTextCursor(cursor)
-        self.statusBar().showMessage("Hilfe-Thema geöffnet.")
+        self.help_controller.jump_to_topic(item)
 
     # --- Barriere-Labels (0.9.13) ---
     def _acc(self, widget, name: str, desc: str = ""):

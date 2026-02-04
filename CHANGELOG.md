@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.60 - 2026-02-12
+Verbessert: Main-UI verdrahtet Signale zentral, das Hilfe-Center ist in einen Controller ausgelagert, und die manuelle Werkbank-Zuweisung wird validiert, bevor sie übernommen wird.
+
 ## 1.0.59 - 2026-02-11
 Verbessert: Release-Checks in der Start-Routine brechen bei Fehlern klar ab, Maintenance verlangt --auto mit verständlicher Erklärung, und Wartungswerte werden bei negativen oder falschen Einstellungen sicher validiert.
 

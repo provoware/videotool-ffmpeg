@@ -88,3 +88,4 @@
 - [x] Start-Routine: Hinweis ausgeben, wenn Start-Log nicht erstellt werden kann.
 - [x] Release-Build: ZIP- und .deb-Artefakte nach Build validieren.
 - [x] Release-Checks: Must-Pass-Läufe entdoppeln und Effizienz-Option in den Regeln dokumentieren.
+- [x] Main-UI modularisiert: Signal-Verdrahtung ausgelagert, Hilfe-Center-Logik in Controller getrennt und manuelle Zuweisung validiert.
