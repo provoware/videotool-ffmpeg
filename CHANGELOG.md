@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.72 - 2026-02-04
+Verbessert: Quarantäne-Tabelle ist direkt editierbar, Presets werden aus manifest.json und optional presets.json geladen (Plugin-Schnittstelle), und die Werkbank validiert die Vorlagen-Auswahl mit sauberem Fallback.
+
 ## 1.0.71 - 2026-02-04
 Verbessert: Start-Routine bietet AutoFix als Vollautomatik für Self-Repair und Auto-Install, der Preflight-Check schreibt optional JSON ins Log, und der Werkstatt-Check liest diese Datei robust samt Hinweis bei Lesefehlern.
 

@@ -20,9 +20,11 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QSpinBox,
     QTableWidget,
+    QAbstractItemView,
 )
 
 from logging_utils import log_exception, log_message
+from app_services import load_presets
 from paths import config_dir
 
 
@@ -461,17 +463,15 @@ def build_main_layout(main) -> None:
     # Vorlagen
     tab_presets = QWidget()
     lp = QVBoxLayout(tab_presets)
-    main.btn_p1 = QPushButton(
-        main.texts["strings"].get("preset.youtube_hd_tonsafe", "YouTube HD (Ton Safe)")
-    )
-    main.btn_p3 = QPushButton(
-        main.texts["strings"].get(
-            "preset.shorts_9_16_tonsafe", "Shorts 9:16 (Ton Safe)"
-        )
-    )
+    presets = load_presets()
+    main.preset_options = presets
+    main.preset_buttons = []
     lp.addWidget(QLabel("Vorlagen (Ton Safe):"))
-    lp.addWidget(main.btn_p1)
-    lp.addWidget(main.btn_p3)
+    for preset in presets:
+        btn = QPushButton(preset["name"])
+        btn.setToolTip(preset["id"])
+        main.preset_buttons.append((btn, preset["id"], preset["name"]))
+        lp.addWidget(btn)
     lp.addStretch(1)
     main.left.addTab(
         tab_presets, main.texts["strings"].get("sidebar.vorlagen", "Vorlagen")
@@ -545,7 +545,11 @@ def build_main_layout(main) -> None:
     )
     main.quar_table.setColumnHidden(5, True)
     main.quar_table.setSelectionBehavior(main.quar_table.SelectRows)
-    main.quar_table.setEditTriggers(main.quar_table.NoEditTriggers)
+    main.quar_table.setEditTriggers(
+        QAbstractItemView.DoubleClicked
+        | QAbstractItemView.SelectedClicked
+        | QAbstractItemView.EditKeyPressed
+    )
     lq.addWidget(main.quar_table, 1)
 
     # Action buttons for selected row
@@ -713,7 +717,8 @@ def build_main_layout(main) -> None:
 
     wrow1 = QHBoxLayout()
     main.wb_preset = QComboBox()
-    main.wb_preset.addItems(["youtube_hd_ton_safe", "shorts_9_16_ton_safe"])
+    for preset in presets:
+        main.wb_preset.addItem(preset["name"], preset["id"])
     wrow1.addWidget(QLabel(main.texts["strings"].get("workbench.preset", "Vorlage")))
     wrow1.addWidget(main.wb_preset, 1)
     wb.addLayout(wrow1)

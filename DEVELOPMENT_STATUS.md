@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.71
-- Fokus dieser Iteration: AutoFix-Startoption ergänzt, Preflight kann JSON ins Log schreiben, und der Werkstatt-Check liest diese Datei robust mit klaren Hinweisen.
+- Version: 1.0.72
+- Fokus dieser Iteration: Quarantäne-Tabelle editierbar gemacht, Preset-Plugins über Konfig laden, und Werkbank prüft Vorlagen-Eingaben mit Fallback.
 
 ## Nächster Schritt
-- Barrierefreiheit & UI-Integration weiter abschließen (Quarantäne-Tagesliste als Tabelle editierbar, Preset-Plugin-Schnittstelle planen, Theme-Auswahl im UI klarer führen).
+- Preset-Plugin-Format dokumentieren und Theme-Auswahl im UI mit klaren Hinweisen ergänzen.
