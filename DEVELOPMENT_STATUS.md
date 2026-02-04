@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.53
-- Fokus dieser Iteration: Start-Routine nutzt vollständige Release-Checks bei RUN_CHECKS, Preflight setzt ungültige Themes auf Standard zurück, und Logging meldet Log-Fehler sichtbar.
+- Version: 1.0.54
+- Fokus dieser Iteration: Werkstatt-Check verarbeitet Preflight-JSON robuster, GUI-Start meldet Exit-Code mit klaren Optionen, und Logging schreibt Zeitstempel ohne Warnungen.
 
 ## Nächster Schritt
 - Main-UI weiter modularisieren (Materialliste und übrige UI-Sektionen in eigenständige Klassen trennen).

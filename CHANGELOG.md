@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.54 - 2026-02-07
+Verbessert: Werkstatt-Check verarbeitet Preflight-JSON robuster, der GUI-Start meldet Exit-Codes mit klaren Optionen, und Logging schreibt Zeitstempel zeitzonen-sicher ohne Warnungen.
+
 ## 1.0.53 - 2026-02-04
 Verbessert: Logging bereinigt ungültige Meldungen und meldet Log-Fehler sichtbar, der Preflight setzt ungültige Themes sicher auf den Standard zurück (mit Debug-Hinweis), und die Start-Routine führt bei RUN_CHECKS vollständige Release-Checks aus.
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +44,9 @@ def log_message(
     try:
         target_dir = logs_path or logs_dir()
         payload = {
-            "at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "at": datetime.now(timezone.utc)
+            .isoformat(timespec="seconds")
+            .replace("+00:00", "Z"),
             "level": safe_level,
             "message": safe_message,
         }
