@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.63 - 2026-02-14
+Verbessert: Preflight prüft jetzt den Basis-Ordner (base_data_dir) inklusive Schreibrechten, die Pfad-Validierung deckt zusätzliche Einstellungs-Ordner ab, und die Start-Routine meldet Basis-Ordner-Probleme klar mit Empfehlungen.
+
 ## 1.0.62 - 2026-02-14
 Verbessert: Einstellungen prüfen Vorlagen vor dem Speichern, der Watchfolder wird auf Schreibrechte getestet, und Rückmeldungen sind klarer protokolliert.
 
