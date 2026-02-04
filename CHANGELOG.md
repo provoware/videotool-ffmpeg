@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.56 - 2026-02-08
+Verbessert: Preflight prüft den Config-Ordner auf Schreibrechte und meldet das klar, die Start-Routine warnt, wenn kein Start-Log angelegt werden kann, und der Release-Build validiert ZIP/.deb-Artefakte nach dem Build.
+
 ## 1.0.55 - 2026-02-04
 Verbessert: Drag-&-Drop validiert jetzt den Handler und gibt klare Nutzerhinweise, wichtige Suchfelder sind barrierefrei beschrieben, und das Automatik-Logging prüft Eingaben sowie Schreibfehler robuster.
 
