@@ -46,6 +46,9 @@
 - [x] Logging: Exceptions im UI/Automation konsistent ins Debug-Log schreiben.
 - [x] Maintenance: Dateifehler als Warnungen sammeln und im Summary ausgeben.
 - [x] Preflight: Config-Ordner auf Schreibrechte prüfen und klar melden.
+- [x] Start-Routine: Bootstrap-Fehler triggern eine einmalige Self-Repair-Runde mit klaren Hinweisen.
+- [x] Self-Repair: Python-Umgebung nach Bootstrap validieren und klare Reparatur-Tipps geben.
+- [x] Bootstrap: pip-Check ergänzt, um inkonsistente Dependencies (Zusatzpakete) zu erkennen.
 - [x] Preflight: Basis-Ordner (base_data_dir) prüfen, Schreibrechte testen und Empfehlungen ergänzen.
 - [x] Quarantäne-UI: Aktionen brauchen Auswahl-Check mit klarer Rückmeldung und Log.
 - [x] Quarantäne-UI: Ordner öffnen mit Validierung und Nutzer-Feedback.

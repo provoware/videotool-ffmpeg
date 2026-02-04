@@ -51,6 +51,12 @@ if ! "$ROOT/tools/bootstrap_python_env.sh"; then
   echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
   exit 1
 fi
+if [ ! -x "$VENV_DIR/bin/python" ]; then
+  echo "[Modultool] Fehler: Python-Umgebung fehlt oder ist defekt."
+  echo "[Modultool] Tipp: Lösche $VENV_DIR und starte erneut."
+  echo "[Modultool] Optionen: Jetzt reparieren, Sicherer Standard, Details."
+  exit 1
+fi
 
 if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
   echo "[Modultool] Hinweis: FFmpeg/ffprobe fehlt (Video-Werkzeug)."

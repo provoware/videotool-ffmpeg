@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.65
-- Fokus dieser Iteration: Klick-Start im Root ergänzt, Start-Routine meldet Fortschrittsschritte und führt bei Bedarf eine Autoreparatur-Runde durch.
+- Version: 1.0.66
+- Fokus dieser Iteration: Start-Routine repariert Bootstrap-Fehler automatisch einmalig, Self-Repair validiert die Python-Umgebung, und Bootstrap prüft Dependencies mit pip-Check.
 
 ## Nächster Schritt
 - Klick-Start-Texte in zentrale JSON-Texte auslagern und gemeinsam für UI/CLI nutzen.
