@@ -1,4 +1,7 @@
 # todo.txt
+- [x] Start-Routine: AutoFix-Option bündelt Self-Repair und Auto-Install mit klarer Start-Info.
+- [x] Start-Routine: Preflight kann JSON in Log-Datei schreiben, damit der Werkstatt-Check stabile Daten nutzt.
+- [x] Start-Routine: Werkstatt-Check liest Preflight-Datei robust und meldet den Speicherort bei Lesefehlern.
 - [x] Start-Routine: Start-Info mit laienfreundlichen Optionen und Vollautomatik-Hinweis ausgeben.
 - [x] Start-Routine: Config- und Daten-Ordner auf Schreibrechte prüfen und klare Fehleroptionen bieten.
 - [x] Start-Routine: Wiederkehrende Fehler-Optionen und Debug-Tipps zentral bündeln.

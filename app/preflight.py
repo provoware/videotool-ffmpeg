@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import sys
 from pathlib import Path
 from datetime import datetime, timezone
 from uuid import uuid4
-from io_utils import load_json
+from io_utils import load_json, atomic_write_json
 from logging_utils import log_message
 from paths import config_dir, data_dir, cache_dir
 from validation_utils import validate_settings_paths, validate_settings_schema
@@ -299,13 +300,30 @@ def run(settings_path: Path | None = None) -> dict:
     return result
 
 
+def write_json_report(path_value: str | None, payload: dict) -> bool:
+    if not path_value:
+        return False
+    path = Path(path_value).expanduser()
+    if path.suffix.lower() != ".json":
+        path = path.with_suffix(".json")
+    return atomic_write_json(path, payload, context="preflight_json_report")
+
+
 if __name__ == "__main__":
     import argparse
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--json-path")
     args = ap.parse_args()
     res = run()
+    if args.json_path:
+        if not write_json_report(args.json_path, res):
+            print(
+                "[Modultool] Hinweis: Preflight-JSON konnte nicht geschrieben werden.",
+                file=sys.stderr,
+                flush=True,
+            )
     if args.json:
         print(json.dumps(res, ensure_ascii=False))
     else:

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.71 - 2026-02-04
+Verbessert: Start-Routine bietet AutoFix als Vollautomatik für Self-Repair und Auto-Install, der Preflight-Check schreibt optional JSON ins Log, und der Werkstatt-Check liest diese Datei robust samt Hinweis bei Lesefehlern.
+
 ## 1.0.70 - 2026-02-04
 Verbessert: Material- und Auswahl-Logik ist in einen eigenen Controller ausgelagert, die UI bindet Suche/Sortierung/Import zentral daran, und Eingaben/Fehler werden dort konsistent validiert sowie protokolliert.
 
