@@ -31,29 +31,28 @@ from PySide6.QtWidgets import (
 )
 from ui_main_layout import build_main_layout
 from quarantine_table_controller import QuarantineTableController
+from favorites_controller import FavoritesController
+from quarantine_actions_controller import QuarantineActionsController
+from settings_controller import SettingsController
 
 from app_services import (
     activity,
     ensure_dirs,
-    fav_id_for_path,
     favorites_dir,
     get_thumb_pixmap,
     have,
     is_audio_path,
     is_image_path,
     latest_report_file,
-    load_favorites,
     load_json,
     load_today_quarantine_jobs,
     normalize_report_doc,
-    norm_tags,
     open_path,
     rename_file_safe,
     run_automation_now,
     run_quarantine_worker,
     run_setup,
     run_timer_install,
-    save_favorites,
     save_today_quarantine_jobs,
     today_quarantine_jobs,
     update_quarantine_list_status,
@@ -114,6 +113,48 @@ class Main(QMainWindow):
             save_today_quarantine_jobs,
             update_quarantine_list_status,
         )
+        self.settings_controller = SettingsController(
+            self,
+            self.settings,
+            self.texts,
+            {
+                "set_watch_folder": self.set_watch_folder,
+                "set_exports_dir": self.set_exports_dir,
+                "set_library_audio_dir": self.set_library_audio_dir,
+                "set_library_images_dir": self.set_library_images_dir,
+                "set_quarantine_dir": self.set_quarantine_dir,
+                "set_quarantine_jobs_dir": self.set_quarantine_jobs_dir,
+                "set_reports_dir": self.set_reports_dir,
+                "set_staging_dir": self.set_staging_dir,
+                "set_trash_dir": self.set_trash_dir,
+                "set_fade_in": self.set_fade_in,
+                "set_fade_out": self.set_fade_out,
+                "set_min_br": self.set_min_br,
+                "set_target_br": self.set_target_br,
+                "set_sr": self.set_sr,
+                "set_tmpl_single": self.set_tmpl_single,
+                "set_tmpl_batch": self.set_tmpl_batch,
+                "set_append_label": self.set_append_label,
+                "set_append_mode": self.set_append_mode,
+                "set_append_short": self.set_append_short,
+                "lbl_preview_name": self.lbl_preview_name,
+            },
+        )
+        self.favorites_controller = FavoritesController(
+            self,
+            self.fav_list,
+            self.fav_tag_combo,
+            self.texts,
+        )
+        self.quarantine_actions = QuarantineActionsController(
+            self,
+            self._quar_controller,
+            self.settings,
+            self._open_dir_with_feedback,
+            self.open_qjobs_today,
+            self.refresh_last_night,
+            self._load_quarantine_table,
+        )
 
         # --- Signals ---
         self.material.itemChanged.connect(self.refresh_sel)
@@ -145,12 +186,14 @@ class Main(QMainWindow):
         # Quarantäne-Tab (Tabelle)
         self.btn_quar_refresh.clicked.connect(self._load_quarantine_table)
         self.btn_quar_open_json.clicked.connect(self.open_qjobs_today)
-        self.btn_quar_open_folder.clicked.connect(self._quar_open_folder)
+        self.btn_quar_open_folder.clicked.connect(self.quarantine_actions.open_folder)
         self.btn_quar_all_rerun.clicked.connect(self.rerun_all_quarantine_ready)
-        self.btn_quar_rerun.clicked.connect(self._quar_rerun_selected)
-        self.btn_quar_replace.clicked.connect(self._quar_replace_selected)
-        self.btn_quar_postpone.clicked.connect(self._quar_postpone_selected)
-        self.btn_quar_done.clicked.connect(self._quar_done_selected)
+        self.btn_quar_rerun.clicked.connect(self.quarantine_actions.rerun_selected)
+        self.btn_quar_replace.clicked.connect(self.quarantine_actions.replace_selected)
+        self.btn_quar_postpone.clicked.connect(
+            self.quarantine_actions.postpone_selected
+        )
+        self.btn_quar_done.clicked.connect(self.quarantine_actions.done_selected)
         # Initial load
         self._load_quarantine_table()
         self.quar_table.itemChanged.connect(self._quar_controller.on_item_changed)
@@ -165,25 +208,37 @@ class Main(QMainWindow):
             lambda: open_path(config_dir() / "HELP_CENTER.md")
         )
         # Favoriten (Werkzeugkasten)
-        self.fav_search_box.textChanged.connect(self.on_fav_search)
-        self.fav_tag_combo.currentIndexChanged.connect(self.on_fav_tag)
-        self.btn_fav_add.clicked.connect(self.fav_add_files)
-        self.btn_fav_remove.clicked.connect(self.fav_remove_selected)
-        self.btn_fav_star.clicked.connect(self.fav_toggle_star)
-        self.btn_fav_tags.clicked.connect(self.fav_set_tags)
+        self.fav_search_box.textChanged.connect(self.favorites_controller.on_search)
+        self.fav_tag_combo.currentIndexChanged.connect(self.favorites_controller.on_tag)
+        self.btn_fav_add.clicked.connect(self.favorites_controller.add_files)
+        self.btn_fav_remove.clicked.connect(self.favorites_controller.remove_selected)
+        self.btn_fav_star.clicked.connect(self.favorites_controller.toggle_star)
+        self.btn_fav_tags.clicked.connect(self.favorites_controller.set_tags)
         self.btn_fav_folder.clicked.connect(lambda: open_path(favorites_dir()))
 
         # Einstellungen
-        self.btn_settings_save.clicked.connect(self._settings_save)
-        self.btn_settings_default.clicked.connect(self._settings_defaults)
-        self.btn_settings_test.clicked.connect(self._settings_test_paths)
-        self.set_tmpl_single.textChanged.connect(self._update_name_preview)
-        self.set_tmpl_batch.textChanged.connect(self._update_name_preview)
-        self.set_append_label.stateChanged.connect(self._update_name_preview)
-        self.set_append_mode.currentIndexChanged.connect(self._update_name_preview)
-        self.set_append_short.stateChanged.connect(self._update_name_preview)
-        self._update_name_preview()
-        self.fav_list.itemDoubleClicked.connect(self.fav_open_selected)
+        self.btn_settings_save.clicked.connect(self.settings_controller.save_settings)
+        self.btn_settings_default.clicked.connect(
+            self.settings_controller.apply_defaults
+        )
+        self.btn_settings_test.clicked.connect(self.settings_controller.test_paths)
+        self.set_tmpl_single.textChanged.connect(
+            self.settings_controller.update_name_preview
+        )
+        self.set_tmpl_batch.textChanged.connect(
+            self.settings_controller.update_name_preview
+        )
+        self.set_append_label.stateChanged.connect(
+            self.settings_controller.update_name_preview
+        )
+        self.set_append_mode.currentIndexChanged.connect(
+            self.settings_controller.update_name_preview
+        )
+        self.set_append_short.stateChanged.connect(
+            self.settings_controller.update_name_preview
+        )
+        self.settings_controller.update_name_preview()
+        self.fav_list.itemDoubleClicked.connect(self.favorites_controller.open_selected)
 
         self.btn_add_files.clicked.connect(self.pick_files)
         self.btn_add_folder.clicked.connect(self.pick_folder)
@@ -238,7 +293,7 @@ class Main(QMainWindow):
             self.btn_settings_test, "Pfade testen", "Prüft Schreibrechte und Pfade."
         )
         # Barriere-Labels gesetzt
-        self.refresh_favorites()
+        self.favorites_controller.refresh_favorites()
         self.apply_material_filter()
 
         if not have("ffmpeg") or not have("ffprobe"):
@@ -816,400 +871,15 @@ class Main(QMainWindow):
         self.list_q.addItem(item)
         self.list_q.setItemWidget(item, w)
 
-    # --- Favoriten (Werkzeugkasten) ---
-    def on_fav_search(self, t: str):
-        self.fav_search = t.strip().lower()
-        self.refresh_favorites()
-
-    def on_fav_tag(self, idx: int):
-        t = self.fav_tag_combo.currentText()
-        self.fav_tag_filter = "alle"
-        if t.startswith("Tag: "):
-            val = t[5:].strip()
-            self.fav_tag_filter = val if val and val != "alle" else "alle"
-        self.refresh_favorites()
-
-    def refresh_favorites(self):
-        doc = load_favorites()
-        items = doc.get("items", [])
-        # tags dropdown
-        tags = set()
-        for it in items:
-            for tg in it.get("tags", []):
-                tags.add(tg)
-
-        current = (
-            self.fav_tag_combo.currentText()
-            if self.fav_tag_combo.count()
-            else "Tag: alle"
-        )
-        self.fav_tag_combo.blockSignals(True)
-        self.fav_tag_combo.clear()
-        self.fav_tag_combo.addItem("Tag: alle")
-        for tg in sorted(tags):
-            self.fav_tag_combo.addItem(f"Tag: {tg}")
-        if current:
-            ix = self.fav_tag_combo.findText(current)
-            if ix >= 0:
-                self.fav_tag_combo.setCurrentIndex(ix)
-        self.fav_tag_combo.blockSignals(False)
-
-        self.fav_list.clear()
-        for it in items:
-            p = Path(it.get("path", ""))
-            name = it.get("name") or p.name or "unbekannt"
-            starred = bool(it.get("starred", False))
-            tgs = it.get("tags", [])
-            if getattr(self, "fav_search", "") and self.fav_search not in name.lower():
-                continue
-            if getattr(self, "fav_tag_filter", "alle") != "alle":
-                if self.fav_tag_filter not in tgs:
-                    continue
-            lw = QListWidgetItem(("⭐ " if starred else "") + name)
-            lw.setData(Qt.UserRole, it.get("id"))
-            lw.setToolTip(str(p))
-            if p.exists() and is_image_path(p):
-                pm = get_thumb_pixmap(p, 64)
-                if pm:
-                    lw.setIcon(QIcon(pm))
-            else:
-                lw.setForeground(Qt.gray)
-                lw.setText(lw.text() + "  (fehlt)")
-        self.fav_list.addItem(lw)
-
-    def _selected_fav_ids(self):
-        return [it.data(Qt.UserRole) for it in self.fav_list.selectedItems()]
-
-    def fav_add_files(self):
-        files, _ = QFileDialog.getOpenFileNames(
-            self,
-            "Favorit hinzufügen",
-            str(Path.home() / "Downloads"),
-            "Bilder/Logos (*.jpg *.jpeg *.png *.webp *.bmp)",
-        )
-        if not files:
-            return
-        doc = load_favorites()
-        items = doc.get("items", [])
-        existing = {it.get("id") for it in items}
-        added = 0
-        for f in files:
-            p = Path(f)
-            if not p.exists() or not is_image_path(p):
-                continue
-            fid = fav_id_for_path(p)
-            if fid in existing:
-                continue
-            items.append(
-                {
-                    "id": fid,
-                    "path": str(p),
-                    "name": p.name,
-                    "type": "bild",
-                    "tags": [],
-                    "starred": False,
-                    "added_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-                }
-            )
-            existing.add(fid)
-            added += 1
-        doc["items"] = items
-        save_favorites(doc)
-        QMessageBox.information(self, "Favoriten", f"{added} Favorit(en) hinzugefügt.")
-        self.refresh_favorites()
-
-    def fav_remove_selected(self):
-        ids = set(self._selected_fav_ids())
-        if not ids:
-            return
-        doc = load_favorites()
-        before = len(doc.get("items", []))
-        doc["items"] = [it for it in doc.get("items", []) if it.get("id") not in ids]
-        save_favorites(doc)
-        QMessageBox.information(
-            self, "Favoriten", f"Entfernt: {before - len(doc['items'])}"
-        )
-        self.refresh_favorites()
-
-    def fav_toggle_star(self):
-        ids = set(self._selected_fav_ids())
-        if not ids:
-            return
-        doc = load_favorites()
-        for it in doc.get("items", []):
-            if it.get("id") in ids:
-                it["starred"] = not bool(it.get("starred", False))
-        save_favorites(doc)
-        self.refresh_favorites()
-
-    def fav_set_tags(self):
-        ids = set(self._selected_fav_ids())
-        if not ids:
-            return
-        text, ok = QInputDialog.getText(
-            self, "Tags setzen", "Tags (kommagetrennt):", text="logo, hell, transparent"
-        )
-        if not ok:
-            return
-        tags = norm_tags(text)
-        doc = load_favorites()
-        for it in doc.get("items", []):
-            if it.get("id") in ids:
-                it["tags"] = tags
-        save_favorites(doc)
-        self.refresh_favorites()
-
-    def fav_open_selected(self, item: QListWidgetItem):
-        fid = item.data(Qt.UserRole)
-        doc = load_favorites()
-        for it in doc.get("items", []):
-            if it.get("id") == fid:
-                p = Path(it.get("path", ""))
-                if p.exists():
-                    open_path(p)
-                else:
-                    QMessageBox.information(
-                        self, "Favorit", "Datei nicht gefunden. Pfad ist veraltet."
-                    )
-                return
-
     # --- Einstellungen (0.9.7) ---
     def _pick_folder_into(self, line_edit, title):
-        folder = QFileDialog.getExistingDirectory(
-            self, title, str(Path.home() / "Downloads")
-        )
-        if folder:
-            line_edit.setText(folder)
-
-    def _settings_defaults(self):
-        self.set_watch_folder.setText(str(Path.home() / "Downloads"))
-        self.set_exports_dir.setText("exports")
-        self.set_library_audio_dir.setText("library/audio")
-        self.set_library_images_dir.setText("library/images")
-        self.set_quarantine_dir.setText("quarantine")
-        self.set_quarantine_jobs_dir.setText("quarantine_jobs")
-        self.set_reports_dir.setText("reports")
-        self.set_staging_dir.setText("staging")
-        self.set_trash_dir.setText("trash")
-
-        self.set_fade_in.setValue(0.5)
-        self.set_fade_out.setValue(1.0)
-        self.set_min_br.setValue(192)
-        self.set_target_br.setValue(320)
-        self.set_sr.setValue(48000)
-
-        self.set_tmpl_single.setText("{audio}_{vorlage}_{datum}_{uhrzeit}{sw}")
-        self.set_tmpl_batch.setText("{audio}_{vorlage}_{datum}_{nummer}{sw}")
-        self.set_append_label.setChecked(False)
-        ix = self.set_append_mode.findText("only_quarantine")
-        if ix >= 0:
-            self.set_append_mode.setCurrentIndex(ix)
-        self.set_append_short.setChecked(True)
-        self._update_name_preview()
-
-    def _settings_save(self):
-        self.settings.setdefault("paths", {})
-        self.settings["paths"]["watch_folder"] = self.set_watch_folder.text().strip()
-        for k in [
-            "exports_dir",
-            "library_audio_dir",
-            "library_images_dir",
-            "quarantine_dir",
-            "quarantine_jobs_dir",
-            "reports_dir",
-            "staging_dir",
-            "trash_dir",
-        ]:
-            le = getattr(self, f"set_{k}")
-            self.settings["paths"][k] = le.text().strip() or self.settings["paths"].get(
-                k, ""
-            )
-
-        self.settings.setdefault("audio", {})
-        self.settings["audio"]["fade_in_sec"] = float(self.set_fade_in.value())
-        self.settings["audio"]["fade_out_sec"] = float(self.set_fade_out.value())
-        self.settings["audio"]["min_bitrate_kbps"] = int(self.set_min_br.value())
-        self.settings["audio"]["target_bitrate_kbps"] = int(self.set_target_br.value())
-        self.settings["audio"]["target_samplerate_hz"] = int(self.set_sr.value())
-
-        self.settings.setdefault("naming", {})
-        self.settings["naming"]["template_single"] = self.set_tmpl_single.text().strip()
-        self.settings["naming"]["template_batch"] = self.set_tmpl_batch.text().strip()
-        self.settings["naming"]["append_label_to_output"] = bool(
-            self.set_append_label.isChecked()
-        )
-        self.settings["naming"]["append_label_mode"] = (
-            self.set_append_mode.currentText().strip()
-        )
-        self.settings["naming"]["append_label_shortform"] = bool(
-            self.set_append_short.isChecked()
-        )
-
-        settings_path = config_dir() / "settings.json"
-        ok = atomic_write_json(
-            settings_path,
-            self.settings,
-            context="ui.settings_save",
-        )
-        if ok:
-            QMessageBox.information(
-                self,
-                self.texts["strings"].get("settings.ok", "OK"),
-                "Gespeichert. Werkstatt läuft weiter.",
-            )
-            activity("Einstellungen gespeichert.")
-        else:
-            QMessageBox.critical(
-                self,
-                "Einstellungen",
-                "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-            )
-
-    def _settings_test_paths(self):
-        base_dir = data_dir()
-        rels = {
-            "exports": self.set_exports_dir.text().strip(),
-            "library_audio": self.set_library_audio_dir.text().strip(),
-            "library_images": self.set_library_images_dir.text().strip(),
-            "quarantine": self.set_quarantine_dir.text().strip(),
-            "quarantine_jobs": self.set_quarantine_jobs_dir.text().strip(),
-            "reports": self.set_reports_dir.text().strip(),
-            "staging": self.set_staging_dir.text().strip(),
-            "trash": self.set_trash_dir.text().strip(),
-        }
-        errors = []
-        for key, rel in rels.items():
-            if not rel:
-                errors.append(f"{key}: leer")
-                continue
-            p = base_dir / rel
-            try:
-                p.mkdir(parents=True, exist_ok=True)
-                testfile = p / ".modultool_write_test.tmp"
-                testfile.write_text("ok", encoding="utf-8")
-                testfile.unlink(missing_ok=True)
-            except Exception as e:
-                errors.append(f"{key}: {e}")
-
-        watch = Path(self.set_watch_folder.text().strip()).expanduser()
-        if not watch.exists():
-            errors.append(f"watch_folder fehlt: {watch}")
-
-        if errors:
-            QMessageBox.critical(
-                self,
-                self.texts["strings"].get("settings.fehler", "Fehler"),
-                "Pfade nicht ok:\n- " + "\n- ".join(errors),
-            )
-        else:
-            QMessageBox.information(
-                self,
-                self.texts["strings"].get("settings.ok", "OK"),
-                "Alle Pfade sind schreibbar. Nachtbetrieb ist safe.",
-            )
-        activity("Pfade getestet.")
-
-    def _update_name_preview(self):
-        import datetime as _dt
-
-        audio = "track_demo"
-        vorlage = "youtube_hd_ton_safe"
-        datum = _dt.datetime.now().strftime("%Y-%m-%d")
-        uhrzeit = _dt.datetime.now().strftime("%H%M%S")
-        nummer = "003"
-        sw = ""
-        try:
-            example = self.set_tmpl_batch.text().format(
-                audio=audio,
-                vorlage=vorlage,
-                datum=datum,
-                uhrzeit=uhrzeit,
-                nummer=nummer,
-                sw=sw,
-            )
-        except Exception:
-            example = "(Vorlage hat Fehler)"
-            self.statusBar().showMessage(
-                "Vorlage hat Fehler. Nächster Schritt: Felder prüfen."
-            )
-        self.lbl_preview_name.setText(example + ".mp4")
+        self.settings_controller.pick_folder_into(line_edit, title)
 
     # --- Quarantäne Tabelle (0.9.9) ---
     def _load_quarantine_table(self):
         self._quar_controller.load_table()
 
         # Visual hint: mark abgehakt in tab title (derzeit deaktiviert, Parent-Pfad ist nicht stabil).
-
-    def _selected_quar_job_id(self):
-        return self._quar_controller.selected_job_id()
-
-    def _update_quar_status(self, job_id: str, new_status: str):
-        return self._quar_controller.update_job_status(job_id, new_status)
-
-    def _quar_open_folder(self):
-        # open today's quarantine folder, if exists
-        qdir = (
-            data_dir()
-            / self.settings.get("paths", {}).get("quarantine_dir", "quarantine")
-            / datetime.now().strftime("%Y-%m-%d")
-        )
-        self._open_dir_with_feedback(qdir, "Quarantäne-Ordner")
-
-    def _require_quar_job_id(self, action_label: str) -> str | None:
-        job_id = self._selected_quar_job_id()
-        if job_id:
-            return job_id
-        msg = (
-            f"{action_label}: Kein Eintrag gewählt. Nächster Schritt: Zeile anklicken."
-        )
-        QMessageBox.information(self, action_label, msg)
-        self.statusBar().showMessage(msg)
-        log_message(
-            "Quarantäne-Aktion ohne Auswahl.",
-            level="WARN",
-            context="ui.quarantine",
-            user_message=msg,
-        )
-        return None
-
-    def _quar_rerun_selected(self):
-        job_id = self._require_quar_job_id("Quarantäne neu starten")
-        if not job_id:
-            return
-        run_quarantine_worker(job_id)
-        self.statusBar().showMessage("Quarantäne-Auftrag gestartet.")
-        activity("Quarantäne-Worker gestartet (Einzelauftrag).")
-        self.refresh_last_night()
-
-    def _quar_replace_selected(self):
-        job_id = self._require_quar_job_id("Quelle ersetzen")
-        if not job_id:
-            return
-        self._quar_replace_source_simple(job_id)
-
-    def _quar_postpone_selected(self):
-        job_id = self._require_quar_job_id("Quarantäne zurückstellen")
-        if not job_id:
-            return
-        if self._update_quar_status(job_id, "zurueckgestellt"):
-            self._load_quarantine_table()
-
-    def _quar_done_selected(self):
-        job_id = self._require_quar_job_id("Quarantäne erledigt")
-        if not job_id:
-            return
-        if self._update_quar_status(job_id, "erledigt"):
-            self._load_quarantine_table()
-
-    def _quar_replace_source_simple(self, job_id: str):
-        # minimal: open JSON and let user use existing dashboard replace flow later
-        # (full replace UI comes in later iteration)
-        QMessageBox.information(
-            self,
-            "Quelle ersetzen",
-            "Für jetzt: Öffne die Tagesliste (JSON) und ändere staging_audio/staging_image.\nDanach 'Neu (Ton Safe)'.",
-        )
-        self.open_qjobs_today()
 
     # --- Werkbank Export (0.9.10) ---
     def _wb_pick_logo(self):
