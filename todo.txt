@@ -1,4 +1,7 @@
 # todo.txt
+- [x] Start-Routine: FFmpeg/ffprobe konsistent prüfen und bei Fehler sauber abbrechen.
+- [x] System-Setup: mehrere Paketmanager unterstützen und klare Fehlermeldung ausgeben.
+- [x] Must-Pass Suite: fehlendes ffmpeg/ffprobe überspringen und fehlendes python3 klar melden.
 - [x] Preflight: Zeitstempel zeitzonen-sicher machen (keine Warnungen).
 - [x] Start-Routine: Preflight-JSON robust abfangen und laienfreundliche Debug-Befehle ausgeben.
 - [x] Qualitäts-Checks: klare Installationsbefehle ausgeben, wenn rg (ripgrep) fehlt.

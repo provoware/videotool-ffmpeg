@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.51 - 2026-02-05
+Verbessert: Start-Routine prüft jetzt FFmpeg/ffprobe konsistent und bricht mit klaren Optionen ab, die Systemeinrichtung unterstützt mehrere Paketmanager mit verständlichem Fehlerbild, und die Must-Pass Suite überspringt fehlende FFmpeg/ffprobe sauber bzw. meldet fehlendes python3 klar.
+
 ## 1.0.50 - 2026-02-05
 Verbessert: Preflight-Zeitstempel ist jetzt zeitzonen-sicher (keine Warnung), der Werkstatt-Check fängt leere/defekte JSON-Ausgaben ab und erklärt einfache Debug-Befehle, und Qualitäts-Checks geben klare Installationsbefehle für rg (ripgrep) aus.
 
