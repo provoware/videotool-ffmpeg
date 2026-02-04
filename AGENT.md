@@ -57,6 +57,7 @@ tools/build_release.sh
 ```
 - Jeder Check zeigt **klaren Erfolg** oder **klaren Fehler**.
 - Fehler werden in einfachen Worten erklärt (Fachbegriff in Klammern).
+- Effizienz: Wenn `tools/run_release_checks.sh` genutzt wird, darf die Must-Pass Suite in `tools/build_release.sh` per `MODULTOOL_SKIP_MUST_PASS=1` übersprungen werden, um Doppelprüfungen zu vermeiden.
 
 ### D) Packaging-Validierung
 - ZIP und .deb müssen bauen.
