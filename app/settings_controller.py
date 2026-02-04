@@ -68,6 +68,8 @@ class SettingsController:
         self.update_name_preview()
 
     def save_settings(self) -> None:
+        if not self._validate_templates():
+            return
         self.settings.setdefault("paths", {})
         self.settings["paths"]["watch_folder"] = (
             self.widgets["set_watch_folder"].text().strip()
@@ -171,6 +173,23 @@ class SettingsController:
         watch = Path(self.widgets["set_watch_folder"].text().strip()).expanduser()
         if not watch.exists():
             errors.append(f"watch_folder fehlt: {watch}")
+        else:
+            try:
+                testfile = watch / ".modultool_watch_write_test.tmp"
+                testfile.write_text("ok", encoding="utf-8")
+                testfile.unlink(missing_ok=True)
+            except Exception as exc:
+                errors.append(f"watch_folder nicht schreibbar: {exc}")
+                log_message(
+                    "Einstellungen: Watchfolder nicht schreibbar.",
+                    level="WARN",
+                    context="ui.settings",
+                    user_message=(
+                        "Watchfolder (Eingangsordner) braucht Schreibrechte. "
+                        "Nächster Schritt: Ordnerrechte prüfen oder neuen Ordner wählen."
+                    ),
+                    extra={"path": str(watch), "error": str(exc)},
+                )
 
         if errors:
             QMessageBox.critical(
@@ -185,6 +204,48 @@ class SettingsController:
                 "Alle Pfade sind schreibbar. Nachtbetrieb ist safe.",
             )
         activity("Pfade getestet.")
+
+    def _validate_templates(self) -> bool:
+        keys = {
+            "audio": "track_demo",
+            "vorlage": "youtube_hd_ton_safe",
+            "datum": "2026-02-14",
+            "uhrzeit": "120000",
+            "nummer": "001",
+            "sw": "",
+        }
+        templates = {
+            "Einzelvorlage": self.widgets["set_tmpl_single"].text(),
+            "Sammelvorlage": self.widgets["set_tmpl_batch"].text(),
+        }
+        for label, template in templates.items():
+            try:
+                template.format(**keys)
+            except Exception as exc:
+                log_message(
+                    "Einstellungen: Vorlage ungültig.",
+                    level="WARN",
+                    context="ui.settings",
+                    user_message=(
+                        "Vorlage ungültig (Formatierung = Felder mit {name}). "
+                        "Nächster Schritt: Felder prüfen und Beispiel übernehmen."
+                    ),
+                    extra={"template": label, "error": str(exc)},
+                )
+                QMessageBox.critical(
+                    self.parent,
+                    "Einstellungen",
+                    (
+                        f"{label} ungültig. "
+                        "Bitte Felder wie {audio} oder {datum} prüfen."
+                    ),
+                )
+                if hasattr(self.parent, "statusBar"):
+                    self.parent.statusBar().showMessage(
+                        "Vorlage ungültig. Nächster Schritt: Felder prüfen."
+                    )
+                return False
+        return True
 
     def update_name_preview(self) -> None:
         import datetime as _dt
