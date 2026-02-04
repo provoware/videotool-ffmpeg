@@ -1,8 +1,8 @@
 # Entwicklungsstatus
 
 ## Fortschritt
-- Version: 1.0.51
-- Fokus dieser Iteration: Start-Routine prüft FFmpeg/ffprobe konsistent, Setup unterstützt mehrere Paketmanager mit klaren Fehlern, und die Must-Pass Suite überspringt fehlende FFmpeg/ffprobe bzw. meldet fehlendes python3 verständlich.
+- Version: 1.0.52
+- Fokus dieser Iteration: Favoriten-, Einstellungen- und Quarantäne-Aktionen wurden in eigene Controller ausgelagert, wodurch die Haupt-UI wartbarer ist und Favoriten korrekt vollständig angezeigt werden.
 
 ## Nächster Schritt
-- Main-UI weiter modularisieren (Materialliste, Favoriten, Einstellungen und Quarantäne-UI in eigenständige Klassen trennen).
+- Main-UI weiter modularisieren (Materialliste und übrige UI-Sektionen in eigenständige Klassen trennen).

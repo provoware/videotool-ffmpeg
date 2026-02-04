@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.52 - 2026-02-06
+Verbessert: Favoriten-Logik in eigenen Controller ausgelagert (inkl. Fix, damit alle Einträge angezeigt werden), Einstellungen sind in einen Controller mit klarer Validierung umgezogen, und Quarantäne-Aktionen laufen nun in einem separaten Modul für bessere Wartbarkeit.
+
 ## 1.0.51 - 2026-02-05
 Verbessert: Start-Routine prüft jetzt FFmpeg/ffprobe konsistent und bricht mit klaren Optionen ab, die Systemeinrichtung unterstützt mehrere Paketmanager mit verständlichem Fehlerbild, und die Must-Pass Suite überspringt fehlende FFmpeg/ffprobe sauber bzw. meldet fehlendes python3 klar.
 
