@@ -106,11 +106,16 @@ def validate_settings_schema(settings: dict) -> list[str]:
     ui = expect_dict(settings.get("ui"), "ui")
 
     expect_type(paths.get("watch_folder"), "paths.watch_folder", str)
+    expect_type(paths.get("base_data_dir"), "paths.base_data_dir", str)
     for key in (
         "exports_dir",
         "reports_dir",
         "staging_dir",
         "trash_dir",
+        "library_audio_dir",
+        "library_images_dir",
+        "quarantine_dir",
+        "quarantine_jobs_dir",
     ):
         expect_type(paths.get(key), f"paths.{key}", str)
 
@@ -158,12 +163,25 @@ def validate_settings_paths(settings: dict) -> list[str]:
         if ".." in candidate.parts:
             errors.append(f"{key}:parent_traversal")
 
+    def check_base_dir(value: object, key: str) -> None:
+        check_string(value, key)
+        if not isinstance(value, str) or not value.strip():
+            return
+        candidate = Path(value).expanduser()
+        if ".." in candidate.parts:
+            errors.append(f"{key}:parent_traversal")
+
     check_string(paths.get("watch_folder"), "paths.watch_folder", allow_empty=True)
+    check_base_dir(paths.get("base_data_dir"), "paths.base_data_dir")
     for key in (
         "exports_dir",
         "reports_dir",
         "staging_dir",
         "trash_dir",
+        "library_audio_dir",
+        "library_images_dir",
+        "quarantine_dir",
+        "quarantine_jobs_dir",
     ):
         check_relative(paths.get(key), f"paths.{key}")
     return errors

@@ -142,10 +142,24 @@ def run(settings_path: Path | None = None) -> dict:
         except Exception as exc:
             if debug:
                 log_debug(f"Watchfolder create failed: {watch} ({exc})", level="WARN")
-    exports = data_dir() / paths.get("exports_dir", "exports")
-    reports = data_dir() / paths.get("reports_dir", "reports")
-    staging = data_dir() / paths.get("staging_dir", "staging")
-    trash = data_dir() / paths.get("trash_dir", "trash")
+    base_raw = paths.get("base_data_dir")
+    base_input = "" if base_raw is None else str(base_raw)
+    base_dir = data_dir()
+    base_ok = True
+    base_writable_ok = True
+    base_writable_error = ""
+    if isinstance(base_raw, str) and base_raw.strip():
+        base_dir = Path(base_raw).expanduser()
+        base_writable_ok, base_writable_error = writable_dir(base_dir)
+    else:
+        base_ok = False
+        base_writable_ok = False
+        base_writable_error = "base_data_dir_missing_or_invalid"
+
+    exports = base_dir / paths.get("exports_dir", "exports")
+    reports = base_dir / paths.get("reports_dir", "reports")
+    staging = base_dir / paths.get("staging_dir", "staging")
+    trash = base_dir / paths.get("trash_dir", "trash")
     thumbs = cache_dir() / "thumbs"
     temp_r = cache_dir() / "temp_renders"
 
@@ -162,7 +176,18 @@ def run(settings_path: Path | None = None) -> dict:
     config_root = config_dir()
     config_writable_ok, config_writable_error = writable_dir(config_root)
 
-    writable = {}
+    writable = {
+        "base_data_dir": {
+            "ok": base_writable_ok,
+            "path": str(base_dir),
+            "error": base_writable_error,
+        }
+    }
+    if not base_ok:
+        path_errors.append("paths.base_data_dir:missing_or_invalid")
+    elif not base_writable_ok:
+        path_errors.append("paths.base_data_dir:not_writable")
+
     for key, p in [
         ("config", config_root),
         ("exports", exports),
@@ -205,6 +230,10 @@ def run(settings_path: Path | None = None) -> dict:
         rec.append("free_space")
     if not ok_font:
         rec.append("install_font")
+    if not base_ok:
+        rec.append("base_data_dir_invalid")
+    if base_ok and not base_writable_ok:
+        rec.append("base_data_dir_not_writable")
     if not config_writable_ok:
         rec.append("config_not_writable")
     if not min_free_ok:
@@ -236,6 +265,11 @@ def run(settings_path: Path | None = None) -> dict:
         "watchfolder_created": watch_created,
         "watchfolder_writable_ok": watch_writable_ok,
         "watchfolder_writable_error": watch_writable_error,
+        "base_data_dir": str(base_dir),
+        "base_data_dir_input": base_input,
+        "base_data_dir_ok": base_ok,
+        "base_data_dir_writable_ok": base_writable_ok,
+        "base_data_dir_writable_error": base_writable_error,
         "free_mb": free_mb,
         "min_free_mb_ok": min_free_ok,
         "min_free_mb_input": min_free_raw,

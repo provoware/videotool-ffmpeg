@@ -140,6 +140,8 @@ else:
     recs = data.get("recommendations") or []
     rec_map = {
         "ffmpeg_install": "FFmpeg (Video-Werkzeug) installieren.",
+        "base_data_dir_invalid": "Basis-Ordner (base_data_dir) prüfen und setzen.",
+        "base_data_dir_not_writable": "Basis-Ordner (base_data_dir) braucht Schreibrechte.",
         "set_watchfolder": "Watchfolder (Eingangsordner) wählen.",
         "free_space": "Speicher frei machen (nicht benötigte Dateien löschen).",
         "install_font": "Schrift (Font) installieren, z.B. DejaVuSans.",
